@@ -7,12 +7,18 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 @NoArgsConstructor
 @Getter
 @Setter
 @Entity
 @Table(name = "job_levels_sectors")
-public class JobLevelSector {
+public class JobLevelSector implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @EmbeddedId
     private JobLevelSectorPK pk = new JobLevelSectorPK();
