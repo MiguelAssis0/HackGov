@@ -2,9 +2,7 @@ package com.fiap.hackgov.entities;
 
 import com.fiap.hackgov.entities.enums.LevelJobLevel;
 import com.fiap.hackgov.entities.enums.TypeJobLevel;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,6 +22,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "job_levels")
 public class JobLevel {
+
     @Id
     private UUID id;
 
@@ -31,10 +30,19 @@ public class JobLevel {
 
     private String description;
 
-
+    @ElementCollection
+    @CollectionTable(name = "job_level_types", joinColumns = @JoinColumn(name = "job_level_id"))
+    @Column(name = "type")
+    @Enumerated(EnumType.STRING)
     private final List<TypeJobLevel> types = new ArrayList<>();
 
     private LevelJobLevel level;
+
+    @OneToMany(mappedBy = "pk.jobLevel", cascade = CascadeType.ALL)
+    private List<PermissionsJobLevel> permissions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "pk.jobLevel", cascade = CascadeType.ALL)
+    private List<JobLevelSector> sectors = new ArrayList<>();
 
     @CreationTimestamp
     private LocalDateTime createdAt;

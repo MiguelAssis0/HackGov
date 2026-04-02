@@ -1,39 +1,23 @@
 package com.fiap.hackgov.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-@NoArgsConstructor
-@AllArgsConstructor
+@Entity
+@Table(name = "permissions_job_level")
 @Getter
 @Setter
-@Entity
-@Table(name = "permissions_job_levels")
+@NoArgsConstructor
 public class PermissionsJobLevel {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @EmbeddedId
+    private PermissionsJobLevelPK pk = new PermissionsJobLevelPK();
 
-    @ManyToOne
-    private final List<Permissions> permissions = new ArrayList<>();
+    public PermissionsJobLevel(Permissions permission, JobLevel jobLevel) {
+        this.pk.setPermission(permission);
+        this.pk.setJobLevel(jobLevel);
+    }
 
-    @ManyToOne
-    private final List<JobLevel> jobLevel = new ArrayList<>();
-
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
 }

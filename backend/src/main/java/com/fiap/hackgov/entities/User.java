@@ -1,20 +1,16 @@
 package com.fiap.hackgov.entities;
 
-import java.time.LocalDateTime;
-
-import jakarta.persistence.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.validator.constraints.UUID;
-import org.hibernate.validator.constraints.br.CPF;
-
 import com.fiap.hackgov.entities.enums.Roles;
-
-import jakarta.validation.constraints.Email;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter

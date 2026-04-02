@@ -1,8 +1,5 @@
 package com.fiap.hackgov.entities;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,10 +8,15 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-@Getter
-@Setter
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 @Entity
 @Table(name = "sectors")
 public class Sector {
@@ -28,11 +30,10 @@ public class Sector {
 
     @ManyToOne
     @JoinColumn(name = "cityhall_id")
-    private Cityhall cityhall;
+    private CityHall cityhall;
 
-    @ManyToOne
-    @JoinColumn(name = "job_level_id")
-    private JobLevel jobLevel;
+    @OneToMany(mappedBy = "pk.sector", cascade = CascadeType.ALL)
+    private List<JobLevelSector> jobLevels = new ArrayList<>();
 
     @CreationTimestamp
     private LocalDateTime createdAt;

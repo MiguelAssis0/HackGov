@@ -1,23 +1,17 @@
 package com.fiap.hackgov.entities;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import org.hibernate.annotations.CreationTimestamp;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,7 +19,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Setter
 @Entity
 @Table(name = "cityhalls")
-public class Cityhall {
+public class CityHall {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -35,7 +29,11 @@ public class Cityhall {
     @Column(unique = true)
     private String cnpj;
 
+    @OneToOne
+    @JoinColumn(name = "state_id")
     private State state;
+
+    @OneToMany(mappedBy = "cityhall", cascade = CascadeType.ALL)
     private final List<Sector> sectors = new ArrayList<>();
 
     @CreationTimestamp

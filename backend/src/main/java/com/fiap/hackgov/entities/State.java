@@ -1,16 +1,15 @@
 package com.fiap.hackgov.entities;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
 import jakarta.persistence.*;
-import org.hibernate.annotations.CreationTimestamp;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,7 +22,9 @@ public class State {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     private String name;
-    private char[] uf = new char[2];
+
+    @Column(length = 2, nullable = false)
+    private String uf;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

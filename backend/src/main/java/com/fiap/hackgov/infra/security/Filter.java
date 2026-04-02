@@ -1,6 +1,6 @@
 package com.fiap.hackgov.infra.security;
 
-import com.fiap.hackgov.repositories.UserResository;
+import com.fiap.hackgov.repositories.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +24,7 @@ public class Filter extends OncePerRequestFilter {
     @Autowired
     private TokenService tokenService;
     @Autowired
-    private UserResository userRepository;
+    private UserRepository userRepository;
 
     @Autowired
     public Filter(HandlerExceptionResolver handlerExceptionResolver) {

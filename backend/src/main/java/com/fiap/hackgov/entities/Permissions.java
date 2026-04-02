@@ -9,6 +9,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -25,6 +27,9 @@ public class Permissions {
 
     private String name;
     private String codename;
+
+    @OneToMany(mappedBy = "pk.permission", cascade = CascadeType.ALL)
+    private List<PermissionsJobLevel> jobLevels = new ArrayList<>();
 
     @CreationTimestamp
     private LocalDateTime createdAt;
