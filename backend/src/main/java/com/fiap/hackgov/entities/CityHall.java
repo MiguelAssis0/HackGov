@@ -8,6 +8,8 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +21,10 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "cityhalls")
-public class CityHall {
+public class CityHall implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -29,7 +34,7 @@ public class CityHall {
     @Column(unique = true)
     private String cnpj;
 
-    @OneToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "state_id")
     private State state;
 

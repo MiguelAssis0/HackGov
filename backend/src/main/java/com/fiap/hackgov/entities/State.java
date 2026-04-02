@@ -8,7 +8,11 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -17,7 +21,11 @@ import java.util.UUID;
 @Getter
 @Entity
 @Table(name = "states")
-public class State {
+public class State implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -25,6 +33,9 @@ public class State {
 
     @Column(length = 2, nullable = false)
     private String uf;
+
+    @OneToMany(mappedBy = "state")
+    private List<CityHall> cityHalls = new ArrayList<>();
 
     @CreationTimestamp
     private LocalDateTime createdAt;

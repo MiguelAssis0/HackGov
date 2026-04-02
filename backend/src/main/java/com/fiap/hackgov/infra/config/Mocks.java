@@ -51,12 +51,14 @@ public class Mocks implements CommandLineRunner {
         cityHallSP.setName("Prefeitura de São Paulo");
         cityHallSP.setCnpj("46.395.000/0001-39");
         cityHallSP.setState(sp);
+        sp.getCityHalls().add(cityHallSP);
         cityHallRepository.save(cityHallSP);
 
         CityHall cityHallRJ = new CityHall();
         cityHallRJ.setName("Prefeitura do Rio de Janeiro");
         cityHallRJ.setCnpj("42.498.383/0001-48");
         cityHallRJ.setState(rj);
+        rj.getCityHalls().add(cityHallRJ);
         cityHallRepository.save(cityHallRJ);
 
         // -------------------------
@@ -193,6 +195,6 @@ public class Mocks implements CommandLineRunner {
         emp3.setJobLevel(assistente);
         employeeRepository.save(emp3);
 
-        System.out.println("✅ Mocks carregados com sucesso!");
+        System.out.println("Mocks carregados com sucesso!");
     }
 }
