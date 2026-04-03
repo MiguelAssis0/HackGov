@@ -9,7 +9,7 @@ import com.fiap.hackgov.infra.exceptions.InvalidCredentialsException;
 import com.fiap.hackgov.infra.security.TokenService;
 import com.fiap.hackgov.repositories.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -27,7 +27,8 @@ public class AuthService {
     @Autowired
     private TwoFactorAuthService twoFactorAuthService;
 
-    private final Argon2PasswordEncoder passwordEncoder = new Argon2PasswordEncoder(10, 1024, 1, 1024, 1);
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public LoginResponseDTO login(LoginRequestDTO loginRequest) {
         Optional<Employee> employeeOpt = employeeRepository.findByEmail(loginRequest.email());

@@ -3,8 +3,6 @@ package com.fiap.hackgov.controllers;
 import com.fiap.hackgov.DTOs.Employee.CreateEmployeeDTO;
 import com.fiap.hackgov.DTOs.Employee.EmployeeDTO;
 import com.fiap.hackgov.entities.Employee;
-import com.fiap.hackgov.entities.User;
-import com.fiap.hackgov.infra.security.TokenService;
 import com.fiap.hackgov.mapper.EmployeeMapper;
 import com.fiap.hackgov.services.EmployeeService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,15 +11,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import java.net.URI;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -57,10 +53,17 @@ public class EmployeeController {
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
     @GetMapping
-    public ResponseEntity<Page<EmployeeDTO>> getAllEmployees(HttpServletRequest request, Pageable pageable) {
-        Page<Employee> employees = employeeService.findAll(request, pageable);
-        Page<EmployeeDTO> employeeDTOs = employees.map(employeeMapper::toEmployeeDTO);
-        return ResponseEntity.ok(employeeDTOs);
+    public ResponseEntity<Page<EmployeeDTO>> getAllEmployees(Pageable pageable) {
+        System.out.println("entrei auqi");
+        try {
+            Page<EmployeeDTO> employeeDTOs = employeeService.findAll(pageable)
+                    .map(employeeMapper::toEmployeeDTO);
+            return ResponseEntity.ok(employeeDTOs);
+        } catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+
+
     }
 
     @Operation(summary = "Get Employee by ID", security = @SecurityRequirement(name = "bearer-key"), description = "Retrieve an employee by their ID")

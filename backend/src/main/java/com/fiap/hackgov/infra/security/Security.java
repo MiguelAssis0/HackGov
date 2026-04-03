@@ -19,6 +19,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 @Configuration
 @EnableWebSecurity
 public class Security {
+
     @Bean
     public Filter securityFilter() {
         return new Filter(exceptionResolver);
@@ -37,6 +38,7 @@ public class Security {
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/users/**").permitAll()
+                        .requestMatchers("/api/employee/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll() // Endpoints de autenticação
 
                         .requestMatchers("/v3/api-docs/**","/swagger-ui.html", "/swagger-ui/**").permitAll()

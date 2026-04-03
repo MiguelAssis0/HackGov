@@ -17,7 +17,7 @@ import java.time.ZoneOffset;
 public class TokenService {
     @Value("${api.security.token.secret}")
     private String SECRET_KEY;
-    private static final String ISSUER = "MatchHub";
+    private static final String ISSUER = "HackGov";
 
     public String generateToken(User user) {
         Algorithm algorithm = Algorithm.HMAC256(SECRET_KEY);
@@ -25,13 +25,11 @@ public class TokenService {
 
         return JWT.create()
                 .withIssuer(ISSUER)
-                .withSubject(user.getName())
+                .withSubject(user.getEmail())
                 .withClaim("role", "ROLE_" + user.getRole().name())
                 .withExpiresAt(fullDate.toInstant(ZoneOffset.of("-03:00")))
                 .sign(algorithm);
     }
-
-
 
     public String getSubject(String token) {
         try{
@@ -59,7 +57,7 @@ public class TokenService {
         if (token == null) {
             throw new TokenInvalidException("Authorization header missing or malformed");
         }
-        return getSubject(token); 
+        return getSubject(token);
     }
 
 

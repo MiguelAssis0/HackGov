@@ -1,5 +1,6 @@
 package com.fiap.hackgov.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fiap.hackgov.DTOs.Employee.CreateEmployeeDTO;
 import com.fiap.hackgov.DTOs.Employee.EmployeeDTO;
 import com.fiap.hackgov.entities.Employee;
@@ -7,8 +8,6 @@ import com.fiap.hackgov.entities.enums.Roles;
 import com.fiap.hackgov.mapper.EmployeeMapper;
 import com.fiap.hackgov.services.AuthService;
 import com.fiap.hackgov.services.EmployeeService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -23,7 +22,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -138,7 +136,7 @@ public class EmployeeControllerTest {
                 List.of(employee1, employee2), PageRequest.of(0, 10), 2
         );
 
-        when(employeeService.findAll(any(HttpServletRequest.class), any(Pageable.class)))
+        when(employeeService.findAll(any(Pageable.class)))
                 .thenReturn(employeePage);
 
         // mockar o mapper para cada employee

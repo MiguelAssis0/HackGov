@@ -6,7 +6,6 @@ import com.fiap.hackgov.entities.CityHall;
 import com.fiap.hackgov.entities.Employee;
 import com.fiap.hackgov.infra.exceptions.EmployeeAlreadyExistsException;
 import com.fiap.hackgov.infra.exceptions.EmployeeNotFoundException;
-import com.fiap.hackgov.infra.exceptions.UnauthorizedException;
 import com.fiap.hackgov.infra.security.TokenService;
 import com.fiap.hackgov.mapper.EmployeeMapper;
 import com.fiap.hackgov.repositories.CityHallRepository;
@@ -19,7 +18,6 @@ import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -58,16 +56,12 @@ public class EmployeeService {
         return employeeRepository.save(employee);
     }
 
-    public Page<Employee> findAll(HttpServletRequest token, Pageable pageable) {
-        tokenService.validateToken(token);
+    public Page<Employee> findAll(Pageable pageable) {
         return employeeRepository.findAll(pageable);
     }
 
     public EmployeeDTO findById(String id, HttpServletRequest token) {
         try {
-            var isTokenValid = tokenService.validateToken(token);
-            if(isTokenValid == null)
-                throw new UnauthorizedException("User not authorized");
             UUID uuid = UUID.fromString(id);
             Employee employee = employeeRepository.findById(uuid)
                     .orElseThrow(() -> new EmployeeNotFoundException("Employee not found"));

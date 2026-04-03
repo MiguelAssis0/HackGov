@@ -1,6 +1,6 @@
 package com.fiap.hackgov.infra.security;
 
-import com.fiap.hackgov.repositories.EmployeeRepository;
+import com.fiap.hackgov.services.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,13 +8,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
-import com.fiap.hackgov.entities.User;
 
 @Component
 public class Filter extends OncePerRequestFilter {
@@ -23,8 +22,9 @@ public class Filter extends OncePerRequestFilter {
 
     @Autowired
     private TokenService tokenService;
+
     @Autowired
-    private EmployeeRepository employeeRepository;
+    private UserDetailsServiceImpl userDetailsService;
 
     @Autowired
     public Filter(HandlerExceptionResolver handlerExceptionResolver) {
@@ -34,22 +34,20 @@ public class Filter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-
         String token = getToken(request);
         try {
             if (token != null) {
-
                 var userLogin = tokenService.getSubject(token);
-                User user = employeeRepository.findByEmail(userLogin)
-                        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-                var auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                UserDetails user = userDetailsService.loadUserByUsername(userLogin);
+
+                var auth = new UsernamePasswordAuthenticationToken(
+                        user, null, user.getAuthorities()
+                );
                 SecurityContextHolder.getContext().setAuthentication(auth);
-
             }
-
             filterChain.doFilter(request, response);
-        }catch (Exception e) {
+        } catch (Exception e) {
             handlerExceptionResolver.resolveException(request, response, null, e);
         }
     }
