@@ -39,7 +39,7 @@ public class Security {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/users/**").permitAll()
                         .requestMatchers("/api/employee/**").permitAll()
-                        .requestMatchers("/api/auth/**").permitAll() // Endpoints de autenticação
+                        .requestMatchers("/api/auth/**").permitAll()
 
                         .requestMatchers("/v3/api-docs/**","/swagger-ui.html", "/swagger-ui/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()

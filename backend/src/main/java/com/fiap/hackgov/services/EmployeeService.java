@@ -14,7 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +35,9 @@ public class EmployeeService {
     @Autowired
     private CityHallRepository cityHallRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Transactional
     public Employee save(CreateEmployeeDTO employeeDTO) {
         if(employeeRepository.findByName(employeeDTO.name()).isPresent())
@@ -50,7 +53,7 @@ public class EmployeeService {
                 .orElseThrow(() -> new IllegalArgumentException("City Hall not found"));
 
         Employee employee = employeeMapper.toEntity(employeeDTO);
-        employee.setPassword(new Argon2PasswordEncoder(10, 1024, 1, 1024, 1).encode(employeeDTO.password()));
+        employee.setPassword(passwordEncoder.encode(employeeDTO.password()));
         employee.setCityhall(cityHall);
 
         return employeeRepository.save(employee);

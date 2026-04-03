@@ -54,15 +54,9 @@ public class EmployeeController {
     })
     @GetMapping
     public ResponseEntity<Page<EmployeeDTO>> getAllEmployees(Pageable pageable) {
-        System.out.println("entrei auqi");
-        try {
             Page<EmployeeDTO> employeeDTOs = employeeService.findAll(pageable)
                     .map(employeeMapper::toEmployeeDTO);
             return ResponseEntity.ok(employeeDTOs);
-        } catch (Exception e){
-            return ResponseEntity.badRequest().build();
-        }
-
 
     }
 
