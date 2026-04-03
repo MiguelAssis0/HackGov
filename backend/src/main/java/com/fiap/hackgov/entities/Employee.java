@@ -1,5 +1,7 @@
 package com.fiap.hackgov.entities;
 
+import com.fiap.hackgov.entities.enums.RequisitionStatus;
+import com.fiap.hackgov.entities.enums.Roles;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -41,11 +43,12 @@ public class Employee extends User implements Serializable {
     @JoinColumn(name = "job_level_id")
     private JobLevel jobLevel;
 
-    private String cpf;
 
     private Double salary;
 
     private LocalDateTime admissionDate;
+
+    private RequisitionStatus requisitionStatus;
 
     private LocalDateTime dismissalDate;
 
@@ -54,5 +57,9 @@ public class Employee extends User implements Serializable {
     private Double hoursWorked;
 
     private LocalDateTime createdAt;
+
+    @ManyToOne
+    @JoinColumn(name = "cityhall_id")
+    private CityHall cityhall;
 
 }

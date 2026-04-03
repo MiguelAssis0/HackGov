@@ -46,12 +46,20 @@ public class TokenService {
         }
     }
 
-    public String getToken(HttpServletRequest request) {
-        var authorization = request.getHeader("Authorization");
+    public String extractToken(HttpServletRequest request) {
+        String authorization = request.getHeader("Authorization");
         if (authorization != null && authorization.startsWith("Bearer ")) {
-            return authorization.replace("Bearer ", "");
+            return authorization.substring(7);
         }
         return null;
+    }
+
+    public String validateToken(HttpServletRequest request) {
+        String token = extractToken(request);
+        if (token == null) {
+            throw new TokenInvalidException("Authorization header missing or malformed");
+        }
+        return getSubject(token); 
     }
 
 

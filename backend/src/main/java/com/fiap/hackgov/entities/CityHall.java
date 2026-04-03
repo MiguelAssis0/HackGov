@@ -46,4 +46,7 @@ public class CityHall implements Serializable {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "cityhall", cascade = CascadeType.ALL)
+    private final List<Employee> employees = new ArrayList<>();
 }

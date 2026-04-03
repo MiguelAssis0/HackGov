@@ -1,5 +1,6 @@
 package com.fiap.hackgov.entities;
 
+import com.fiap.hackgov.entities.enums.UF;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -31,8 +32,8 @@ public class State implements Serializable {
     private UUID id;
     private String name;
 
-    @Column(length = 2, nullable = false)
-    private String uf;
+    @Column(nullable = false)
+    private UF uf;
 
     @OneToMany(mappedBy = "state")
     private List<CityHall> cityHalls = new ArrayList<>();

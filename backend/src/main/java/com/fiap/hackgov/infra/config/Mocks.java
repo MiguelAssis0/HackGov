@@ -4,6 +4,7 @@ import com.fiap.hackgov.entities.*;
 import com.fiap.hackgov.entities.enums.LevelJobLevel;
 import com.fiap.hackgov.entities.enums.Roles;
 import com.fiap.hackgov.entities.enums.TypeJobLevel;
+import com.fiap.hackgov.entities.enums.UF;
 import com.fiap.hackgov.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -36,12 +37,12 @@ public class Mocks implements CommandLineRunner {
         // -------------------------
         State sp = new State();
         sp.setName("São Paulo");
-        sp.setUf("SP");
+        sp.setUf(UF.SP);
         stateRepository.save(sp);
 
         State rj = new State();
         rj.setName("Rio de Janeiro");
-        rj.setUf("RJ");
+        rj.setUf(UF.RJ);
         stateRepository.save(rj);
 
         // -------------------------

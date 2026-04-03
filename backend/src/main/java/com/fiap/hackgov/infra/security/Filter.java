@@ -1,6 +1,6 @@
 package com.fiap.hackgov.infra.security;
 
-import com.fiap.hackgov.repositories.UserRepository;
+import com.fiap.hackgov.repositories.EmployeeRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +24,7 @@ public class Filter extends OncePerRequestFilter {
     @Autowired
     private TokenService tokenService;
     @Autowired
-    private UserRepository userRepository;
+    private EmployeeRepository employeeRepository;
 
     @Autowired
     public Filter(HandlerExceptionResolver handlerExceptionResolver) {
@@ -40,7 +40,7 @@ public class Filter extends OncePerRequestFilter {
             if (token != null) {
 
                 var userLogin = tokenService.getSubject(token);
-                User user = userRepository.findByEmail(userLogin)
+                User user = employeeRepository.findByEmail(userLogin)
                         .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
                 var auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());

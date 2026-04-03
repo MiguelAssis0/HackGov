@@ -25,8 +25,12 @@ public abstract class User implements UserDetails {
     private String name;
 
     @Column(unique = true)
+    private String cpf;
+
+    @Column(unique = true)
     private String email;
 
+    @Column(nullable = false, length = 2000)
     private String password;
     private boolean status;
 
@@ -34,6 +38,7 @@ public abstract class User implements UserDetails {
     private Roles role;
 
     private String avatarPath;
+    @Column(unique = true)
     private String phone;
     private boolean twoFactor = false;
     private LocalDateTime lastLogin = null;
