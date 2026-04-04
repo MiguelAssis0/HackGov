@@ -5,7 +5,7 @@ import com.fiap.hackgov.DTOs.Auth.LoginResponseDTO;
 import com.fiap.hackgov.DTOs.Auth.TwoFactorRequestDTO;
 import com.fiap.hackgov.DTOs.Auth.TwoFactorResponseDTO;
 import com.fiap.hackgov.entities.enums.Roles;
-import com.fiap.hackgov.infra.security.Filter;
+import com.fiap.hackgov.infra.filters.Filter;
 import com.fiap.hackgov.services.AuthService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.catalina.security.SecurityConfig;
@@ -53,7 +53,7 @@ public class AuthControllerTest {
         LoginRequestDTO loginRequest = new LoginRequestDTO("test@example.com", "password123");
         LoginResponseDTO loginResponse = new LoginResponseDTO("jwt-token", "test@example.com", "Test User", Roles.EMPLOYEE, false);
 
-        when(authService.login(any(LoginRequestDTO.class))).thenReturn(loginResponse);
+        when(authService.login(any(LoginRequestDTO.class), any(String.class))).thenReturn(loginResponse);
 
         mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -72,7 +72,7 @@ public class AuthControllerTest {
         LoginRequestDTO loginRequest = new LoginRequestDTO("test@example.com", "password123");
         LoginResponseDTO loginResponse = new LoginResponseDTO(null, "test@example.com", "Test User", Roles.EMPLOYEE, true);
 
-        when(authService.login(any(LoginRequestDTO.class))).thenReturn(loginResponse);
+        when(authService.login(any(LoginRequestDTO.class), any(String.class))).thenReturn(loginResponse);
 
         mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)

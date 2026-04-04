@@ -30,54 +30,67 @@ public class AuthService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public LoginResponseDTO login(LoginRequestDTO loginRequest) {
+    @Autowired
+    private LoginAttemptService loginAttemptService;
+
+    public LoginResponseDTO login(LoginRequestDTO loginRequest, String clientIp) {
+        loginAttemptService.checkBlocked(loginRequest.email(), clientIp);
+
         Optional<Employee> employeeOpt = employeeRepository.findByEmail(loginRequest.email());
-        
+
         if (employeeOpt.isEmpty()) {
+            loginAttemptService.registerFailure(loginRequest.email(), clientIp);
             throw new InvalidCredentialsException("Invalid credentials");
         }
-        
+
         Employee employee = employeeOpt.get();
-        
+
         if (!employee.isStatus()) {
             throw new InvalidCredentialsException("Account is inactive");
         }
-        
+
         if (!passwordEncoder.matches(loginRequest.password(), employee.getPassword())) {
+            loginAttemptService.registerFailure(loginRequest.email(), clientIp); // FALHA
             throw new InvalidCredentialsException("Invalid credentials");
         }
-        
-        employee.setLastLogin(LocalDateTime.now());
-        employeeRepository.save(employee);
-        
+
+        // Senha correta — reseta tentativas
+        loginAttemptService.registerSuccess(loginRequest.email(), clientIp);
+
         if (employee.isTwoFactor()) {
             twoFactorAuthService.sendTwoFactorCode(employee.getEmail(), employee.getName());
             return new LoginResponseDTO(null, employee.getEmail(), employee.getName(), employee.getRole(), true);
         }
-        
+
+        employee.setLastLogin(LocalDateTime.now());
+        employeeRepository.save(employee);
+
         String token = tokenService.generateToken(employee);
         return new LoginResponseDTO(token, employee.getEmail(), employee.getName(), employee.getRole(), false);
     }
 
     public TwoFactorResponseDTO verifyTwoFactor(TwoFactorRequestDTO twoFactorRequest) {
         Optional<Employee> employeeOpt = employeeRepository.findByEmail(twoFactorRequest.email());
-        
+
         if (employeeOpt.isEmpty()) {
             throw new InvalidCredentialsException("Invalid credentials");
         }
-        
+
         Employee employee = employeeOpt.get();
-        
+
         if (!employee.isTwoFactor()) {
             throw new InvalidCredentialsException("Two-factor authentication not enabled for this account");
         }
-        
+
         boolean isValid = twoFactorAuthService.verifyCode(twoFactorRequest.email(), twoFactorRequest.code());
-        
+
         if (!isValid) {
             throw new InvalidCredentialsException("Invalid two-factor code");
         }
-        
+
+        employee.setLastLogin(LocalDateTime.now());
+        employeeRepository.save(employee);
+
         String token = tokenService.generateToken(employee);
         return new TwoFactorResponseDTO(token, "Two-factor authentication successful");
     }

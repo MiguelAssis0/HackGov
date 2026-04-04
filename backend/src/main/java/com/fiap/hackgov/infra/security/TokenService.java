@@ -52,12 +52,12 @@ public class TokenService {
         return null;
     }
 
-    public String validateToken(HttpServletRequest request) {
+    public void validateToken(HttpServletRequest request) {
         String token = extractToken(request);
         if (token == null) {
             throw new TokenInvalidException("Authorization header missing or malformed");
         }
-        return getSubject(token);
+        getSubject(token);
     }
 
 

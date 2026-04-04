@@ -155,9 +155,9 @@ public class Mocks implements CommandLineRunner {
         // Employees
         // -------------------------
         Employee emp1 = new Employee();
-        emp1.setName("João Silva");
-        emp1.setEmail("joao.silva@sp.gov.br");
-        emp1.setPassword(passwordEncoder.encode("senha123"));
+        emp1.setName("admin");
+        emp1.setEmail("admin@admin.com");
+        emp1.setPassword(passwordEncoder.encode("Admin123!"));
         emp1.setStatus(true);
         emp1.setRole(Roles.ADMIN);
         emp1.setCpf("123.456.789-00");

@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -52,6 +53,7 @@ public class EmployeeController {
             @ApiResponse(responseCode = "200", description = "Employees retrieved successfully"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
+    @Cacheable
     @GetMapping
     public ResponseEntity<Page<EmployeeDTO>> getAllEmployees(Pageable pageable) {
             Page<EmployeeDTO> employeeDTOs = employeeService.findAll(pageable)
@@ -66,6 +68,7 @@ public class EmployeeController {
             @ApiResponse(responseCode = "404", description = "Employee not found"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
+    @Cacheable
     @GetMapping("/{id}")
     public ResponseEntity<EmployeeDTO> getEmployeeById(@PathVariable UUID id, HttpServletRequest request) {
         EmployeeDTO employee = employeeService.findById(id.toString(), request);

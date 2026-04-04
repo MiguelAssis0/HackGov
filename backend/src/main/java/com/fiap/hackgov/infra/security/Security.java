@@ -1,5 +1,7 @@
 package com.fiap.hackgov.infra.security;
 
+import com.fiap.hackgov.infra.filters.Filter;
+import com.fiap.hackgov.infra.filters.RateLimitFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -20,15 +22,17 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 @EnableWebSecurity
 public class Security {
 
-    @Bean
-    public Filter securityFilter() {
-        return new Filter(exceptionResolver);
-    }
-
     @Autowired
     @Qualifier("handlerExceptionResolver")
     private HandlerExceptionResolver exceptionResolver;
 
+    @Autowired
+    private RateLimitFilter rateLimitFilter;
+
+    @Bean
+    public Filter securityFilter() {
+        return new Filter(exceptionResolver);
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -40,12 +44,14 @@ public class Security {
                         .requestMatchers("/api/users/**").permitAll()
                         .requestMatchers("/api/employee/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-
-                        .requestMatchers("/v3/api-docs/**","/swagger-ui.html", "/swagger-ui/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .anyRequest().permitAll()
                 )
+                // SecurityFilter antes do UsernamePasswordAuthenticationFilter
                 .addFilterBefore(securityFilter(), UsernamePasswordAuthenticationFilter.class)
+                // RateLimitFilter antes do SecurityFilter
+                .addFilterBefore(rateLimitFilter, securityFilter().getClass())
                 .build();
     }
 

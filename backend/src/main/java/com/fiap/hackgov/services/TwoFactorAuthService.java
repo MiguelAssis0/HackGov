@@ -4,10 +4,13 @@ import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -27,7 +30,7 @@ public class TwoFactorAuthService {
     public void sendTwoFactorCode(String email, String name) {
         String code = generateCode();
         LocalDateTime expiration = LocalDateTime.now().plusMinutes(10);
-        
+
         codeStorage.put(email, new TwoFactorCode(code, expiration));
 
         try {
@@ -53,7 +56,7 @@ public class TwoFactorAuthService {
 
     public boolean verifyCode(String email, String code) {
         TwoFactorCode storedCode = codeStorage.get(email);
-        
+
         if (storedCode == null) {
             return false;
         }
@@ -63,8 +66,11 @@ public class TwoFactorAuthService {
             return false;
         }
 
-        boolean isValid = storedCode.code.equals(code);
-        
+        boolean isValid = MessageDigest.isEqual(
+                storedCode.code.getBytes(StandardCharsets.UTF_8),
+                code.getBytes(StandardCharsets.UTF_8)
+        );
+
         if (isValid) {
             codeStorage.remove(email);
         }
@@ -72,13 +78,13 @@ public class TwoFactorAuthService {
         return isValid;
     }
 
-    private static class TwoFactorCode {
-        final String code;
-        final LocalDateTime expiration;
+    @Scheduled(fixedRate = 60000)
+    public void cleanExpiredCodes() {
+        codeStorage.entrySet().removeIf(e ->
+                e.getValue().expiration.isBefore(LocalDateTime.now())
+        );
+    }
 
-        TwoFactorCode(String code, LocalDateTime expiration) {
-            this.code = code;
-            this.expiration = expiration;
-        }
+    private record TwoFactorCode(String code, LocalDateTime expiration) {
     }
 }

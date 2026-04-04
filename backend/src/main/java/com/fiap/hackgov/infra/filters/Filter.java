@@ -1,11 +1,13 @@
-package com.fiap.hackgov.infra.security;
+package com.fiap.hackgov.infra.filters;
 
+import com.fiap.hackgov.infra.security.TokenService;
 import com.fiap.hackgov.services.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,9 +18,11 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import java.io.IOException;
 
 @Component
+@Order(2)
 public class Filter extends OncePerRequestFilter {
 
     private final HandlerExceptionResolver handlerExceptionResolver;
+
 
     @Autowired
     private TokenService tokenService;

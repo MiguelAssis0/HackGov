@@ -5,6 +5,7 @@ import com.fiap.hackgov.DTOs.Employee.CreateEmployeeDTO;
 import com.fiap.hackgov.DTOs.Employee.EmployeeDTO;
 import com.fiap.hackgov.entities.Employee;
 import com.fiap.hackgov.entities.enums.Roles;
+import com.fiap.hackgov.infra.filters.Filter;
 import com.fiap.hackgov.mapper.EmployeeMapper;
 import com.fiap.hackgov.services.AuthService;
 import com.fiap.hackgov.services.EmployeeService;
@@ -36,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         excludeFilters = {
                 @ComponentScan.Filter(
                         type = FilterType.ASSIGNABLE_TYPE,
-                        classes = {com.fiap.hackgov.infra.security.Filter.class}
+                        classes = {Filter.class}
                 )
         }
 )
@@ -65,7 +66,7 @@ public class EmployeeControllerTest {
                 "Test User",
                 "52998224725",
                 "test@example.com",
-                "password123",
+                "Wr0ngPassw@rd",
                 true,
                 Roles.EMPLOYEE,
                 null,

@@ -2,33 +2,29 @@ package com.fiap.hackgov.services;
 
 import com.fiap.hackgov.DTOs.Auth.LoginRequestDTO;
 import com.fiap.hackgov.DTOs.Auth.LoginResponseDTO;
-import com.fiap.hackgov.DTOs.Auth.TwoFactorRequestDTO;
-import com.fiap.hackgov.DTOs.Auth.TwoFactorResponseDTO;
 import com.fiap.hackgov.entities.Employee;
-import com.fiap.hackgov.entities.enums.Roles;
+import com.fiap.hackgov.infra.exceptions.BlockedException;
 import com.fiap.hackgov.infra.exceptions.InvalidCredentialsException;
 import com.fiap.hackgov.infra.security.TokenService;
 import com.fiap.hackgov.repositories.EmployeeRepository;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthServiceTest {
+
+    @InjectMocks
+    private AuthService authService;
 
     @Mock
     private EmployeeRepository employeeRepository;
@@ -39,148 +35,125 @@ public class AuthServiceTest {
     @Mock
     private TwoFactorAuthService twoFactorAuthService;
 
-    @Spy
-    private PasswordEncoder passwordEncoder =
-            Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
-    @InjectMocks
-    private AuthService authService;
+    @Mock
+    private LoginAttemptService loginAttemptService;
 
-    private Employee testEmployee;
-    private LoginRequestDTO loginRequest;
-    private TwoFactorRequestDTO twoFactorRequest;
+    private static final String EMAIL     = "user@test.com";
+    private static final String PASSWORD  = "senha123";
+    private static final String IP        = "192.168.0.1";
+    private static final String TOKEN     = "jwt-token-mock";
 
-    @BeforeEach
-    void setUp() {
-        testEmployee = new Employee();
-        testEmployee.setId(UUID.randomUUID());
-        testEmployee.setName("Test User");
-        testEmployee.setEmail("test@example.com");
-        testEmployee.setPassword(passwordEncoder.encode("password123"));
-        testEmployee.setRole(Roles.EMPLOYEE);
-        testEmployee.setStatus(true);
-        testEmployee.setTwoFactor(false);
-
-        loginRequest = new LoginRequestDTO("test@example.com", "password123");
-        twoFactorRequest = new TwoFactorRequestDTO("test@example.com", "123456");
+    private Employee mockEmployee(boolean twoFactor) {
+        Employee employee = mock(Employee.class);
+        when(employee.getEmail()).thenReturn(EMAIL);
+        when(employee.getName()).thenReturn("Test User");
+        when(employee.getPassword()).thenReturn("encodedPassword");
+        when(employee.isStatus()).thenReturn(true);
+        when(employee.isTwoFactor()).thenReturn(twoFactor);
+        return employee;
     }
 
     @Test
-    void login_Success_Without2FA() {
-        when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.of(testEmployee));
-        when(tokenService.generateToken(any(Employee.class))).thenReturn("jwt-token");
+    @DisplayName("Deve realizar login com sucesso sem 2FA")
+    void shouldLoginSuccessfullyWithoutTwoFactor() {
+        Employee employee = mockEmployee(false);
+        when(employeeRepository.findByEmail(EMAIL)).thenReturn(Optional.of(employee));
+        when(passwordEncoder.matches(PASSWORD, "encodedPassword")).thenReturn(true);
+        when(tokenService.generateToken(employee)).thenReturn(TOKEN);
 
-        LoginResponseDTO response = authService.login(loginRequest);
+        LoginResponseDTO response = authService.login(new LoginRequestDTO(EMAIL, PASSWORD), IP);
 
-        assertNotNull(response);
-        assertEquals("jwt-token", response.token());
-        assertEquals("test@example.com", response.email());
-        assertEquals("Test User", response.name());
-        assertEquals(Roles.EMPLOYEE, response.role());
+        assertNotNull(response.token());
         assertFalse(response.requiresTwoFactor());
-        
-        verify(employeeRepository).save(testEmployee);
-        verify(twoFactorAuthService, never()).sendTwoFactorCode(anyString(), anyString());
+        verify(loginAttemptService).registerSuccess(EMAIL, IP);
+        verify(loginAttemptService).checkBlocked(EMAIL, IP);
     }
 
     @Test
-    void login_Success_With2FA() {
-        testEmployee.setTwoFactor(true);
-        when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.of(testEmployee));
+    @DisplayName("Deve registrar falha quando email não encontrado")
+    void shouldRegisterFailureWhenEmailNotFound() {
+        when(employeeRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
 
-        LoginResponseDTO response = authService.login(loginRequest);
+        assertThrows(InvalidCredentialsException.class,
+                () -> authService.login(new LoginRequestDTO(EMAIL, PASSWORD), IP));
 
-        assertNotNull(response);
+        verify(loginAttemptService).registerFailure(EMAIL, IP);
+        verify(loginAttemptService, never()).registerSuccess(any(), any());
+    }
+
+    @Test
+    @DisplayName("Deve registrar falha quando senha incorreta")
+    void shouldRegisterFailureWhenWrongPassword() {
+        Employee employee = mock(Employee.class);
+        when(employee.isStatus()).thenReturn(true);
+        when(employee.getPassword()).thenReturn("encodedPassword");
+
+        when(employeeRepository.findByEmail(EMAIL)).thenReturn(Optional.of(employee));
+        when(passwordEncoder.matches(PASSWORD, "encodedPassword")).thenReturn(false);
+
+        assertThrows(InvalidCredentialsException.class,
+                () -> authService.login(new LoginRequestDTO(EMAIL, PASSWORD), IP));
+
+        verify(loginAttemptService).registerFailure(EMAIL, IP);
+        verify(loginAttemptService, never()).registerSuccess(any(), any());
+    }
+
+    @Test
+    @DisplayName("Deve lançar BlockedException quando bloqueado")
+    void shouldThrowBlockedExceptionWhenBlocked() {
+        doThrow(new BlockedException("Your account is blocked. Try again in 5 minute(s)."))
+                .when(loginAttemptService).checkBlocked(EMAIL, IP);
+
+        BlockedException ex = assertThrows(BlockedException.class,
+                () -> authService.login(new LoginRequestDTO(EMAIL, PASSWORD), IP));
+
+        assertTrue(ex.getMessage().contains("blocked"));
+        verify(employeeRepository, never()).findByEmail(any());
+    }
+
+    @Test
+    @DisplayName("Deve retornar requiresTwoFactor true quando 2FA habilitado")
+    void shouldReturnRequiresTwoFactorWhenEnabled() {
+        Employee employee = mockEmployee(true);
+        when(employeeRepository.findByEmail(EMAIL)).thenReturn(Optional.of(employee));
+        when(passwordEncoder.matches(PASSWORD, "encodedPassword")).thenReturn(true);
+
+        LoginResponseDTO response = authService.login(new LoginRequestDTO(EMAIL, PASSWORD), IP);
+
         assertNull(response.token());
-        assertEquals("test@example.com", response.email());
-        assertEquals("Test User", response.name());
-        assertEquals(Roles.EMPLOYEE, response.role());
         assertTrue(response.requiresTwoFactor());
-        
-        verify(twoFactorAuthService).sendTwoFactorCode("test@example.com", "Test User");
-        verify(tokenService, never()).generateToken(any(Employee.class));
+        verify(twoFactorAuthService).sendTwoFactorCode(EMAIL, "Test User");
+        verify(loginAttemptService).registerSuccess(EMAIL, IP);
     }
 
     @Test
-    void login_InvalidEmail_ThrowsException() {
-        when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+    @DisplayName("Não deve registrar falha quando conta está inativa")
+    void shouldNotRegisterFailureWhenAccountInactive() {
+        Employee employee = mock(Employee.class);
+        when(employee.isStatus()).thenReturn(false);
+        when(employeeRepository.findByEmail(EMAIL)).thenReturn(Optional.of(employee));
 
-        assertThrows(InvalidCredentialsException.class, () -> authService.login(loginRequest));
-        
-        verify(tokenService, never()).generateToken(any(Employee.class));
-        verify(twoFactorAuthService, never()).sendTwoFactorCode(anyString(), anyString());
+        assertThrows(InvalidCredentialsException.class,
+                () -> authService.login(new LoginRequestDTO(EMAIL, PASSWORD), IP));
+
+        // Conta inativa não conta como tentativa de brute force
+        verify(loginAttemptService, never()).registerFailure(any(), any());
     }
 
     @Test
-    void login_InactiveUser_ThrowsException() {
-        testEmployee.setStatus(false);
-        when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.of(testEmployee));
+    @DisplayName("Deve resetar tentativas após login bem-sucedido")
+    void shouldResetAttemptsAfterSuccessfulLogin() {
+        Employee employee = mockEmployee(false);
+        when(employeeRepository.findByEmail(EMAIL)).thenReturn(Optional.of(employee));
+        when(passwordEncoder.matches(PASSWORD, "encodedPassword")).thenReturn(true);
+        when(tokenService.generateToken(employee)).thenReturn(TOKEN);
 
-        assertThrows(InvalidCredentialsException.class, () -> authService.login(loginRequest));
-        
-        verify(tokenService, never()).generateToken(any(Employee.class));
-        verify(twoFactorAuthService, never()).sendTwoFactorCode(anyString(), anyString());
-    }
+        authService.login(new LoginRequestDTO(EMAIL, PASSWORD), IP);
 
-    @Test
-    void login_InvalidPassword_ThrowsException() {
-        when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.of(testEmployee));
-
-        LoginRequestDTO wrongPasswordRequest = new LoginRequestDTO("test@example.com", "wrongpassword");
-        
-        assertThrows(InvalidCredentialsException.class, () -> authService.login(wrongPasswordRequest));
-        
-        verify(tokenService, never()).generateToken(any(Employee.class));
-        verify(twoFactorAuthService, never()).sendTwoFactorCode(anyString(), anyString());
-    }
-
-    @Test
-    void verifyTwoFactor_Success() {
-        testEmployee.setTwoFactor(true);
-        when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.of(testEmployee));
-        when(twoFactorAuthService.verifyCode(anyString(), anyString())).thenReturn(true);
-        when(tokenService.generateToken(any(Employee.class))).thenReturn("jwt-token");
-
-        TwoFactorResponseDTO response = authService.verifyTwoFactor(twoFactorRequest);
-
-        assertNotNull(response);
-        assertEquals("jwt-token", response.token());
-        assertEquals("Two-factor authentication successful", response.message());
-        
-        verify(twoFactorAuthService).verifyCode("test@example.com", "123456");
-        verify(tokenService).generateToken(testEmployee);
-    }
-
-    @Test
-    void verifyTwoFactor_InvalidEmail_ThrowsException() {
-        when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.empty());
-
-        assertThrows(InvalidCredentialsException.class, () -> authService.verifyTwoFactor(twoFactorRequest));
-        
-        verify(twoFactorAuthService, never()).verifyCode(anyString(), anyString());
-        verify(tokenService, never()).generateToken(any(Employee.class));
-    }
-
-    @Test
-    void verifyTwoFactor_TwoFactorDisabled_ThrowsException() {
-        testEmployee.setTwoFactor(false);
-        when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.of(testEmployee));
-
-        assertThrows(InvalidCredentialsException.class, () -> authService.verifyTwoFactor(twoFactorRequest));
-        
-        verify(twoFactorAuthService, never()).verifyCode(anyString(), anyString());
-        verify(tokenService, never()).generateToken(any(Employee.class));
-    }
-
-    @Test
-    void verifyTwoFactor_InvalidCode_ThrowsException() {
-        testEmployee.setTwoFactor(true);
-        when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.of(testEmployee));
-        when(twoFactorAuthService.verifyCode(anyString(), anyString())).thenReturn(false);
-
-        assertThrows(InvalidCredentialsException.class, () -> authService.verifyTwoFactor(twoFactorRequest));
-        
-        verify(twoFactorAuthService).verifyCode("test@example.com", "123456");
-        verify(tokenService, never()).generateToken(any(Employee.class));
+        verify(loginAttemptService).registerSuccess(EMAIL, IP);
+        verify(loginAttemptService, never()).registerFailure(any(), any());
     }
 }

@@ -15,7 +15,9 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
@@ -24,6 +26,20 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(JWTVerificationException.class)
     public ResponseEntity<StandardError> handleJWTVerificationException(JWTVerificationException e, HttpServletRequest request) {
         return handleException("JWT Verification Exception", HttpStatus.BAD_REQUEST, e, request);
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidCredentials(InvalidCredentialsException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
+                "status", 401,
+                "message", ex.getMessage(),
+                "timestamp", LocalDateTime.now().toString()
+        ));
+    }
+
+    @ExceptionHandler(BlockedException.class)
+    public ResponseEntity<String> handleBlockedException(BlockedException ex) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

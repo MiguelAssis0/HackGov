@@ -8,7 +8,9 @@ import com.fiap.hackgov.services.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.bouncycastle.util.IPAddress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,12 +26,25 @@ public class AuthController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Login successful"),
             @ApiResponse(responseCode = "401", description = "Invalid credentials"),
+            @ApiResponse(responseCode = "429", description = "Too many attempts - blocked"),
             @ApiResponse(responseCode = "400", description = "Invalid input")
     })
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid LoginRequestDTO loginRequest) {
-        LoginResponseDTO response = authService.login(loginRequest);
+    public ResponseEntity<LoginResponseDTO> login(
+            @RequestBody @Valid LoginRequestDTO loginRequest,
+            HttpServletRequest httpRequest) { // CORRIGIDO
+
+        String clientIp = getClientIp(httpRequest); // extrai o IP aqui
+        LoginResponseDTO response = authService.login(loginRequest, clientIp);
         return ResponseEntity.ok(response);
+    }
+
+    private String getClientIp(HttpServletRequest request) {
+        String forwarded = request.getHeader("X-Forwarded-For");
+        if (forwarded != null && !forwarded.isEmpty()) {
+            return forwarded.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
     }
 
     @Operation(summary = "Verify Two-Factor Authentication", description = "Verify 2FA code for employee login")
