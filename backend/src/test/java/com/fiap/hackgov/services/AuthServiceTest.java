@@ -14,8 +14,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -37,6 +39,10 @@ public class AuthServiceTest {
     @Mock
     private TwoFactorAuthService twoFactorAuthService;
 
+    @Spy
+    private PasswordEncoder passwordEncoder =
+            Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
+
     @InjectMocks
     private AuthService authService;
 
@@ -50,7 +56,7 @@ public class AuthServiceTest {
         testEmployee.setId(UUID.randomUUID());
         testEmployee.setName("Test User");
         testEmployee.setEmail("test@example.com");
-        testEmployee.setPassword(new Argon2PasswordEncoder(10, 1024, 1, 1024, 1).encode("password123"));
+        testEmployee.setPassword(passwordEncoder.encode("password123"));
         testEmployee.setRole(Roles.EMPLOYEE);
         testEmployee.setStatus(true);
         testEmployee.setTwoFactor(false);
