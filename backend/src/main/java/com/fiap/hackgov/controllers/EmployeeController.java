@@ -53,7 +53,6 @@ public class EmployeeController {
             @ApiResponse(responseCode = "200", description = "Employees retrieved successfully"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
-    @Cacheable
     @GetMapping
     public ResponseEntity<Page<EmployeeDTO>> getAllEmployees(Pageable pageable) {
             Page<EmployeeDTO> employeeDTOs = employeeService.findAll(pageable)
@@ -68,11 +67,9 @@ public class EmployeeController {
             @ApiResponse(responseCode = "404", description = "Employee not found"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
-    @Cacheable
     @GetMapping("/{id}")
-    public ResponseEntity<EmployeeDTO> getEmployeeById(@PathVariable UUID id, HttpServletRequest request) {
-        EmployeeDTO employee = employeeService.findById(id.toString(), request);
-        return ResponseEntity.ok(employee);
+    public ResponseEntity<EmployeeDTO> getEmployeeById(@PathVariable UUID id) {
+        return ResponseEntity.ok(employeeService.findById(id));
     }
 
 

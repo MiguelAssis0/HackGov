@@ -13,6 +13,7 @@ public record CreateEmployeeDTO(
 
         @NotBlank(message = "Name is required")
         @Size(min = 3, max = 50, message = "Name must be between 3 and 100 characters")
+        @Pattern(message = "Name must contain only letters", regexp = "^[a-zA-Z\s]*$")
         String name,
 
 
@@ -31,7 +32,6 @@ public record CreateEmployeeDTO(
         @Pattern(message = "Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character", regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$")
         String password,
 
-
         boolean status,
 
 
@@ -39,12 +39,12 @@ public record CreateEmployeeDTO(
         @Enumerated(EnumType.STRING)
         Roles role,
 
-
         String avatarPath,
 
-
-        @NotBlank(message = "Phone is required")
-        @Size(min = 8, max = 16, message = "Phone must be 12 characters long")
+        @Pattern(
+                regexp = "^\\+55\\d{10,11}$",
+                message = "Phone must be in format +5511999999999"
+        )
         String phone,
 
 

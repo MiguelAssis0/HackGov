@@ -5,7 +5,8 @@ import com.fiap.hackgov.DTOs.Employee.CreateEmployeeDTO;
 import com.fiap.hackgov.DTOs.Employee.EmployeeDTO;
 import com.fiap.hackgov.entities.Employee;
 import com.fiap.hackgov.entities.enums.Roles;
-import com.fiap.hackgov.infra.filters.Filter;
+import com.fiap.hackgov.infra.filters.JwtAuthenticationFilter;
+import com.fiap.hackgov.infra.filters.RateLimitFilter;
 import com.fiap.hackgov.mapper.EmployeeMapper;
 import com.fiap.hackgov.services.AuthService;
 import com.fiap.hackgov.services.EmployeeService;
@@ -37,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         excludeFilters = {
                 @ComponentScan.Filter(
                         type = FilterType.ASSIGNABLE_TYPE,
-                        classes = {Filter.class}
+                        classes = {JwtAuthenticationFilter.class, RateLimitFilter.class}
                 )
         }
 )
@@ -64,13 +65,13 @@ public class EmployeeControllerTest {
         UUID cityHallId = UUID.randomUUID();
         CreateEmployeeDTO employeeDTO = new CreateEmployeeDTO(
                 "Test User",
-                "52998224725",
+                "11144477735",
                 "test@example.com",
                 "Wr0ngPassw@rd",
                 true,
                 Roles.EMPLOYEE,
                 null,
-                "1234567890",
+                "+551234567890",
                 false,
                 cityHallId
         );
@@ -181,7 +182,7 @@ public class EmployeeControllerTest {
                 null
         );
 
-        when(employeeService.findById(any(String.class), any(jakarta.servlet.http.HttpServletRequest.class)))
+        when(employeeService.findById(any(UUID.class)))
                 .thenReturn(employee);
 
         mockMvc.perform(get("/api/employee/" + employee.id()))

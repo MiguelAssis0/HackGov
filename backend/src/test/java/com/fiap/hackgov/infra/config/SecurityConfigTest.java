@@ -1,7 +1,7 @@
 package com.fiap.hackgov.infra.config;
 
 import com.fiap.hackgov.infra.filters.RateLimitFilter;
-import com.fiap.hackgov.infra.filters.Filter;
+import com.fiap.hackgov.infra.filters.JwtAuthenticationFilter;
 import com.fiap.hackgov.infra.security.Security;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,8 +9,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -24,10 +26,10 @@ public class SecurityConfigTest {
     private Security security;
 
     @Mock
-    private RateLimitFilter rateLimitFilter;
+    private AuthenticationConfiguration authenticationConfiguration;
 
     @Mock
-    private AuthenticationConfiguration authenticationConfiguration;
+    private JwtAuthenticationFilter jwtFilter;
 
     @Test
     @DisplayName("Deve criar PasswordEncoder do tipo BCrypt")
@@ -35,7 +37,7 @@ public class SecurityConfigTest {
         PasswordEncoder encoder = security.passwordEncoder();
 
         assertNotNull(encoder);
-        assertInstanceOf(BCryptPasswordEncoder.class, encoder);
+        assertInstanceOf(Argon2PasswordEncoder.class, encoder);
     }
 
     @Test
@@ -75,12 +77,9 @@ public class SecurityConfigTest {
     }
 
     @Test
-    @DisplayName("Deve criar SecurityFilter corretamente")
-    void shouldCreateSecurityFilter() {
-        Filter filter = security.securityFilter();
-
-        assertNotNull(filter);
-        assertInstanceOf(Filter.class, filter);
+    @DisplayName("Deve injetar JwtAuthenticationFilter corretamente")
+    void shouldInjectJwtFilter() {
+        assertNotNull(jwtFilter);
     }
 
     @Test

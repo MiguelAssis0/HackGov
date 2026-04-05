@@ -2,8 +2,11 @@ package com.fiap.hackgov.controllers;
 
 import com.fiap.hackgov.DTOs.Auth.LoginRequestDTO;
 import com.fiap.hackgov.DTOs.Auth.LoginResponseDTO;
+import com.fiap.hackgov.DTOs.Auth.RefreshToken.RefreshTokenRequestDTO;
+import com.fiap.hackgov.DTOs.Auth.RefreshToken.RefreshTokenResponseDTO;
 import com.fiap.hackgov.DTOs.Auth.TwoFactorRequestDTO;
 import com.fiap.hackgov.DTOs.Auth.TwoFactorResponseDTO;
+import com.fiap.hackgov.infra.security.TokenService;
 import com.fiap.hackgov.services.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -22,6 +25,9 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+    @Autowired
+    private TokenService tokenService;
+
     @Operation(summary = "Employee Login", description = "Authenticate employee with email and password")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Login successful"),
@@ -32,9 +38,9 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(
             @RequestBody @Valid LoginRequestDTO loginRequest,
-            HttpServletRequest httpRequest) { // CORRIGIDO
+            HttpServletRequest httpRequest) {
 
-        String clientIp = getClientIp(httpRequest); // extrai o IP aqui
+        String clientIp = getClientIp(httpRequest);
         LoginResponseDTO response = authService.login(loginRequest, clientIp);
         return ResponseEntity.ok(response);
     }
@@ -54,8 +60,33 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "Invalid input")
     })
     @PostMapping("/2fa/verify")
-    public ResponseEntity<TwoFactorResponseDTO> verifyTwoFactor(@RequestBody @Valid TwoFactorRequestDTO twoFactorRequest) {
-        TwoFactorResponseDTO response = authService.verifyTwoFactor(twoFactorRequest);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<TwoFactorResponseDTO> verifyTwoFactor(
+            @RequestBody @Valid TwoFactorRequestDTO twoFactorRequest,
+            HttpServletRequest httpRequest) {
+
+        String clientIp = getClientIp(httpRequest);
+        return ResponseEntity.ok(authService.verifyTwoFactor(twoFactorRequest, clientIp));
+    }
+
+    @Operation(summary = "Logout", description = "Invalidate current access token")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Logout successful"),
+            @ApiResponse(responseCode = "401", description = "Invalid token")
+    })
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest request){
+        String token = tokenService.extractToken(request);
+        authService.logout(token);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Refresh Token", description = "Generate new access token using refresh token")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Token refreshed successful"),
+            @ApiResponse(responseCode = "401", description = "Invalid or expired refresh token")
+    })
+    @PostMapping("/refresh")
+    public ResponseEntity<RefreshTokenResponseDTO> refresh(@RequestBody @Valid RefreshTokenRequestDTO request){
+        return ResponseEntity.ok(authService.refreshToken(request));
     }
 }

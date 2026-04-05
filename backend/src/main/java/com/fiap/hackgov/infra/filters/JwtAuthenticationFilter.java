@@ -1,6 +1,9 @@
 package com.fiap.hackgov.infra.filters;
 
+import com.fiap.hackgov.infra.security.SecurityProperties;
 import com.fiap.hackgov.infra.security.TokenService;
+import com.fiap.hackgov.infra.utils.BaseSecurityFilter;
+import com.fiap.hackgov.services.TokenBlacklistService;
 import com.fiap.hackgov.services.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -12,18 +15,16 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 
 @Component
 @Order(2)
-public class Filter extends OncePerRequestFilter {
+public class JwtAuthenticationFilter extends BaseSecurityFilter {
 
     private final HandlerExceptionResolver handlerExceptionResolver;
-
-
+    
     @Autowired
     private TokenService tokenService;
 
@@ -31,16 +32,24 @@ public class Filter extends OncePerRequestFilter {
     private UserDetailsServiceImpl userDetailsService;
 
     @Autowired
-    public Filter(HandlerExceptionResolver handlerExceptionResolver) {
+    public JwtAuthenticationFilter(HandlerExceptionResolver handlerExceptionResolver) {
         this.handlerExceptionResolver = handlerExceptionResolver;
     }
 
+    @Autowired
+    private TokenBlacklistService tokenBlacklistService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String token = getToken(request);
         try {
             if (token != null) {
+                if (tokenBlacklistService.isBlacklisted(token)) {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\": \"Token has been invalidated\"}");
+                    return;
+                }
                 var userLogin = tokenService.getSubject(token);
 
                 UserDetails user = userDetailsService.loadUserByUsername(userLogin);

@@ -1,6 +1,7 @@
 package com.fiap.hackgov.DTOs.Auth;
 
 public record TwoFactorResponseDTO(
-        String token,
+        String accessToken,
+        String refreshToken,
         String message
 ) {}

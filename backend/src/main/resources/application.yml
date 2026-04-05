@@ -10,8 +10,14 @@ server:
 
 api:
   security:
+    skip-paths:
+      - /h2-console
+      - /swagger-ui.html
+      - /v3/api-docs
+      - /swagger-ui/**
     token:
       secret: ${JWT_SECRET:my-secret}
+      refresh-secret: ${JWT_REFRESH_SECRET:my-refresh-secret}
       expiration: ${JWT_TIME:2}
 
 logging:

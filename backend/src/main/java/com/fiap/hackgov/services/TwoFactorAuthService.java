@@ -1,18 +1,22 @@
 package com.fiap.hackgov.services;
 
+import com.fiap.hackgov.entities.TwoFactorCode;
+import com.fiap.hackgov.infra.utils.AuditLog;
+import com.fiap.hackgov.repositories.TwoFactorCodeRepository;
 import lombok.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Optional;
 
 @Service
 public class TwoFactorAuthService {
@@ -20,23 +24,44 @@ public class TwoFactorAuthService {
     @Autowired
     private JavaMailSender mailSender;
 
-    private final ConcurrentMap<String, TwoFactorCode> codeStorage = new ConcurrentHashMap<>();
+    @Autowired
+    private TwoFactorCodeRepository twoFactorCodeRepository;
+
+    @Autowired
+    private AuditLog auditLog;
+
     private final SecureRandom secureRandom = new SecureRandom();
+
+    private static final Logger log = LoggerFactory.getLogger(TwoFactorAuthService.class);
+
 
     public String generateCode() {
         return String.format("%06d", secureRandom.nextInt(1000000));
     }
 
     public void sendTwoFactorCode(String email, String name) {
+        auditLog.with(log).event("2fa_generate_start").email(email).level(AuditLog.Level.INFO).log();
+
         String code = generateCode();
         LocalDateTime expiration = LocalDateTime.now().plusMinutes(10);
 
-        codeStorage.put(email, new TwoFactorCode(code, expiration));
+        TwoFactorCode twoFactorCode = twoFactorCodeRepository.findByEmail(email)
+                .orElse(new TwoFactorCode());
+        twoFactorCode.setEmail(email);
+        twoFactorCode.setCode(code);
+        twoFactorCode.setExpiration(expiration);
+        twoFactorCodeRepository.save(twoFactorCode);
+
+        auditLog.with(log).event("2fa_code_persisted").email(email).level(AuditLog.Level.INFO).log();
 
         try {
             SimpleMailMessage message = getSimpleMailMessage(email, name, code);
             mailSender.send(message);
+
+            auditLog.with(log).event("2fa_email_sent").email(email).level(AuditLog.Level.INFO).log();
         } catch (Exception e) {
+            auditLog.with(log).event("2fa_email_failed").reason(e.getMessage()).email(email).level(AuditLog.Level.ERROR).log();
+            twoFactorCodeRepository.deleteByEmail(email);
             throw new RuntimeException("Failed to send two-factor authentication code", e);
         }
     }
@@ -55,24 +80,32 @@ public class TwoFactorAuthService {
     }
 
     public boolean verifyCode(String email, String code) {
-        TwoFactorCode storedCode = codeStorage.get(email);
+        auditLog.with(log).event("2fa_verify_start").email(email).level(AuditLog.Level.INFO).log();
+        Optional<TwoFactorCode> storedCodeOpt = twoFactorCodeRepository.findByEmail(email);
 
-        if (storedCode == null) {
+        if (storedCodeOpt.isEmpty()) {
+            auditLog.with(log).event("2fa_verify_failed").reason("code_not_found").email(email).level(AuditLog.Level.WARN).log();
             return false;
         }
 
-        if (storedCode.expiration.isBefore(LocalDateTime.now())) {
-            codeStorage.remove(email);
+        TwoFactorCode storedCode = storedCodeOpt.get();
+
+        if (storedCode.getExpiration().isBefore(LocalDateTime.now())) {
+            auditLog.with(log).event("2fa_verify_failed").reason("code_expired").email(email).level(AuditLog.Level.WARN).log();
+            twoFactorCodeRepository.deleteByEmail(email);
             return false;
         }
 
         boolean isValid = MessageDigest.isEqual(
-                storedCode.code.getBytes(StandardCharsets.UTF_8),
+                storedCode.getCode().getBytes(StandardCharsets.UTF_8),
                 code.getBytes(StandardCharsets.UTF_8)
         );
 
         if (isValid) {
-            codeStorage.remove(email);
+            auditLog.with(log).reason("2fa_verify_success").email(email).level(AuditLog.Level.INFO).log();
+            twoFactorCodeRepository.deleteByEmail(email);
+        }else{
+            auditLog.with(log).reason("2fa_verify_failed").reason("invalid_code").email(email).level(AuditLog.Level.WARN).log();
         }
 
         return isValid;
@@ -80,11 +113,8 @@ public class TwoFactorAuthService {
 
     @Scheduled(fixedRate = 60000)
     public void cleanExpiredCodes() {
-        codeStorage.entrySet().removeIf(e ->
-                e.getValue().expiration.isBefore(LocalDateTime.now())
-        );
-    }
-
-    private record TwoFactorCode(String code, LocalDateTime expiration) {
+        auditLog.with(log).event("2fa_cleanup_start").level(AuditLog.Level.INFO).log();
+        twoFactorCodeRepository.deleteAllExpired(LocalDateTime.now());
+        auditLog.with(log).event("2fa_cleanup_done").level(AuditLog.Level.INFO).log();
     }
 }

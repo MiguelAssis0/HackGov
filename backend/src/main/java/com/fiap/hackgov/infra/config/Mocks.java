@@ -165,6 +165,7 @@ public class Mocks implements CommandLineRunner {
         emp1.setAdmissionDate(LocalDateTime.of(2020, 3, 15, 8, 0));
         emp1.setRegistrationNumber("SP-001");
         emp1.setHoursWorked(1840.0);
+        emp1.setTwoFactor(false);
         emp1.setJobLevel(analista);
         employeeRepository.save(emp1);
 

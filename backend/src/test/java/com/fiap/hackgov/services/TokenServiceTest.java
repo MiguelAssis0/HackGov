@@ -52,7 +52,6 @@ public class TokenServiceTest {
     @Test
     void validateToken_InvalidToken_ThrowsException() {
         HttpServletRequest request = mock(HttpServletRequest.class);
-        // token assinado com chave diferente
         String invalidToken = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyIn0.invalidsignature";
         when(request.getHeader("Authorization")).thenReturn("Bearer " + invalidToken);
 

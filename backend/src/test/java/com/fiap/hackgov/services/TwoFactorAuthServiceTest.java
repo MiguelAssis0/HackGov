@@ -1,18 +1,21 @@
 package com.fiap.hackgov.services;
 
+import com.fiap.hackgov.entities.TwoFactorCode;
+import com.fiap.hackgov.infra.utils.AuditLog;
+import com.fiap.hackgov.repositories.TwoFactorCodeRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,11 +27,34 @@ public class TwoFactorAuthServiceTest {
     @Mock
     private JavaMailSender mailSender;
 
+    @Mock
+    private TwoFactorCodeRepository twoFactorCodeRepository;
+
+    @Mock
+    private AuditLog auditLog;
+
+    @Mock
+    private AuditLog.Builder builderMock;
+
     @InjectMocks
     private TwoFactorAuthService twoFactorAuthService;
 
+    private static final String EMAIL = "test@example.com";
+    private static final String NAME  = "Test User";
+    private static final String CODE  = "123456";
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(auditLog.with(any())).thenReturn(builderMock);
+        lenient().when(builderMock.event(any())).thenReturn(builderMock);
+        lenient().when(builderMock.email(any())).thenReturn(builderMock);
+        lenient().when(builderMock.reason(any())).thenReturn(builderMock);
+        lenient().when(builderMock.level(any())).thenReturn(builderMock);
+    }
+
     @Test
-    void generateCode_ReturnsSixDigits() {
+    @DisplayName("Deve gerar código com 6 dígitos numéricos")
+    void shouldGenerateSixDigitCode() {
         String code = twoFactorAuthService.generateCode();
 
         assertNotNull(code);
@@ -37,129 +63,124 @@ public class TwoFactorAuthServiceTest {
     }
 
     @Test
-    void sendTwoFactorCode_Success() {
-        String email = "test@example.com";
-        String name = "Test User";
+    @DisplayName("Deve salvar código no banco e enviar email com sucesso")
+    void shouldSaveCodeAndSendEmail() {
+        when(twoFactorCodeRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
 
-        assertDoesNotThrow(() -> twoFactorAuthService.sendTwoFactorCode(email, name));
-        
-        verify(mailSender, times(1)).send(any(SimpleMailMessage.class));
+        twoFactorAuthService.sendTwoFactorCode(EMAIL, NAME);
+
+        verify(twoFactorCodeRepository).save(any(TwoFactorCode.class));
+        verify(mailSender).send(any(SimpleMailMessage.class));
     }
 
     @Test
-    void sendTwoFactorCode_EmailFailure_ThrowsException() {
-        String email = "test@example.com";
-        String name = "Test User";
+    @DisplayName("Deve sobrescrever código existente ao reenviar")
+    void shouldOverwriteExistingCodeOnResend() {
+        TwoFactorCode existing = new TwoFactorCode(EMAIL, "654321", LocalDateTime.now().plusMinutes(5));
+        when(twoFactorCodeRepository.findByEmail(EMAIL)).thenReturn(Optional.of(existing));
 
-        doThrow(new RuntimeException("Mail service failed")).when(mailSender).send(any(SimpleMailMessage.class));
+        twoFactorAuthService.sendTwoFactorCode(EMAIL, NAME);
 
-        assertThrows(RuntimeException.class, () -> twoFactorAuthService.sendTwoFactorCode(email, name));
-        
-        verify(mailSender, times(1)).send(any(SimpleMailMessage.class));
+        ArgumentCaptor<TwoFactorCode> captor = ArgumentCaptor.forClass(TwoFactorCode.class);
+        verify(twoFactorCodeRepository).save(captor.capture());
+
+        assertNotEquals("654321", captor.getValue().getCode());
     }
 
     @Test
-    void verifyCode_Success() {
-        String email = "test@example.com";
-        String name = "Test User";
+    @DisplayName("Deve deletar código do banco se falhar ao enviar email")
+    void shouldDeleteCodeIfEmailFails() {
+        when(twoFactorCodeRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
+        doThrow(new RuntimeException("Mail service failed"))
+                .when(mailSender).send(any(SimpleMailMessage.class));
 
-        twoFactorAuthService.sendTwoFactorCode(email, name);
+        assertThrows(RuntimeException.class,
+                () -> twoFactorAuthService.sendTwoFactorCode(EMAIL, NAME));
 
-        String code = "123456";
-        
-        // Create TwoFactorCode instance using reflection
-        try {
-            Class<?> twoFactorCodeClass = Class.forName("com.fiap.hackgov.services.TwoFactorAuthService$TwoFactorCode");
-            java.lang.reflect.Constructor<?> constructor = twoFactorCodeClass.getDeclaredConstructor(String.class, LocalDateTime.class);
-            constructor.setAccessible(true);
-            Object twoFactorCode = constructor.newInstance(code, LocalDateTime.now().plusMinutes(10));
-            
-            // Set up code storage with test data
-            ConcurrentMap<String, Object> testStorage = new ConcurrentHashMap<>();
-            testStorage.put(email, twoFactorCode);
-            ReflectionTestUtils.setField(twoFactorAuthService, "codeStorage", testStorage);
-        } catch (Exception e) {
-            fail("Failed to set up test data: " + e.getMessage());
-        }
+        verify(twoFactorCodeRepository).deleteByEmail(EMAIL);
+    }
 
-        boolean result = twoFactorAuthService.verifyCode(email, code);
+    @Test
+    @DisplayName("Deve salvar código com expiração de 10 minutos")
+    void shouldSaveCodeWithTenMinuteExpiration() {
+        when(twoFactorCodeRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
+
+        twoFactorAuthService.sendTwoFactorCode(EMAIL, NAME);
+
+        ArgumentCaptor<TwoFactorCode> captor = ArgumentCaptor.forClass(TwoFactorCode.class);
+        verify(twoFactorCodeRepository).save(captor.capture());
+
+        LocalDateTime expiration = captor.getValue().getExpiration();
+        assertTrue(expiration.isAfter(LocalDateTime.now().plusMinutes(9)));
+        assertTrue(expiration.isBefore(LocalDateTime.now().plusMinutes(11)));
+    }
+
+    @Test
+    @DisplayName("Deve retornar true para código válido")
+    void shouldReturnTrueForValidCode() {
+        TwoFactorCode stored = new TwoFactorCode(EMAIL, CODE, LocalDateTime.now().plusMinutes(10));
+        when(twoFactorCodeRepository.findByEmail(EMAIL)).thenReturn(Optional.of(stored));
+
+        boolean result = twoFactorAuthService.verifyCode(EMAIL, CODE);
 
         assertTrue(result);
+        verify(twoFactorCodeRepository).deleteByEmail(EMAIL);
     }
 
     @Test
-    void verifyCode_InvalidCode_ReturnsFalse() {
-        String email = "test@example.com";
-        String name = "Test User";
+    @DisplayName("Deve retornar false quando código não encontrado")
+    void shouldReturnFalseWhenCodeNotFound() {
+        when(twoFactorCodeRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
 
-        twoFactorAuthService.sendTwoFactorCode(email, name);
-
-        boolean result = twoFactorAuthService.verifyCode(email, "999999");
+        boolean result = twoFactorAuthService.verifyCode(EMAIL, CODE);
 
         assertFalse(result);
+        verify(twoFactorCodeRepository, never()).deleteByEmail(any());
     }
 
     @Test
-    void verifyCode_EmailNotFound_ReturnsFalse() {
-        String email = "nonexistent@example.com";
-        String code = "123456";
+    @DisplayName("Deve retornar false e deletar quando código expirado")
+    void shouldReturnFalseAndDeleteWhenExpired() {
+        TwoFactorCode expired = new TwoFactorCode(EMAIL, CODE, LocalDateTime.now().minusMinutes(1));
+        when(twoFactorCodeRepository.findByEmail(EMAIL)).thenReturn(Optional.of(expired));
 
-        boolean result = twoFactorAuthService.verifyCode(email, code);
+        boolean result = twoFactorAuthService.verifyCode(EMAIL, CODE);
 
         assertFalse(result);
+        verify(twoFactorCodeRepository).deleteByEmail(EMAIL);
     }
 
     @Test
-    void verifyCode_ExpiredCode_ReturnsFalse() {
-        String email = "test@example.com";
-        String code = "123456";
-        LocalDateTime expiredTime = LocalDateTime.now().minusMinutes(1);
+    @DisplayName("Deve retornar false para código incorreto")
+    void shouldReturnFalseForWrongCode() {
+        TwoFactorCode stored = new TwoFactorCode(EMAIL, CODE, LocalDateTime.now().plusMinutes(10));
+        when(twoFactorCodeRepository.findByEmail(EMAIL)).thenReturn(Optional.of(stored));
 
-        // Create expired TwoFactorCode instance using reflection
-        try {
-            Class<?> twoFactorCodeClass = Class.forName("com.fiap.hackgov.services.TwoFactorAuthService$TwoFactorCode");
-            java.lang.reflect.Constructor<?> constructor = twoFactorCodeClass.getDeclaredConstructor(String.class, LocalDateTime.class);
-            constructor.setAccessible(true);
-            Object twoFactorCode = constructor.newInstance(code, expiredTime);
-            
-            // Set up code storage with test data
-            ConcurrentMap<String, Object> testStorage = new ConcurrentHashMap<>();
-            testStorage.put(email, twoFactorCode);
-            ReflectionTestUtils.setField(twoFactorAuthService, "codeStorage", testStorage);
-        } catch (Exception e) {
-            fail("Failed to set up test data: " + e.getMessage());
-        }
-
-        boolean result = twoFactorAuthService.verifyCode(email, code);
+        boolean result = twoFactorAuthService.verifyCode(EMAIL, "999999");
 
         assertFalse(result);
+        verify(twoFactorCodeRepository, never()).deleteByEmail(any());
     }
 
     @Test
-    void verifyCode_SuccessfulVerification_RemovesCode() {
-        String email = "test@example.com";
-        String code = "123456";
-        LocalDateTime futureTime = LocalDateTime.now().plusMinutes(10);
+    @DisplayName("Não deve permitir reutilizar código após verificação bem-sucedida")
+    void shouldNotAllowCodeReuseAfterVerification() {
+        TwoFactorCode stored = new TwoFactorCode(EMAIL, CODE, LocalDateTime.now().plusMinutes(10));
+        when(twoFactorCodeRepository.findByEmail(EMAIL))
+                .thenReturn(Optional.of(stored))
+                .thenReturn(Optional.empty());
 
-        // Create TwoFactorCode instance using reflection
-        try {
-            Class<?> twoFactorCodeClass = Class.forName("com.fiap.hackgov.services.TwoFactorAuthService$TwoFactorCode");
-            java.lang.reflect.Constructor<?> constructor = twoFactorCodeClass.getDeclaredConstructor(String.class, LocalDateTime.class);
-            constructor.setAccessible(true);
-            Object twoFactorCode = constructor.newInstance(code, futureTime);
-            
-            // Set up code storage with test data
-            ConcurrentMap<String, Object> testStorage = new ConcurrentHashMap<>();
-            testStorage.put(email, twoFactorCode);
-            ReflectionTestUtils.setField(twoFactorAuthService, "codeStorage", testStorage);
-        } catch (Exception e) {
-            fail("Failed to set up test data: " + e.getMessage());
-        }
+        twoFactorAuthService.verifyCode(EMAIL, CODE);
+        boolean secondAttempt = twoFactorAuthService.verifyCode(EMAIL, CODE);
 
-        twoFactorAuthService.verifyCode(email, code);
+        assertFalse(secondAttempt);
+    }
 
-        boolean result = twoFactorAuthService.verifyCode(email, code);
+    @Test
+    @DisplayName("Deve deletar códigos expirados do banco")
+    void shouldDeleteExpiredCodesFromDatabase() {
+        twoFactorAuthService.cleanExpiredCodes();
 
-        assertFalse(result);
+        verify(twoFactorCodeRepository).deleteAllExpired(any(LocalDateTime.class));
     }
 }

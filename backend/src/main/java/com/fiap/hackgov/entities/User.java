@@ -35,6 +35,7 @@ public abstract class User implements UserDetails {
     private boolean status;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Roles role;
 
     private String avatarPath;
