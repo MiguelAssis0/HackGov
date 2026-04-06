@@ -5,6 +5,7 @@ import com.fiap.hackgov.infra.filters.LoggingFilter;
 import com.fiap.hackgov.infra.filters.RateLimitFilter;
 import com.fiap.hackgov.infra.security.headers.HeaderSecurityConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,10 +18,16 @@ import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 @Configuration
 @EnableWebSecurity
 public class Security {
+
+    @Autowired
+    @Qualifier("handlerExceptionResolver")
+    private HandlerExceptionResolver exceptionResolver;
+
     @Autowired
     private RateLimitFilter rateLimitFilter;
 
@@ -48,8 +55,8 @@ public class Security {
                         .requestMatchers("/h2-console/**").permitAll()
                         .anyRequest().permitAll()
                 )
-                .addFilterBefore(loggingFilter, rateLimitFilter.getClass())
-                .addFilterBefore(rateLimitFilter, jwtFilter.getClass())
+                .addFilterBefore(loggingFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
@@ -63,4 +70,6 @@ public class Security {
     public PasswordEncoder passwordEncoder() {
         return Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
     }
+
 }
+
