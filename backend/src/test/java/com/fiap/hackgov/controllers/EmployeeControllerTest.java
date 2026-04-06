@@ -7,8 +7,8 @@ import com.fiap.hackgov.entities.Employee;
 import com.fiap.hackgov.entities.enums.Roles;
 import com.fiap.hackgov.infra.filters.JwtAuthenticationFilter;
 import com.fiap.hackgov.infra.filters.RateLimitFilter;
+import com.fiap.hackgov.infra.security.SecurityProperties;
 import com.fiap.hackgov.mapper.EmployeeMapper;
-import com.fiap.hackgov.services.AuthService;
 import com.fiap.hackgov.services.EmployeeService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +55,7 @@ public class EmployeeControllerTest {
     private EmployeeMapper employeeMapper;
 
     @MockBean
-    private AuthService authService;
+    private SecurityProperties securityProperties;
 
     @Autowired
     private ObjectMapper objectMapper;

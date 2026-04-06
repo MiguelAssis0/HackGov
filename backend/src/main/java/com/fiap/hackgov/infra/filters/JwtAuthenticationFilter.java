@@ -1,14 +1,13 @@
 package com.fiap.hackgov.infra.filters;
 
-import com.fiap.hackgov.infra.security.SecurityProperties;
 import com.fiap.hackgov.infra.security.TokenService;
-import com.fiap.hackgov.infra.utils.BaseSecurityFilter;
 import com.fiap.hackgov.services.TokenBlacklistService;
 import com.fiap.hackgov.services.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -40,7 +39,7 @@ public class JwtAuthenticationFilter extends BaseSecurityFilter {
     private TokenBlacklistService tokenBlacklistService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
         String token = getToken(request);
         try {
             if (token != null) {

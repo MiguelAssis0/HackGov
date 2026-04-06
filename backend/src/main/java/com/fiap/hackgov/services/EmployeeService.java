@@ -6,12 +6,10 @@ import com.fiap.hackgov.entities.CityHall;
 import com.fiap.hackgov.entities.Employee;
 import com.fiap.hackgov.infra.exceptions.EmployeeAlreadyExistsException;
 import com.fiap.hackgov.infra.exceptions.EmployeeNotFoundException;
-import com.fiap.hackgov.infra.security.TokenService;
 import com.fiap.hackgov.infra.utils.AuditLog;
 import com.fiap.hackgov.mapper.EmployeeMapper;
 import com.fiap.hackgov.repositories.CityHallRepository;
 import com.fiap.hackgov.repositories.EmployeeRepository;
-import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +29,6 @@ public class EmployeeService {
 
     @Autowired
     private EmployeeMapper employeeMapper;
-
-    @Autowired
-    private TokenService tokenService;
 
     @Autowired
     private CityHallRepository cityHallRepository;

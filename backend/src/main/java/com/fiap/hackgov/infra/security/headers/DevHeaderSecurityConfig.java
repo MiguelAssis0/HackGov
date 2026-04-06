@@ -2,6 +2,8 @@ package com.fiap.hackgov.infra.security.headers;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -11,7 +13,7 @@ public class DevHeaderSecurityConfig implements HeaderSecurityConfig {
     public void apply(HttpSecurity http) throws Exception {
         http
                 .headers(headers -> headers
-                        .frameOptions(frame -> frame.disable())
+                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable)
                         .contentSecurityPolicy(csp -> csp.policyDirectives(
                                 "default-src 'self'; " +
                                         "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; " +
@@ -20,6 +22,6 @@ public class DevHeaderSecurityConfig implements HeaderSecurityConfig {
                                         "frame-src 'self' http://localhost:*;"
                         ))
                 )
-                .csrf(csrf -> csrf.disable());
+                .csrf(AbstractHttpConfigurer::disable);
     }
 }

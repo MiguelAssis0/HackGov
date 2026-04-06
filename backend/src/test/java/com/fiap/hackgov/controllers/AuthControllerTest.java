@@ -8,6 +8,7 @@ import com.fiap.hackgov.entities.enums.Roles;
 import com.fiap.hackgov.infra.filters.JwtAuthenticationFilter;
 import com.fiap.hackgov.infra.filters.RateLimitFilter;
 import com.fiap.hackgov.infra.security.Security;
+import com.fiap.hackgov.infra.security.SecurityProperties;
 import com.fiap.hackgov.infra.security.TokenService;
 import com.fiap.hackgov.services.AuthService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -51,6 +52,9 @@ public class AuthControllerTest {
 
     @MockBean
     private TokenService tokenService;
+
+    @MockBean
+    private SecurityProperties securityProperties;
 
     @Autowired
     private ObjectMapper objectMapper;

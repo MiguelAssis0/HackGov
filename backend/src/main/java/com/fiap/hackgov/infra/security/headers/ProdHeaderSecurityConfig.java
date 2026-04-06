@@ -3,6 +3,7 @@ package com.fiap.hackgov.infra.security.headers;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -12,7 +13,7 @@ public class ProdHeaderSecurityConfig implements HeaderSecurityConfig {
     @Override
     public void apply(HttpSecurity http) throws Exception {
         http .headers(headers -> headers
-                .frameOptions(frame -> frame.sameOrigin())
+                .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
                 .xssProtection(Customizer.withDefaults())
                 .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'"))
                 .contentTypeOptions(Customizer.withDefaults())

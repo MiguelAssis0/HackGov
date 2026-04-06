@@ -3,8 +3,6 @@ package com.fiap.hackgov.services;
 import com.fiap.hackgov.entities.BlockedAttempt;
 import com.fiap.hackgov.infra.exceptions.BlockedException;
 import com.fiap.hackgov.repositories.BlockedAttemptRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -39,7 +37,7 @@ public class LoginAttemptService {
     }
 
     public void checkBlocked(String ip) {
-        checkKey("ip:" + ip, "Your IP address");
+        checkKey("ip:" + ip);
     }
 
     // ==================== 2FA ====================
@@ -55,7 +53,7 @@ public class LoginAttemptService {
     }
 
     public void checkTwoFactorBlocked(String ip) {
-        checkKey("2fa-ip:" + ip, "Your IP address");
+        checkKey("2fa-ip:" + ip);
     }
 
     // ==================== Internos ====================
@@ -85,45 +83,45 @@ public class LoginAttemptService {
         });
     }
 
-    private void checkKey(String key, String subject) {
+    private void checkKey(String key) {
         BlockedAttempt data = blockedAttemptRepository.findByKey(key).orElse(null);
         if (data == null) return;
 
         if (data.isPermanentlyBlocked()) {
-            throw new BlockedException(subject + " is permanently blocked. Please contact support.");
+            throw new BlockedException("Your IP address" + " is permanently blocked. Please contact support.");
         }
 
         if (data.getTotalAttempts() >= PERMANENT_BLOCK_ATTEMPTS) {
             data.setPermanentlyBlocked(true);
             data.setUpdatedAt(LocalDateTime.now());
             blockedAttemptRepository.save(data);
-            throw new BlockedException(subject + " is permanently blocked. Please contact support.");
+            throw new BlockedException("Your IP address" + " is permanently blocked. Please contact support.");
         }
 
         if (data.getTotalAttempts() >= SECOND_BLOCK_ATTEMPTS) {
-            applyOrCheckTemporaryBlock(data, THIRD_BLOCK_MINUTES, subject);
+            applyOrCheckTemporaryBlock(data, THIRD_BLOCK_MINUTES);
             return;
         }
 
         if (data.getTotalAttempts() >= FIRST_BLOCK_ATTEMPTS) {
-            applyOrCheckTemporaryBlock(data, SECOND_BLOCK_MINUTES, subject);
+            applyOrCheckTemporaryBlock(data, SECOND_BLOCK_MINUTES);
             return;
         }
 
         if (data.getBlockedUntil() != null && data.getBlockedUntil().isAfter(LocalDateTime.now())) {
             long minutesLeft = java.time.Duration.between(LocalDateTime.now(), data.getBlockedUntil()).toMinutes() + 1;
-            throw new BlockedException(subject + " is blocked. Try again in " + minutesLeft + " minute(s).");
+            throw new BlockedException("Your IP address" + " is blocked. Try again in " + minutesLeft + " minute(s).");
         }
     }
 
-    private void applyOrCheckTemporaryBlock(BlockedAttempt data, int minutes, String subject) {
+    private void applyOrCheckTemporaryBlock(BlockedAttempt data, int minutes) {
         if (data.getBlockedUntil() == null || data.getBlockedUntil().isBefore(LocalDateTime.now())) {
             data.setBlockedUntil(LocalDateTime.now().plusMinutes(minutes));
             data.setUpdatedAt(LocalDateTime.now());
             blockedAttemptRepository.save(data);
         }
         long minutesLeft = java.time.Duration.between(LocalDateTime.now(), data.getBlockedUntil()).toMinutes() + 1;
-        throw new BlockedException(subject + " is blocked. Try again in " + minutesLeft + " minute(s).");
+        throw new BlockedException("Your IP address" + " is blocked. Try again in " + minutesLeft + " minute(s).");
     }
 
     @Scheduled(cron = "0 0 3 * * *")

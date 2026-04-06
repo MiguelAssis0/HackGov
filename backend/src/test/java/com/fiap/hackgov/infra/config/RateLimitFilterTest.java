@@ -1,6 +1,7 @@
 package com.fiap.hackgov.infra.config;
 
 import com.fiap.hackgov.infra.filters.RateLimitFilter;
+import com.fiap.hackgov.infra.utils.AuditLog;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -33,10 +34,19 @@ public class RateLimitFilterTest {
     @Mock
     private FilterChain filterChain;
 
+    @Mock
+    private AuditLog auditLog;
+
+    @Mock
+    private AuditLog.Builder builderMock;
+
     @BeforeEach
     void setUp() {
-        // Garante que cada teste começa com uma instância limpa
-        rateLimitFilter = new RateLimitFilter();
+        lenient().when(auditLog.with(any())).thenReturn(builderMock);
+        lenient().when(builderMock.event(any())).thenReturn(builderMock);
+        lenient().when(builderMock.email(any())).thenReturn(builderMock);
+        lenient().when(builderMock.reason(any())).thenReturn(builderMock);
+        lenient().when(builderMock.level(any())).thenReturn(builderMock);
     }
 
     // ==================== Limite padrão (20 req/min) ====================
@@ -70,7 +80,7 @@ public class RateLimitFilterTest {
         when(request.getRemoteAddr()).thenReturn("192.168.0.2");
         when(response.getWriter()).thenReturn(mock(PrintWriter.class));
 
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 21; i++) {
             rateLimitFilter.doFilterInternal(request, response, filterChain);
         }
 

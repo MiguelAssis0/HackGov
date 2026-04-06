@@ -1,12 +1,12 @@
 package com.fiap.hackgov.infra.security;
 
 import com.fiap.hackgov.infra.filters.JwtAuthenticationFilter;
+import com.fiap.hackgov.infra.filters.LoggingFilter;
 import com.fiap.hackgov.infra.filters.RateLimitFilter;
 import com.fiap.hackgov.infra.security.headers.HeaderSecurityConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -28,6 +28,9 @@ public class Security {
     private JwtAuthenticationFilter jwtFilter;
 
     @Autowired
+    private LoggingFilter loggingFilter;
+
+    @Autowired
     private HeaderSecurityConfig headerSecurityConfig;
 
     @Bean
@@ -45,8 +48,9 @@ public class Security {
                         .requestMatchers("/h2-console/**").permitAll()
                         .anyRequest().permitAll()
                 )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(loggingFilter, rateLimitFilter.getClass())
                 .addFilterBefore(rateLimitFilter, jwtFilter.getClass())
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

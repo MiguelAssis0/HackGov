@@ -6,7 +6,6 @@ import com.fiap.hackgov.DTOs.Employee.EmployeeDTO;
 import com.fiap.hackgov.entities.Employee;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface EmployeeMapper {

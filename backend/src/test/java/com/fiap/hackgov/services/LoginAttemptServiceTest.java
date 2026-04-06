@@ -28,14 +28,14 @@ public class LoginAttemptServiceTest {
 
     private static final String IP = "192.168.0.1";
 
-    private BlockedAttempt attemptWithCount(String key, int count) {
-        BlockedAttempt data = new BlockedAttempt(key);
+    private BlockedAttempt attemptWithCount(int count) {
+        BlockedAttempt data = new BlockedAttempt("ip:192.168.0.1");
         data.setTotalAttempts(count);
         return data;
     }
 
-    private BlockedAttempt permanentlyBlocked(String key) {
-        BlockedAttempt data = new BlockedAttempt(key);
+    private BlockedAttempt permanentlyBlocked() {
+        BlockedAttempt data = new BlockedAttempt("ip:192.168.0.1");
         data.setTotalAttempts(15);
         data.setPermanentlyBlocked(true);
         return data;
@@ -60,7 +60,7 @@ public class LoginAttemptServiceTest {
     @DisplayName("Não deve bloquear com menos de 5 tentativas")
     void shouldNotBlockBeforeFiveAttempts() {
         when(blockedAttemptRepository.findByKey("ip:" + IP))
-                .thenReturn(Optional.of(attemptWithCount("ip:" + IP, 4)));
+                .thenReturn(Optional.of(attemptWithCount(4)));
 
         assertDoesNotThrow(() -> loginAttemptService.checkBlocked(IP));
     }
@@ -106,7 +106,7 @@ public class LoginAttemptServiceTest {
     @DisplayName("Deve bloquear permanentemente após 15+ tentativas")
     void shouldBlockPermanentlyAfterFifteenPlusAttempts() {
         when(blockedAttemptRepository.findByKey("ip:" + IP))
-                .thenReturn(Optional.of(attemptWithCount("ip:" + IP, 15)));
+                .thenReturn(Optional.of(attemptWithCount(15)));
 
         BlockedException ex = assertThrows(BlockedException.class,
                 () -> loginAttemptService.checkBlocked(IP));
@@ -119,7 +119,7 @@ public class LoginAttemptServiceTest {
     @DisplayName("Deve manter bloqueio permanente")
     void shouldKeepPermanentBlock() {
         when(blockedAttemptRepository.findByKey("ip:" + IP))
-                .thenReturn(Optional.of(permanentlyBlocked("ip:" + IP)));
+                .thenReturn(Optional.of(permanentlyBlocked()));
 
         BlockedException ex = assertThrows(BlockedException.class,
                 () -> loginAttemptService.checkBlocked(IP));
@@ -143,7 +143,7 @@ public class LoginAttemptServiceTest {
     @DisplayName("Deve resetar tentativas após sucesso")
     void shouldResetAttemptsOnSuccess() {
         when(blockedAttemptRepository.findByKey("ip:" + IP))
-                .thenReturn(Optional.of(attemptWithCount("ip:" + IP, 3)));
+                .thenReturn(Optional.of(attemptWithCount(3)));
 
         loginAttemptService.registerSuccess(IP);
 

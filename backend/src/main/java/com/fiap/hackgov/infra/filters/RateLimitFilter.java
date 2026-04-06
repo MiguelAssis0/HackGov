@@ -1,15 +1,17 @@
 package com.fiap.hackgov.infra.filters;
 
+import com.fiap.hackgov.infra.utils.AuditLog;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.fiap.hackgov.infra.utils.BaseSecurityFilter;
-import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
-import io.github.bucket4j.Refill;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -31,10 +33,15 @@ public class RateLimitFilter extends BaseSecurityFilter {
             .maximumSize(100_000)
             .build();
 
+    @Autowired
+    private AuditLog auditLog;
+
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
+
     @Override
-    public void doFilterInternal(HttpServletRequest request,
-                                 HttpServletResponse response,
-                                 FilterChain filterChain) throws ServletException, IOException {
+    public void doFilterInternal(@NonNull HttpServletRequest request,
+                                 @NonNull HttpServletResponse response,
+                                 @NonNull FilterChain filterChain) throws ServletException, IOException {
 
         String clientIp  = getClientIp(request);
         String routeKey  = clientIp + ":" + getRouteKey(request);
@@ -43,6 +50,7 @@ public class RateLimitFilter extends BaseSecurityFilter {
         if (bucket.tryConsume(1)) {
             filterChain.doFilter(request, response);
         } else {
+            auditLog.with(log).event("rate_limit_exceeded").reason("Too many requests").level(AuditLog.Level.WARN).log();
             response.setStatus(429);
             response.setContentType("application/json");
             response.getWriter().write("{\"error\": \"Too many requests. Try again later.\"}");
@@ -54,12 +62,11 @@ public class RateLimitFilter extends BaseSecurityFilter {
 
         int maxRequests   = isAuthRoute ? AUTH_MAX_REQUESTS   : DEFAULT_MAX_REQUESTS;
         int windowMinutes = isAuthRoute ? AUTH_WINDOW_MINUTES : DEFAULT_WINDOW_MINUTES;
-
-        Bandwidth limit = Bandwidth.classic(
-                maxRequests,
-                Refill.greedy(maxRequests, Duration.ofMinutes(windowMinutes))
-        );
-        return Bucket.builder().addLimit(limit).build();
+        return Bucket.builder()
+                .addLimit(limit -> limit
+                        .capacity(maxRequests)
+                        .refillIntervally(maxRequests, Duration.ofMinutes(windowMinutes)))
+                .build();
     }
 
     private boolean isAuthRoute(HttpServletRequest request) {
@@ -73,25 +80,5 @@ public class RateLimitFilter extends BaseSecurityFilter {
         if (uri.contains("/api/auth/login")) return "auth:login";
         if (uri.contains("/api/auth/2fa"))   return "auth:2fa";
         return "default";
-    }
-
-    private String getClientIp(HttpServletRequest request) {
-        String[] headers = {
-                "CF-Connecting-IP",   // Cloudflare
-                "X-Real-IP",          // Nginx
-                "X-Forwarded-For",    // Padrão load balancers
-                "Proxy-Client-IP",    // Apache
-                "WL-Proxy-Client-IP"  // WebLogic
-        };
-
-        for (String header : headers) {
-            String ip = request.getHeader(header);
-            if (ip != null && !ip.isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
-                // X-Forwarded-For pode ter múltiplos IPs — pega o primeiro (cliente real)
-                return ip.split(",")[0].trim();
-            }
-        }
-
-        return request.getRemoteAddr();
     }
 }

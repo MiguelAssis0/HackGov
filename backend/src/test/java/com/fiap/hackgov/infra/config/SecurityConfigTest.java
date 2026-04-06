@@ -1,6 +1,5 @@
 package com.fiap.hackgov.infra.config;
 
-import com.fiap.hackgov.infra.filters.RateLimitFilter;
 import com.fiap.hackgov.infra.filters.JwtAuthenticationFilter;
 import com.fiap.hackgov.infra.security.Security;
 import org.junit.jupiter.api.DisplayName;
@@ -9,11 +8,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,7 +29,7 @@ public class SecurityConfigTest {
     private JwtAuthenticationFilter jwtFilter;
 
     @Test
-    @DisplayName("Deve criar PasswordEncoder do tipo BCrypt")
+    @DisplayName("Deve criar PasswordEncoder do tipo Argon2")
     void shouldCreateBCryptPasswordEncoder() {
         PasswordEncoder encoder = security.passwordEncoder();
 
@@ -41,7 +38,7 @@ public class SecurityConfigTest {
     }
 
     @Test
-    @DisplayName("BCryptPasswordEncoder deve codificar e validar senha corretamente")
+    @DisplayName("Argon2Encoder deve codificar e validar senha corretamente")
     void shouldEncodeAndMatchPassword() {
         PasswordEncoder encoder = security.passwordEncoder();
         String rawPassword = "minhasenha123";
@@ -54,7 +51,7 @@ public class SecurityConfigTest {
     }
 
     @Test
-    @DisplayName("BCryptPasswordEncoder não deve aceitar senha errada")
+    @DisplayName("Argon2Encoder não deve aceitar senha errada")
     void shouldNotMatchWrongPassword() {
         PasswordEncoder encoder = security.passwordEncoder();
 
