@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fiap.hackgov.DTOs.CityHall.CityHallDTO;
 import com.fiap.hackgov.DTOs.CityHall.CreateCityHallDTO;
 import com.fiap.hackgov.entities.CityHall;
+import com.fiap.hackgov.entities.State;
 import com.fiap.hackgov.infra.filters.JwtAuthenticationFilter;
 import com.fiap.hackgov.infra.filters.RateLimitFilter;
 import com.fiap.hackgov.infra.security.SecurityProperties;
@@ -221,7 +222,15 @@ public class CityHallControllerTest {
                 LocalDateTime.now()
         );
 
-        when(cityHallService.findById(any(UUID.class))).thenReturn(dto);
+        CityHall cityHall = new CityHall();
+        cityHall.setId(cityHallId);
+        cityHall.setName("Prefeitura de SP");
+        cityHall.setCnpj("12345678000195");
+        cityHall.setState(new State());
+        cityHall.getState().setName("São Paulo");
+
+        when(cityHallService.findById(any(UUID.class))).thenReturn(cityHall);
+        when(cityHallMapper.toCityHallDTO(cityHall)).thenReturn(dto);
 
         mockMvc.perform(get("/api/cityhall/" + cityHallId))
                 .andExpect(status().isOk())

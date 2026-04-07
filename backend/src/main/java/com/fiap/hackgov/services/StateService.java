@@ -1,9 +1,7 @@
 package com.fiap.hackgov.services;
 
 import com.fiap.hackgov.DTOs.State.CreateStateDTO;
-import com.fiap.hackgov.DTOs.State.StateDTO;
 import com.fiap.hackgov.entities.State;
-import com.fiap.hackgov.mapper.StateMapper;
 import com.fiap.hackgov.repositories.StateRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,9 +17,6 @@ public class StateService {
 
     @Autowired
     private StateRepository stateRepository;
-
-    @Autowired
-    private StateMapper stateMapper;
 
     public State save(CreateStateDTO dto) {
         stateRepository.findByUf(dto.uf()).ifPresent(existing -> {
@@ -39,9 +34,8 @@ public class StateService {
         return stateRepository.findAll(pageable);
     }
 
-    public StateDTO findById(UUID id) {
-        State state = stateRepository.findById(id)
+    public State findById(UUID id) {
+        return stateRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "State not found"));
-        return stateMapper.toStateDTO(state);
     }
 }

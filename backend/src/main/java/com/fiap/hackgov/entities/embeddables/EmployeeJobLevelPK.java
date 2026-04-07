@@ -1,5 +1,7 @@
-package com.fiap.hackgov.entities;
+package com.fiap.hackgov.entities.embeddables;
 
+import com.fiap.hackgov.entities.Employee;
+import com.fiap.hackgov.entities.JobLevel;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -14,14 +16,14 @@ import java.io.Serializable;
 @Setter
 @EqualsAndHashCode
 @Embeddable
-public class JobLevelSectorPK implements Serializable {
+public class EmployeeJobLevelPK implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     @ManyToOne
-    @JoinColumn(name = "sector_id")
-    private Sector sector;
+    @JoinColumn(name = "employee_id")
+    private Employee employee;
 
     @ManyToOne
     @JoinColumn(name = "joblevel_id")

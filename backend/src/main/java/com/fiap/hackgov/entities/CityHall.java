@@ -41,6 +41,8 @@ public class CityHall implements Serializable {
     @OneToMany(mappedBy = "cityhall", cascade = CascadeType.ALL)
     private final List<Sector> sectors = new ArrayList<>();
 
+    private boolean isActive;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 

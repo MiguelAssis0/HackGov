@@ -140,19 +140,17 @@ public class StateServiceTest {
 
         @Test
         @DisplayName("should return StateDTO when ID exists")
-        void shouldReturnStateDTO_whenIdExists() {
+        void shouldReturnState_whenIdExists() {
             when(stateRepository.findById(stateId)).thenReturn(Optional.of(state));
-            when(stateMapper.toStateDTO(state)).thenReturn(stateDTO);
 
-            StateDTO result = stateService.findById(stateId);
+            State result = stateService.findById(stateId);
 
             assertThat(result).isNotNull();
-            assertThat(result.id()).isEqualTo(stateId);
-            assertThat(result.name()).isEqualTo("São Paulo");
-            assertThat(result.uf()).isEqualTo(UF.SP);
+            assertThat(result.getId()).isEqualTo(stateId);
+            assertThat(result.getName()).isEqualTo("São Paulo");
+            assertThat(result.getUf()).isEqualTo(UF.SP);
 
             verify(stateRepository).findById(stateId);
-            verify(stateMapper).toStateDTO(state);
         }
 
         @Test

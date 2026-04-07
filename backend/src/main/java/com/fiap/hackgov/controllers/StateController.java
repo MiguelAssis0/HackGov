@@ -70,6 +70,6 @@ public class StateController {
     })
     @GetMapping("/{id}")
     public ResponseEntity<StateDTO> getStateById(@PathVariable UUID id) {
-        return ResponseEntity.ok(stateService.findById(id));
+        return ResponseEntity.ok(stateMapper.toStateDTO(stateService.findById(id)));
     }
 }

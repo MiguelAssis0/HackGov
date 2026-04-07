@@ -1,11 +1,7 @@
 package com.fiap.hackgov.entities;
 
 import com.fiap.hackgov.entities.enums.RequisitionStatus;
-import com.fiap.hackgov.entities.enums.Roles;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,6 +11,7 @@ import org.springframework.security.core.GrantedAuthority;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -39,10 +36,8 @@ public class Employee extends User implements Serializable {
         return this.getEmail();
     }
 
-    @ManyToOne
-    @JoinColumn(name = "job_level_id")
-    private JobLevel jobLevel;
-
+    @OneToMany(mappedBy = "pk.employee", cascade = CascadeType.ALL)
+    private final List<EmployeeJobLevel> employeeJobLevels = new ArrayList<>();
 
     private Double salary;
 

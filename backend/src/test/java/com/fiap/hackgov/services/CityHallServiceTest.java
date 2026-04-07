@@ -192,19 +192,17 @@ public class CityHallServiceTest {
 
         @Test
         @DisplayName("should return CityHallDTO when ID exists")
-        void shouldReturnCityHallDTO_whenIdExists() {
+        void shouldReturnCityHall_whenIdExists() {
             when(cityHallRepository.findById(cityHallId)).thenReturn(Optional.of(cityHall));
-            when(cityHallMapper.toCityHallDTO(cityHall)).thenReturn(cityHallDTO);
 
-            CityHallDTO result = cityHallService.findById(cityHallId);
+            CityHall result = cityHallService.findById(cityHallId);
 
             assertThat(result).isNotNull();
-            assertThat(result.id()).isEqualTo(cityHallId);
-            assertThat(result.name()).isEqualTo("Prefeitura de SP");
-            assertThat(result.stateName()).isEqualTo("São Paulo");
+            assertThat(result.getId()).isEqualTo(cityHallId);
+            assertThat(result.getName()).isEqualTo("Prefeitura de SP");
+            assertThat(result.getState().getName()).isEqualTo("São Paulo");
 
             verify(cityHallRepository).findById(cityHallId);
-            verify(cityHallMapper).toCityHallDTO(cityHall);
         }
 
         @Test

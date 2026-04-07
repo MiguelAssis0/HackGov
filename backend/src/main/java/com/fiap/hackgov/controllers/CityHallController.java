@@ -71,6 +71,6 @@ public class CityHallController {
     })
     @GetMapping("/{id}")
     public ResponseEntity<CityHallDTO> getCityHallById(@PathVariable UUID id) {
-        return ResponseEntity.ok(cityHallService.findById(id));
+        return ResponseEntity.ok(cityHallMapper.toCityHallDTO(cityHallService.findById(id)));
     }
 }

@@ -1,5 +1,6 @@
 package com.fiap.hackgov.entities;
 
+import com.fiap.hackgov.entities.embeddables.PermissionsJobLevelPK;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;

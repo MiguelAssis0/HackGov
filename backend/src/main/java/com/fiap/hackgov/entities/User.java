@@ -34,6 +34,8 @@ public abstract class User implements UserDetails {
     private String password;
     private boolean status;
 
+    private boolean accessibility;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Roles role;

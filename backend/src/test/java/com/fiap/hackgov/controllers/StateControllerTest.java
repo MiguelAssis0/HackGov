@@ -175,9 +175,17 @@ public class StateControllerTest {
     void getStateById_Success() throws Exception {
         UUID stateId = UUID.randomUUID();
 
-        StateDTO dto = new StateDTO(stateId, "São Paulo", UF.SP, LocalDateTime.now(), LocalDateTime.now());
+        State state = new State();
+        state.setId(stateId);
+        state.setName("São Paulo");
+        state.setUf(UF.SP);
+        state.setCreatedAt(LocalDateTime.now());
+        state.setUpdatedAt(LocalDateTime.now());
 
-        when(stateService.findById(any(UUID.class))).thenReturn(dto);
+        StateDTO stateDTO = new StateDTO(stateId, "São Paulo", UF.SP, LocalDateTime.now(), LocalDateTime.now());
+        
+        when(stateService.findById(any(UUID.class))).thenReturn(state);
+        when(stateMapper.toStateDTO(state)).thenReturn(stateDTO);
 
         mockMvc.perform(get("/api/state/" + stateId))
                 .andExpect(status().isOk())

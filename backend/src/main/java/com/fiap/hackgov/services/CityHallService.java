@@ -1,10 +1,8 @@
 package com.fiap.hackgov.services;
 
-import com.fiap.hackgov.DTOs.CityHall.CityHallDTO;
 import com.fiap.hackgov.DTOs.CityHall.CreateCityHallDTO;
 import com.fiap.hackgov.entities.CityHall;
 import com.fiap.hackgov.entities.State;
-import com.fiap.hackgov.mapper.CityHallMapper;
 import com.fiap.hackgov.repositories.CityHallRepository;
 import com.fiap.hackgov.repositories.StateRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +22,6 @@ public class CityHallService {
 
     @Autowired
     private StateRepository stateRepository;
-
-    @Autowired
-    private CityHallMapper cityHallMapper;
 
     public CityHall save(CreateCityHallDTO dto) {
 
@@ -49,9 +44,8 @@ public class CityHallService {
         return cityHallRepository.findAll(pageable);
     }
 
-    public CityHallDTO findById(UUID id) {
-        CityHall cityHall = cityHallRepository.findById(id)
+    public CityHall findById(UUID id) {
+        return cityHallRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "CityHall not found"));
-        return cityHallMapper.toCityHallDTO(cityHall);
     }
 }

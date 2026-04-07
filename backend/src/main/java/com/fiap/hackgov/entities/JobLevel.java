@@ -44,6 +44,9 @@ public class JobLevel implements Serializable {
     private LevelJobLevel level;
 
     @OneToMany(mappedBy = "pk.jobLevel", cascade = CascadeType.ALL)
+    private List<EmployeeJobLevel> employees = new ArrayList<>();
+
+    @OneToMany(mappedBy = "pk.jobLevel", cascade = CascadeType.ALL)
     private List<PermissionsJobLevel> permissions = new ArrayList<>();
 
     @OneToMany(mappedBy = "pk.jobLevel", cascade = CascadeType.ALL)

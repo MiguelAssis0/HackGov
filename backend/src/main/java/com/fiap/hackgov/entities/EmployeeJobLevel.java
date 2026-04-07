@@ -1,9 +1,8 @@
 package com.fiap.hackgov.entities;
 
-import com.fiap.hackgov.entities.embeddables.JobLevelSectorPK;
+import com.fiap.hackgov.entities.embeddables.EmployeeJobLevelPK;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,17 +17,16 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name = "job_levels_sectors")
-public class JobLevelSector implements Serializable {
+public class EmployeeJobLevel implements Serializable  {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     @EmbeddedId
-    private JobLevelSectorPK pk = new JobLevelSectorPK();
+    private EmployeeJobLevelPK pk = new EmployeeJobLevelPK();
 
-    public JobLevelSector(Sector sector, JobLevel jobLevel) {
-        this.pk.setSector(sector);
+    public EmployeeJobLevel(Employee employee, JobLevel jobLevel) {
+        this.pk.setEmployee(employee);
         this.pk.setJobLevel(jobLevel);
     }
 

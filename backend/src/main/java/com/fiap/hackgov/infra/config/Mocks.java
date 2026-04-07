@@ -166,7 +166,7 @@ public class Mocks implements CommandLineRunner {
         emp1.setRegistrationNumber("SP-001");
         emp1.setHoursWorked(1840.0);
         emp1.setTwoFactor(false);
-        emp1.setJobLevel(analista);
+        emp1.getEmployeeJobLevels().add(new EmployeeJobLevel(emp1,analista));
         employeeRepository.save(emp1);
 
         Employee emp2 = new Employee();
@@ -180,7 +180,7 @@ public class Mocks implements CommandLineRunner {
         emp2.setAdmissionDate(LocalDateTime.of(2018, 6, 1, 8, 0));
         emp2.setRegistrationNumber("SP-002");
         emp2.setHoursWorked(2200.0);
-        emp2.setJobLevel(gerente);
+        emp2.getEmployeeJobLevels().add(new EmployeeJobLevel(emp2,gerente));
         employeeRepository.save(emp2);
 
         Employee emp3 = new Employee();
@@ -194,7 +194,7 @@ public class Mocks implements CommandLineRunner {
         emp3.setAdmissionDate(LocalDateTime.of(2022, 1, 10, 8, 0));
         emp3.setRegistrationNumber("RJ-001");
         emp3.setHoursWorked(920.0);
-        emp3.setJobLevel(assistente);
+        emp3.getEmployeeJobLevels().add(new EmployeeJobLevel(emp3,assistente));
         employeeRepository.save(emp3);
 
         System.out.println("Mocks carregados com sucesso!");
