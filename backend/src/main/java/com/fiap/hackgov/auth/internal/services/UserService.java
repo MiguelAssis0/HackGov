@@ -3,10 +3,11 @@ package com.fiap.hackgov.auth.internal.services;
 import com.fiap.hackgov.auth.internal.DTOs.users.CreateUserDTO;
 import com.fiap.hackgov.auth.internal.DTOs.users.UserDTO;
 import com.fiap.hackgov.auth.internal.entities.User;
+import com.fiap.hackgov.auth.internal.entities.enums.Roles;
 import com.fiap.hackgov.auth.internal.mapper.UserMapper;
 import com.fiap.hackgov.auth.internal.repositories.UserRepository;
-import com.fiap.hackgov.shared.infra.exceptions.EmployeeAlreadyExistsException;
-import com.fiap.hackgov.shared.infra.exceptions.EmployeeNotFoundException;
+import com.fiap.hackgov.shared.infra.exceptions.ResourceAlreadyExistsException;
+import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
 import com.fiap.hackgov.shared.infra.utils.AuditLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,10 +43,11 @@ public class UserService {
 
         if(userRepository.findByEmail(userDTO.email()).isPresent()){
             auditLog.with(log).event("save_user_failed").reason("email_already_exists").email(userDTO.email()).level(AuditLog.Level.WARN).log();
-            throw new EmployeeAlreadyExistsException("Email already exists");
+            throw new ResourceAlreadyExistsException("Email already exists");
         }
 
         User user = userMapper.toEntity(userDTO);
+        user.setRole(Roles.ADMIN);
         user.setPassword(passwordEncoder.encode(userDTO.password()));
 
         auditLog.with(log).event("save_user_success").level(AuditLog.Level.INFO).log();
@@ -63,7 +65,7 @@ public class UserService {
         User employee = userRepository.findById(uuid)
                 .orElseThrow(() -> {
                     auditLog.with(log).event("find_employee_by_id_failed").reason("employee_not_found").level(AuditLog.Level.WARN).log();
-                    return new EmployeeNotFoundException("Employee not found");
+                    return new ResourceNotFoundException("Employee not found");
                 });
 
         auditLog.with(log).event("find_employee_by_id_success").level(AuditLog.Level.INFO).log();

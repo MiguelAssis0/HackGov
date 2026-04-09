@@ -5,6 +5,7 @@ import com.fiap.hackgov.erp.internal.entities.CityHall;
 import com.fiap.hackgov.erp.internal.entities.State;
 import com.fiap.hackgov.erp.internal.repositories.CityHallRepository;
 import com.fiap.hackgov.erp.internal.repositories.StateRepository;
+import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -46,6 +47,6 @@ public class CityHallService {
 
     public CityHall findById(UUID id) {
         return cityHallRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "CityHall not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("CityHall not found"));
     }
 }

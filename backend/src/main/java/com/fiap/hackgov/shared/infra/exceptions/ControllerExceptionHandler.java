@@ -23,6 +23,21 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 public class ControllerExceptionHandler {
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<StandardError> handleResourceNotFoundException(ResourceNotFoundException e, HttpServletRequest request) {
+        return handleException("Resource Not Found", HttpStatus.NOT_FOUND, e, request);
+    }
+
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public ResponseEntity<StandardError> handleResourceAlreadyExistsException(ResourceAlreadyExistsException e, HttpServletRequest request) {
+        return handleException("Resource Already Exists", HttpStatus.BAD_REQUEST, e, request);
+    }
+
+    @ExceptionHandler(AuthException.class)
+    public ResponseEntity<StandardError> handleAuthException(AuthException e, HttpServletRequest request) {
+        return handleException("Auth Exception", HttpStatus.BAD_REQUEST, e, request);
+    }
+
     @ExceptionHandler(JWTVerificationException.class)
     public ResponseEntity<StandardError> handleJWTVerificationException(JWTVerificationException e, HttpServletRequest request) {
         return handleException("JWT Verification Exception", HttpStatus.BAD_REQUEST, e, request);
