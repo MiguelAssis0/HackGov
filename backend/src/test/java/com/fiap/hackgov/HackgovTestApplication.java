@@ -3,7 +3,6 @@ package com.fiap.hackgov;
 
 import com.fiap.hackgov.controllers.AuthControllerTest;
 import com.fiap.hackgov.controllers.CityHallControllerTest;
-import com.fiap.hackgov.controllers.EmployeeControllerTest;
 import com.fiap.hackgov.controllers.StateControllerTest;
 import com.fiap.hackgov.infra.config.JwtAuthenticationFilterTest;
 import com.fiap.hackgov.infra.config.RateLimitFilterTest;
@@ -16,7 +15,6 @@ import org.junit.platform.suite.api.Suite;
 @SelectClasses({
 		AuthControllerTest.class,
 		CityHallControllerTest.class,
-		EmployeeControllerTest.class,
 		AuthServiceTest.class,
 		CityHallServiceTest.class,
 		StateControllerTest.class,

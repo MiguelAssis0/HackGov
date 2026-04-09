@@ -1,8 +1,9 @@
 package com.fiap.hackgov.services;
 
-import com.fiap.hackgov.entities.TwoFactorCode;
-import com.fiap.hackgov.infra.utils.AuditLog;
-import com.fiap.hackgov.repositories.TwoFactorCodeRepository;
+import com.fiap.hackgov.auth.internal.services.TwoFactorAuthService;
+import com.fiap.hackgov.auth.internal.entities.TwoFactorCode;
+import com.fiap.hackgov.shared.infra.utils.AuditLog;
+import com.fiap.hackgov.auth.internal.repositories.TwoFactorCodeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,15 +1,19 @@
 package com.fiap.hackgov.services;
 
-import com.fiap.hackgov.DTOs.Auth.LoginRequestDTO;
-import com.fiap.hackgov.DTOs.Auth.LoginResponseDTO;
-import com.fiap.hackgov.DTOs.Auth.RefreshToken.RefreshTokenRequestDTO;
-import com.fiap.hackgov.DTOs.Auth.RefreshToken.RefreshTokenResponseDTO;
-import com.fiap.hackgov.entities.Employee;
-import com.fiap.hackgov.infra.exceptions.BlockedException;
-import com.fiap.hackgov.infra.exceptions.InvalidCredentialsException;
-import com.fiap.hackgov.infra.security.TokenService;
-import com.fiap.hackgov.infra.utils.AuditLog;
-import com.fiap.hackgov.repositories.EmployeeRepository;
+import com.fiap.hackgov.auth.internal.DTOs.LoginRequestDTO;
+import com.fiap.hackgov.auth.internal.DTOs.LoginResponseDTO;
+import com.fiap.hackgov.auth.internal.DTOs.RefreshToken.RefreshTokenRequestDTO;
+import com.fiap.hackgov.auth.internal.DTOs.RefreshToken.RefreshTokenResponseDTO;
+import com.fiap.hackgov.auth.internal.repositories.UserRepository;
+import com.fiap.hackgov.auth.internal.services.AuthService;
+import com.fiap.hackgov.auth.internal.services.TwoFactorAuthService;
+import com.fiap.hackgov.auth.internal.entities.User;
+import com.fiap.hackgov.shared.infra.exceptions.BlockedException;
+import com.fiap.hackgov.shared.infra.exceptions.InvalidCredentialsException;
+import com.fiap.hackgov.shared.infra.services.TokenService;
+import com.fiap.hackgov.shared.infra.services.LoginAttemptService;
+import com.fiap.hackgov.shared.infra.services.TokenBlacklistService;
+import com.fiap.hackgov.shared.infra.utils.AuditLog;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,7 +36,7 @@ public class AuthServiceTest {
     private AuthService authService;
 
     @Mock
-    private EmployeeRepository employeeRepository;
+    private UserRepository employeeRepository;
 
     @Mock
     private TokenService tokenService;
@@ -70,13 +74,13 @@ public class AuthServiceTest {
         lenient().when(builderMock.level(any())).thenReturn(builderMock);
     }
 
-    private Employee mockFullEmployee(boolean twoFactor) {
-        Employee employee = mock(Employee.class);
+    private User mockFullUser(boolean twoFactor) {
+        User employee = mock(User.class);
         when(employee.getEmail()).thenReturn(EMAIL);
-        when(employee.getName()).thenReturn("Test User");
+        when(employee.getFirstName()).thenReturn("Test User");
         when(employee.getPassword()).thenReturn("encodedPassword");
-        when(employee.isStatus()).thenReturn(true);
-        when(employee.isTwoFactor()).thenReturn(twoFactor);
+        when(employee.getStatus()).thenReturn(true);
+        when(employee.getTwoFactor()).thenReturn(twoFactor);
         return employee;
     }
 
@@ -85,7 +89,7 @@ public class AuthServiceTest {
     @Test
     @DisplayName("Deve realizar login com sucesso sem 2FA")
     void shouldLoginSuccessfullyWithoutTwoFactor() {
-        Employee employee = mockFullEmployee(false);
+        User employee = mockFullUser(false);
         when(employeeRepository.findByEmail(EMAIL)).thenReturn(Optional.of(employee));
         when(passwordEncoder.matches(PASSWORD, "encodedPassword")).thenReturn(true);
         when(tokenService.generateToken(employee)).thenReturn(ACCESS_TOKEN);
@@ -115,7 +119,7 @@ public class AuthServiceTest {
     @Test
     @DisplayName("Deve registrar falha quando senha incorreta")
     void shouldRegisterFailureWhenWrongPassword() {
-        Employee employee = mock(Employee.class);
+        User employee = mock(User.class);
         when(employee.getPassword()).thenReturn("encodedPassword");
         when(employeeRepository.findByEmail(EMAIL)).thenReturn(Optional.of(employee));
         when(passwordEncoder.matches(PASSWORD, "encodedPassword")).thenReturn(false);
@@ -143,7 +147,7 @@ public class AuthServiceTest {
     @Test
     @DisplayName("Deve retornar requiresTwoFactor true e não gerar token quando 2FA habilitado")
     void shouldReturnRequiresTwoFactorWhenEnabled() {
-        Employee employee = mockFullEmployee(true);
+        User employee = mockFullUser(true);
         when(employeeRepository.findByEmail(EMAIL)).thenReturn(Optional.of(employee));
         when(passwordEncoder.matches(PASSWORD, "encodedPassword")).thenReturn(true);
 
@@ -161,9 +165,9 @@ public class AuthServiceTest {
     @Test
     @DisplayName("Não deve registrar falha quando conta está inativa")
     void shouldNotRegisterFailureWhenAccountInactive() {
-        Employee employee = mock(Employee.class);
+        User employee = mock(User.class);
         when(employee.getPassword()).thenReturn("encodedPassword");
-        when(employee.isStatus()).thenReturn(false);
+        when(employee.getStatus()).thenReturn(false);
         when(employeeRepository.findByEmail(EMAIL)).thenReturn(Optional.of(employee));
         when(passwordEncoder.matches(PASSWORD, "encodedPassword")).thenReturn(true);
 
@@ -176,7 +180,7 @@ public class AuthServiceTest {
     @Test
     @DisplayName("Deve resetar tentativas após login bem-sucedido")
     void shouldResetAttemptsAfterSuccessfulLogin() {
-        Employee employee = mockFullEmployee(false);
+        User employee = mockFullUser(false);
         when(employeeRepository.findByEmail(EMAIL)).thenReturn(Optional.of(employee));
         when(passwordEncoder.matches(PASSWORD, "encodedPassword")).thenReturn(true);
         when(tokenService.generateToken(employee)).thenReturn(ACCESS_TOKEN);
@@ -217,9 +221,9 @@ public class AuthServiceTest {
     @Test
     @DisplayName("Deve gerar novos tokens ao fazer refresh com token válido")
     void shouldGenerateNewTokensOnRefresh() {
-        Employee employee = new Employee();
+        User employee = new User();
         employee.setEmail(EMAIL);
-        employee.setName("Test User");
+        employee.setFirstName("Test User");
         employee.setPassword("encodedPassword");
         employee.setStatus(true);
         employee.setTwoFactor(false);
@@ -241,8 +245,8 @@ public class AuthServiceTest {
     @DisplayName("Deve lançar exceção ao fazer refresh com conta inativa")
     void shouldThrowWhenRefreshingWithInactiveAccount() {
         // Mock mínimo — só isStatus() é verificado nesse fluxo
-        Employee employee = mock(Employee.class);
-        when(employee.isStatus()).thenReturn(false);
+        User employee = mock(User.class);
+        when(employee.getStatus()).thenReturn(false);
         when(tokenService.getSubjectFromRefreshToken(REFRESH_TOKEN)).thenReturn(EMAIL);
         when(employeeRepository.findByEmail(EMAIL)).thenReturn(Optional.of(employee));
 
@@ -268,9 +272,9 @@ public class AuthServiceTest {
     @Test
     @DisplayName("Deve gerar tokens diferentes no refresh")
     void shouldGenerateDifferentTokensOnRefresh() {
-        Employee employee = new Employee();
+        User employee = new User();
         employee.setEmail(EMAIL);
-        employee.setName("Test User");
+        employee.setFirstName("Test User");
         employee.setPassword("encodedPassword");
         employee.setStatus(true);
         employee.setTwoFactor(false);

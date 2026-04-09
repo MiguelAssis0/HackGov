@@ -1,7 +1,7 @@
 package com.fiap.hackgov.infra.config;
 
-import com.fiap.hackgov.infra.filters.RateLimitFilter;
-import com.fiap.hackgov.infra.utils.AuditLog;
+import com.fiap.hackgov.shared.infra.filters.RateLimitFilter;
+import com.fiap.hackgov.shared.infra.utils.AuditLog;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

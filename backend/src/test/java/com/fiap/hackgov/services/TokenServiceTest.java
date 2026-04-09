@@ -1,9 +1,10 @@
 package com.fiap.hackgov.services;
 
-import com.fiap.hackgov.entities.Employee;
-import com.fiap.hackgov.entities.enums.Roles;
-import com.fiap.hackgov.infra.security.TokenService;
-import com.fiap.hackgov.infra.exceptions.TokenInvalidException;
+import com.fiap.hackgov.auth.internal.entities.User;
+import com.fiap.hackgov.erp.internal.entities.Employee;
+import com.fiap.hackgov.auth.internal.entities.enums.Roles;
+import com.fiap.hackgov.shared.infra.services.TokenService;
+import com.fiap.hackgov.shared.infra.exceptions.TokenInvalidException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,13 +24,13 @@ public class TokenServiceTest {
     @InjectMocks
     private TokenService tokenService;
 
-    private Employee testEmployee;
+    private User testEmployee;
 
     @BeforeEach
     void setUp() {
-        testEmployee = new Employee();
+        testEmployee = new User();
         testEmployee.setId(UUID.randomUUID());
-        testEmployee.setName("Test User");
+        testEmployee.setFirstName("Test User");
         testEmployee.setEmail("test@example.com");
         testEmployee.setRole(Roles.EMPLOYEE);
         

@@ -1,15 +1,16 @@
 package com.fiap.hackgov.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fiap.hackgov.DTOs.CityHall.CityHallDTO;
-import com.fiap.hackgov.DTOs.CityHall.CreateCityHallDTO;
-import com.fiap.hackgov.entities.CityHall;
-import com.fiap.hackgov.entities.State;
-import com.fiap.hackgov.infra.filters.JwtAuthenticationFilter;
-import com.fiap.hackgov.infra.filters.RateLimitFilter;
-import com.fiap.hackgov.infra.security.SecurityProperties;
-import com.fiap.hackgov.mapper.CityHallMapper;
-import com.fiap.hackgov.services.CityHallService;
+import com.fiap.hackgov.erp.internal.DTOs.CityHall.CityHallDTO;
+import com.fiap.hackgov.erp.internal.DTOs.CityHall.CreateCityHallDTO;
+import com.fiap.hackgov.erp.internal.controllers.CityHallController;
+import com.fiap.hackgov.erp.internal.entities.CityHall;
+import com.fiap.hackgov.erp.internal.entities.State;
+import com.fiap.hackgov.shared.infra.filters.JwtAuthenticationFilter;
+import com.fiap.hackgov.shared.infra.filters.RateLimitFilter;
+import com.fiap.hackgov.shared.infra.security.SecurityProperties;
+import com.fiap.hackgov.erp.internal.mapper.CityHallMapper;
+import com.fiap.hackgov.erp.internal.services.CityHallService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

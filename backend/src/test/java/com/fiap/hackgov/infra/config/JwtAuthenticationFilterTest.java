@@ -1,10 +1,10 @@
 package com.fiap.hackgov.infra.config;
 
-import com.fiap.hackgov.infra.filters.JwtAuthenticationFilter;
-import com.fiap.hackgov.infra.security.SecurityProperties;
-import com.fiap.hackgov.infra.security.TokenService;
-import com.fiap.hackgov.services.TokenBlacklistService;
-import com.fiap.hackgov.services.UserDetailsServiceImpl;
+import com.fiap.hackgov.shared.infra.filters.JwtAuthenticationFilter;
+import com.fiap.hackgov.shared.infra.security.SecurityProperties;
+import com.fiap.hackgov.shared.infra.services.TokenService;
+import com.fiap.hackgov.shared.infra.services.TokenBlacklistService;
+import com.fiap.hackgov.auth.internal.services.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

@@ -1,15 +1,16 @@
 package com.fiap.hackgov.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fiap.hackgov.DTOs.State.CreateStateDTO;
-import com.fiap.hackgov.DTOs.State.StateDTO;
-import com.fiap.hackgov.entities.State;
-import com.fiap.hackgov.entities.enums.UF;
-import com.fiap.hackgov.infra.filters.JwtAuthenticationFilter;
-import com.fiap.hackgov.infra.filters.RateLimitFilter;
-import com.fiap.hackgov.infra.security.SecurityProperties;
-import com.fiap.hackgov.mapper.StateMapper;
-import com.fiap.hackgov.services.StateService;
+import com.fiap.hackgov.erp.internal.DTOs.State.CreateStateDTO;
+import com.fiap.hackgov.erp.internal.DTOs.State.StateDTO;
+import com.fiap.hackgov.erp.internal.controllers.StateController;
+import com.fiap.hackgov.erp.internal.entities.State;
+import com.fiap.hackgov.erp.internal.entities.enums.UF;
+import com.fiap.hackgov.shared.infra.filters.JwtAuthenticationFilter;
+import com.fiap.hackgov.shared.infra.filters.RateLimitFilter;
+import com.fiap.hackgov.shared.infra.security.SecurityProperties;
+import com.fiap.hackgov.erp.internal.mapper.StateMapper;
+import com.fiap.hackgov.erp.internal.services.StateService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

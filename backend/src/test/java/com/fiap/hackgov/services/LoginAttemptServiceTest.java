@@ -1,8 +1,9 @@
 package com.fiap.hackgov.services;
 
-import com.fiap.hackgov.entities.BlockedAttempt;
-import com.fiap.hackgov.infra.exceptions.BlockedException;
-import com.fiap.hackgov.repositories.BlockedAttemptRepository;
+import com.fiap.hackgov.shared.infra.entities.BlockedAttempt;
+import com.fiap.hackgov.shared.infra.exceptions.BlockedException;
+import com.fiap.hackgov.shared.infra.repositories.BlockedAttemptRepository;
+import com.fiap.hackgov.shared.infra.services.LoginAttemptService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

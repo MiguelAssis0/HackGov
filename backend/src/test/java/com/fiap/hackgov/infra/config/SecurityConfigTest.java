@@ -1,7 +1,7 @@
 package com.fiap.hackgov.infra.config;
 
-import com.fiap.hackgov.infra.filters.JwtAuthenticationFilter;
-import com.fiap.hackgov.infra.security.Security;
+import com.fiap.hackgov.shared.infra.filters.JwtAuthenticationFilter;
+import com.fiap.hackgov.shared.infra.security.Security;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

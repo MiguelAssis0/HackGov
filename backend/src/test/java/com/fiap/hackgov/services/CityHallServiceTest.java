@@ -1,12 +1,13 @@
 package com.fiap.hackgov.services;
 
-import com.fiap.hackgov.DTOs.CityHall.CityHallDTO;
-import com.fiap.hackgov.DTOs.CityHall.CreateCityHallDTO;
-import com.fiap.hackgov.entities.CityHall;
-import com.fiap.hackgov.entities.State;
-import com.fiap.hackgov.mapper.CityHallMapper;
-import com.fiap.hackgov.repositories.CityHallRepository;
-import com.fiap.hackgov.repositories.StateRepository;
+import com.fiap.hackgov.erp.internal.DTOs.CityHall.CityHallDTO;
+import com.fiap.hackgov.erp.internal.DTOs.CityHall.CreateCityHallDTO;
+import com.fiap.hackgov.erp.internal.services.CityHallService;
+import com.fiap.hackgov.erp.internal.entities.CityHall;
+import com.fiap.hackgov.erp.internal.entities.State;
+import com.fiap.hackgov.erp.internal.mapper.CityHallMapper;
+import com.fiap.hackgov.erp.internal.repositories.CityHallRepository;
+import com.fiap.hackgov.erp.internal.repositories.StateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
