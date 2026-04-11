@@ -2,12 +2,12 @@ package com.fiap.hackgov.shared.infra.config;
 
 import com.fiap.hackgov.auth.internal.entities.User;
 import com.fiap.hackgov.auth.internal.repositories.UserRepository;
-import com.fiap.hackgov.erp.internal.entities.*;
-import com.fiap.hackgov.erp.internal.repositories.*;
-import com.fiap.hackgov.erp.internal.entities.enums.LevelJobLevel;
+import com.fiap.hackgov.cityhall_management.internal.entities.*;
+import com.fiap.hackgov.cityhall_management.internal.repositories.*;
+import com.fiap.hackgov.cityhall_management.internal.entities.enums.LevelJobLevel;
 import com.fiap.hackgov.auth.internal.entities.enums.Roles;
-import com.fiap.hackgov.erp.internal.entities.enums.TypeJobLevel;
-import com.fiap.hackgov.erp.internal.entities.enums.UF;
+import com.fiap.hackgov.cityhall_management.internal.entities.enums.TypeJobLevel;
+import com.fiap.hackgov.cityhall_management.internal.entities.enums.UF;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;

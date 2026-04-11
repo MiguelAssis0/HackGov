@@ -1,7 +1,6 @@
 package com.fiap.hackgov.services;
 
 import com.fiap.hackgov.auth.internal.entities.User;
-import com.fiap.hackgov.erp.internal.entities.Employee;
 import com.fiap.hackgov.auth.internal.entities.enums.Roles;
 import com.fiap.hackgov.shared.infra.services.TokenService;
 import com.fiap.hackgov.shared.infra.exceptions.TokenInvalidException;
