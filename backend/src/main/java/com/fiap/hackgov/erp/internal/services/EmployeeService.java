@@ -3,7 +3,7 @@ package com.fiap.hackgov.erp.internal.services;
 import com.fiap.hackgov.erp.internal.DTOs.Employee.CreateEmployeeDTO;
 import com.fiap.hackgov.erp.internal.DTOs.Employee.CreateUserRequestDTO;
 import com.fiap.hackgov.erp.internal.DTOs.Employee.EmployeeDTO;
-import com.fiap.hackgov.erp.internal.api.AuthFacade;
+import com.fiap.hackgov.erp.internal.contracts.AuthFacade;
 import com.fiap.hackgov.erp.internal.entities.CityHall;
 import com.fiap.hackgov.erp.internal.entities.Employee;
 import com.fiap.hackgov.erp.internal.mapper.EmployeeMapper;

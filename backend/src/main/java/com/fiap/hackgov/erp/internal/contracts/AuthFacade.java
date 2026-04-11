@@ -1,4 +1,4 @@
-package com.fiap.hackgov.erp.internal.api;
+package com.fiap.hackgov.erp.internal.contracts;
 
 import com.fiap.hackgov.erp.internal.DTOs.Employee.CreateUserRequestDTO;
 import com.fiap.hackgov.erp.internal.DTOs.Employee.EmployeeDTO;

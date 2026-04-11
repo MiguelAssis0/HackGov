@@ -2,10 +2,11 @@ package com.fiap.hackgov.erp.internal.facade;
 
 import com.fiap.hackgov.erp.internal.DTOs.Employee.CreateUserRequestDTO;
 import com.fiap.hackgov.erp.internal.DTOs.Employee.EmployeeDTO;
-import com.fiap.hackgov.erp.internal.api.AuthFacade;
+import com.fiap.hackgov.erp.internal.contracts.AuthFacade;
 import com.fiap.hackgov.shared.infra.exceptions.AuthException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -35,10 +36,10 @@ class AuthFacadeHttpImpl implements AuthFacade {
                 .uri("/auth/users")
                 .body(request)
                 .retrieve()
-                .onStatus(status -> status.is4xxClientError(), (req, res) -> {
+                .onStatus(HttpStatusCode::is4xxClientError, (req, res) -> {
                     throw new AuthException("Error creating user (4xx)");
                 })
-                .onStatus(status -> status.is5xxServerError(), (req, res) -> {
+                .onStatus(HttpStatusCode::is5xxServerError, (req, res) -> {
                     throw new AuthException("Auth service unavailable (5xx)");
                 })
                 .toBodilessEntity();
