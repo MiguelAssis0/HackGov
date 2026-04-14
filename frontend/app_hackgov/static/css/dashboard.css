@@ -1,0 +1,393 @@
+/* DASHBOARD */
+.dashboard {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin-left: var(--sidebar-w);
+    background: var(--cinza-claro);
+}
+
+@media (max-width: 768px) {
+    .dashboard {
+        margin-left: 0;
+    }
+}
+
+/* HERO BANNER */
+.dash-hero {
+    background: linear-gradient(135deg, var(--azul-escuro) 0%, #1a4a8a 100%);
+    padding: 2rem 2rem 1.5rem;
+    border-radius: 16px;
+    margin-top: 0.9rem;
+}
+
+.hero-h2 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--branco);
+    margin-bottom: 0.2rem;
+}
+
+.hero-p {
+    color: var(--cinza-claro)
+}
+
+.dash-hero-botoes {
+    margin-top: 1.2rem;
+    display: flex;
+    gap: 0.8rem;
+}
+
+@media (max-width: 804px) {
+    .dash-hero-botoes {
+        flex-direction: column;
+    }
+
+}
+
+.dash-hero-img {
+    opacity: 0.15;
+}
+
+.dash-hero-img svg {
+    width: 120px;
+    height: 120px;
+}
+
+/* CARDS DE PROGRESSO */
+.card:hover {
+    transform: none;
+}
+
+.anel-container {
+    position: relative;
+    width: 90px;
+    height: 90px;
+}
+
+.anel-svg {
+    transform: rotate(-90deg);
+}
+
+.anel-bg {
+    fill: none;
+    stroke: var(--cinza-claro);
+    stroke-width: 8;
+}
+
+.anel-fill {
+    fill: none;
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s ease;
+}
+
+.anel-progresso {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--azul-escuro);
+}
+
+.anel-status {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* FERRAMENTAS */
+.tool-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: 10px;
+    border: 1.5px solid var(--border-color);
+    background: var(--branco);
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.tool-item:last-child {
+    margin-bottom: 0;
+}
+
+.tool-item:hover {
+    border-color: rgba(46, 139, 255, 0.3);
+    background: var(--azul-claro);
+}
+
+.tool-item:hover .tool-arrow {
+    color: var(--azul);
+}
+
+.tool-icon {
+    color: var(--text-muted);
+    font-size: 1rem;
+    min-width: 20px;
+}
+
+.tool-nome {
+    font-size: 0.85rem;
+    color: var(--azul-escuro);
+    font-weight: 500;
+}
+
+.tool-arrow {
+    margin-left: auto;
+    color: var(--border);
+    font-size: 0.8rem;
+}
+
+/* COLUNA DIREITA */
+.coluna-direita {
+    margin-top: 0.9rem;
+}
+
+/* CALENDÁRIO */
+.cal-nav {
+    gap: 0.3rem;
+}
+
+.cal-nav-btn {
+    width: 26px;
+    height: 26px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: none;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    transition: all 0.15s;
+}
+
+.cal-nav-btn:hover {
+    background: var(--cinza-claro);
+    color: var(--azul-escuro);
+}
+
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.cal-dia-label {
+    text-align: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: 0.3rem 0;
+}
+
+.cal-dia {
+    text-align: center;
+    font-size: 0.7rem;
+    padding: 0.3rem;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--azul-escuro);
+    transition: all 0.15s;
+}
+
+.cal-dia:hover {
+    background: var(--azul-claro);
+}
+
+.cal-dia.outro-mes {
+    color: #c5cdd8;
+}
+
+.cal-dia.hoje {
+    background: var(--azul);
+    color: white;
+    font-weight: 700;
+}
+
+.cal-dia.has-event {
+    position: relative;
+    font-weight: 600;
+}
+
+.cal-dia.has-event::after {
+    content: "";
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--gold);
+}
+
+.cal-dia.hoje.has-event::after {
+    background: rgba(255, 255, 255, 0.8);
+}
+
+/* TAREFAS */
+.item-tarefa {
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.item-tarefa:last-child {
+    border-bottom: none;
+}
+
+.nome-tarefa {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--azul-escuro);
+    margin-bottom: 0.2rem;
+}
+
+.tarefa-meta {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+/* MENSAGENS */
+.mensagens {
+    margin-bottom: 1rem;
+}
+
+.msg-busca-wrap {
+    position: relative;
+    margin-bottom: 0.75rem;
+}
+
+.msg-busca {
+    width: 100%;
+    background: var(--cinza-claro);
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.4rem 0.75rem 0.4rem 2rem;
+    font-size: 0.8rem;
+    color: var(--azul-escuro);
+    outline: none;
+}
+
+.msg-busca::placeholder {
+    color: var(--text-muted);
+}
+
+.msg-busca-wrap i {
+    position: absolute;
+    left: 0.6rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.msg-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1.5px solid var(--border);
+    margin-bottom: 0.75rem;
+}
+
+.msg-tab {
+    flex: 1;
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    padding: 0.4rem 0;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+}
+
+.msg-tab.active {
+    color: var(--azul);
+    border-bottom-color: var(--azul);
+}
+
+.msg-tab:hover {
+    color: var(--azul);
+}
+
+.msg-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+}
+
+.msg-item:last-child {
+    border-bottom: none;
+}
+
+.msg-item:hover {
+    background: var(--cinza-claro);
+    margin: 0 -0.25rem;
+    padding-left: 0.25rem;
+    border-radius: 8px;
+}
+
+.msg-avatar {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    border-radius: 50%;
+    background: var(--azul);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--branco);
+}
+
+.msg-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.msg-sender {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--azul-escuro);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.msg-preview {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.msg-preview i {
+    font-size: 0.8rem;
+}
+
+.msg-filter-btn {
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+}

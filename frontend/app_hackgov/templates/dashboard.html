@@ -1,0 +1,312 @@
+{% extends 'index_dashboard.html' %} {% load static %} {% block content %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
+
+<div class="dashboard">
+    <div class="container">
+
+        <div class="row">
+            <!-- COLUNA ESQUERDA -->
+            <div class="col-12 col-lg-8 d-flex flex-column gap-3">
+
+                <!-- HERO DA DASHBOARD -->
+                <div class="dash-hero">
+                    <div class="row">
+                        <div class="col-12 col-md-8">
+                            <h2 class="hero-h2">Dashboard</h2>
+                            <p class="hero-p">Atenção essa página é um Mockup!</p>
+
+                            <div class="dash-hero-botoes">
+                                <a href="#" class="btn btn-primary">
+                                    Nova Tarefa <i class="bi bi-plus"></i>
+                                </a>
+                                <a href="#" class="btn btn-outline-primary">
+                                    Ver Tarefas <i class="bi bi-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="col-4 d-none d-md-flex align-items-center justify-content-end">
+                            <div class="dash-hero-img">
+                                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <polygon points="50,10 90,80 10,80" fill="white" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARDS DE PROGRESSO -->
+                <div class="row g-2">
+                    <div class="col">
+                        <a href="#" class="card">
+
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <h4>Entrega 2</h4>
+                                <button class="card-menu-btn">
+                                    <i class="bi bi-three-dots"></i>
+                                </button>
+                            </div>
+
+                            <div class="mx-auto text-center">
+                                <div class="anel-container">
+                                    <svg class="anel-svg" width="90" height="90" viewBox="0 0 90 90">
+                                        <circle class="anel-bg" cx="45" cy="45" r="36" />
+                                        <circle class="anel-fill" cx="45" cy="45" r="36" stroke="var(--primary)"
+                                            stroke-dasharray="226.2" stroke-dashoffset="90.5" id="ring1" />
+                                    </svg>
+                                    <div class="anel-progresso">60%</div>
+                                </div>
+                                <span class="anel-status">Em progresso</span>
+                            </div>
+
+                        </a>
+                    </div>
+
+                    <div class="col">
+                        <a href="#" class="card">
+
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <h4>Entrega 1</h4>
+                                <button class="card-menu-btn">
+                                    <i class="bi bi-three-dots"></i>
+                                </button>
+                            </div>
+
+                            <div class="mx-auto text-center">
+                                <div class="anel-container">
+                                    <svg class="anel-svg" width="90" height="90" viewBox="0 0 90 90">
+                                        <circle class="anel-bg" cx="45" cy="45" r="36" />
+                                        <circle class="anel-fill" cx="45" cy="45" r="36" stroke="var(--primary)"
+                                            stroke-dasharray="226.2" stroke-dashoffset="22.6" id="ring2" />
+                                    </svg>
+                                    <div class="anel-progresso">90%</div>
+                                </div>
+                                <span class="anel-status">Quase pronto</span>
+                            </div>
+
+                        </a>
+                    </div>
+                </div>
+
+                <!-- FERRAMENTAS -->
+                <div class="card-2">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4>
+                            <span><i class="bi bi-wrench-adjustable primary me-1"></i></span> Ferramentas
+                        </h4>
+                        <a href="#"><h4 class="primary">Ver todas</h4></a>
+                    </div>
+
+                    <div class="tool-item">
+                        <i class="bi bi-grid-3x3-gap-fill tool-icon"></i>
+                        <span class="tool-nome">Ferramenta 1</span>
+                        <i class="bi bi-chevron-right tool-arrow"></i>
+                    </div>
+
+                    <div class="tool-item">
+                        <i class="bi bi-grid-3x3-gap-fill tool-icon"></i>
+                        <span class="tool-nome">Ferramenta 2</span>
+                        <i class="bi bi-chevron-right tool-arrow"></i>
+                    </div>
+
+                    <div class="tool-item">
+                        <i class="bi bi-grid-3x3-gap-fill tool-icon"></i>
+                        <span class="tool-nome">Ferramenta 3</span>
+                        <i class="bi bi-chevron-right tool-arrow"></i>
+                    </div>
+
+                    <div class="tool-item">
+                        <i class="bi bi-grid-3x3-gap-fill tool-icon"></i>
+                        <span class="tool-nome">Ferramenta 4</span>
+                        <i class="bi bi-chevron-right tool-arrow"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLUNA DIREITA -->
+            <div class="col-12 col-lg-4 mb-5 pb-5 mb-lg-0 pb-lg-0">
+                <aside class="d-flex flex-column gap-3 coluna-direita">
+
+                    <!-- CALENDÁRIO -->
+                    <div class="card-2">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h4>
+                                <span><i class="bi bi-calendar-date-fill primary me-1"></i></span> Abril de 2026
+                            </h4>
+
+                            <div class="cal-nav d-flex">
+                                <button class="cal-nav-btn">
+                                    <i class="bi bi-chevron-left"></i>
+                                </button>
+                                <button class="cal-nav-btn">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="cal-grid">
+                            <div class="cal-dia-label">D</div>
+                            <div class="cal-dia-label">S</div>
+                            <div class="cal-dia-label">T</div>
+                            <div class="cal-dia-label">Q</div>
+                            <div class="cal-dia-label">Q</div>
+                            <div class="cal-dia-label">S</div>
+                            <div class="cal-dia-label">S</div>
+
+                            <div class="cal-dia outro-mes">30</div>
+                            <div class="cal-dia outro-mes">31</div>
+                            <div class="cal-dia">1</div>
+                            <div class="cal-dia">2</div>
+                            <div class="cal-dia">3</div>
+                            <div class="cal-dia">4</div>
+                            <div class="cal-dia">5</div>
+                             
+                            <div class="cal-dia">6</div>
+                            <div class="cal-dia">7</div>
+                            <div class="cal-dia">8</div>
+                            <div class="cal-dia">9</div>
+                            <div class="cal-dia">10</div>
+                            <div class="cal-dia">11</div>
+                            <div class="cal-dia">12</div>
+                            <!-- Week 3 -->
+                            <div class="cal-dia">13</div>
+                            <div class="cal-dia">14</div>
+                            <div class="cal-dia">15</div>
+                            <div class="cal-dia">16</div>
+                            <div class="cal-dia">17</div>
+                            <div class="cal-dia has-event hoje">18</div>
+                            <div class="cal-dia">19</div>
+                            <!-- Week 4 -->
+                            <div class="cal-dia has-event">20</div>
+                            <div class="cal-dia has-event">21</div>
+                            <div class="cal-dia">22</div>
+                            <div class="cal-dia">23</div>
+                            <div class="cal-dia">24</div>
+                            <div class="cal-dia">25</div>
+                            <div class="cal-dia">26</div>
+                            <!-- Week 5 -->
+                            <div class="cal-dia">27</div>
+                            <div class="cal-dia">28</div>
+                            <div class="cal-dia">29</div>
+                            <div class="cal-dia">30</div>
+                            <div class="cal-dia">31</div>
+                            <div class="cal-dia outro-mes">1</div>
+                            <div class="cal-dia outro-mes">2</div>
+                            <!-- Extra row -->
+                            <div class="cal-dia outro-mes">29</div>
+                            <div class="cal-dia outro-mes">30</div>
+                            <div class="cal-dia outro-mes">1</div>
+                            <div class="cal-dia outro-mes">2</div>
+                            <div class="cal-dia outro-mes">3</div>
+                            <div class="cal-dia outro-mes">4</div>
+                            <div class="cal-dia outro-mes">5</div>
+                        </div>
+                    </div>
+
+                    <!-- TAREFAS -->
+                    <div class="card-2">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h4>
+                                <span><i class="bi bi-check-square-fill primary me-1"></i></span>
+                                Suas tarefas
+                            </h4>
+
+                            <a href="#"><h4 class="primary">Ver todas</h4></a>
+                        </div>
+
+                        <div class="item-tarefa">
+                            <div class="nome-tarefa">Entrega 1</div>
+                            <div class="tarefa-meta">
+                                <span class="amarelo"><i class="bi bi-clock-fill"></i></span>
+                                Até dia 14 de Abril, 13:00h
+                            </div>
+                        </div>
+
+                        <div class="item-tarefa">
+                            <div class="nome-tarefa">Reunião</div>
+                            <div class="tarefa-meta">
+                                <span class="primary"><i class="bi bi-clock-fill"></i></span>
+                                Dia 17 de Abril, 13:30h
+                            </div>
+                        </div>
+
+                        <div class="item-tarefa">
+                            <div class="nome-tarefa">Entrega 2</div>
+                            <div class="tarefa-meta">
+                                <span class="vermelho"><i class="bi bi-clock-fill"></i></span>
+                                Até dia 31 de Abril, 14:00h
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MENSAGENS -->
+                    <div class="card-2 mensagens">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h4>
+                                <span><i class="bi bi-chat-dots-fill primary me-1"></i></span>Mensagens
+                            </h4>
+
+                            <button class="msg-filter-btn">
+                                <i class="bi bi-sliders2"></i>
+                            </button>
+                        </div>
+
+                        <div class="msg-busca-wrap">
+                            <i class="bi bi-search"></i>
+                            <input type="text" class="msg-busca" placeholder="Buscar mensagens..." />
+                        </div>
+
+                        <div class="msg-tabs">
+                            <div class="msg-tab active"><i class="bi bi-chat"></i> Chats</div>
+                            <div class="msg-tab"><i class="bi bi-file-earmark"></i> Arquivos</div>
+                            <div class="msg-tab">
+                                <i class="bi bi-person-lines-fill"></i> Contatos
+                            </div>
+                        </div>
+
+                        <div class="d-flex flex-column">
+                            <div class="msg-item">
+                                <div class="msg-avatar">FS</div>
+                                <div class="msg-info">
+                                    <div class="msg-sender">Fulano da Silva (Setor de Obras)</div>
+                                    <div class="msg-preview">
+                                        <i class="bi bi-file-earmark-text"></i> Enviou um documento
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="msg-item">
+                                <div class="msg-avatar">BM</div>
+                                <div class="msg-info">
+                                    <div class="msg-sender">Beltrano Matos (Secretaria da Fazenda)</div>
+                                    <div class="msg-preview">
+                                        <i class="bi bi-image"></i> Enviou uma imagem
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="msg-item">
+                                <div class="msg-avatar">FC</div>
+                                <div class="msg-info">
+                                    <div class="msg-sender">Fulana Costa (Educação)</div>
+                                    <div class="msg-preview">Pode revisar o processo?</div>
+                                </div>
+                            </div>
+
+                            <div class="msg-item">
+                                <div class="msg-avatar">CL</div>
+                                <div class="msg-info">
+                                    <div class="msg-sender">Ciclano Lima (Saúde)</div>
+                                    <div class="msg-preview">Reunião confirmada para amanhã</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock content %}

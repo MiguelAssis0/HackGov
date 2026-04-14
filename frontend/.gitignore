@@ -1,0 +1,35 @@
+# Ambiente virtual
+env/
+venv/
+
+# Arquivo do banco de dados SQLite
+db.sqlite3
+
+# Pasta de uploads do usuário
+media/
+
+# Compilados do Python
+__pycache__/
+*.py[cod]
+
+# Arquivos de log e temporários
+*.log
+*.pot
+*.pyc
+*.pyo
+*.swp
+*.bak
+*.tmp
+
+# IDEs e editores
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# secret key
+# .env

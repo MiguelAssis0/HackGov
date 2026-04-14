@@ -1,0 +1,212 @@
+/* LAYOUT GERAL */
+.auth-wrapper {
+    min-height: 100vh;
+}
+
+@media (max-width: 768px) {
+    .auth-panel {
+        display: none !important;
+    }
+}
+
+/* PAINEL */
+.auth-panel {
+    background: linear-gradient(160deg, var(--azul-escuro) 0%, var(--azul-meio-escuro) 70%, #1a4a8a 100%);
+    background-image: url("../img/servidora_publica.png");
+    background-size: cover;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 3rem;
+}
+
+.panel-content {
+    position: relative;
+    z-index: 2;
+}
+
+/* FORMULÁRIO */
+.auth-form-side {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 3.5rem 4rem;
+    overflow-y: auto;
+}
+
+.mobile-brand {
+    display: none;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--azul-escuro);
+    margin-bottom: 2rem;
+}
+
+.mobile-brand span {
+    color: var(--accent);
+}
+
+@media (max-width: 768px) {
+    .mobile-brand {
+        display: block;
+    }
+}
+
+.auth-title {
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: var(--azul-escuro);
+    margin-bottom: 0.4rem;
+}
+
+/* Form fields */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+@media (max-width: 480px) {
+    .form-group-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--azul-escuro);
+    margin-bottom: 0.4rem;
+    display: block;
+    letter-spacing: 0.2px;
+}
+
+.form-control-custom {
+    width: 100%;
+    background: var(--branco);
+    border: 1.5px solid var(--border-color);
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    font-size: 1rem;
+    color: var(--azul-escuro);
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
+    outline: none;
+}
+
+.form-control-custom:focus {
+    border-color: var(--azul);
+    box-shadow: 0 0 0 3px rgba(46, 139, 255, 0.12);
+}
+
+.form-control-custom::placeholder {
+    color: #b0bac9;
+}
+
+.form-control-custom.is-valid {
+    border-color: var(--verde);
+}
+
+.form-control-custom.is-invalid {
+    border-color: var(--vermelho);
+}
+
+.input-icon-wrap {
+    position: relative;
+}
+
+.input-icon-wrap .form-control-custom {
+    padding-left: 2.5rem;
+}
+
+.input-icon-wrap .input-icon {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #b0bac9;
+    font-size: 1rem;
+    pointer-events: none;
+}
+
+.input-icon-wrap .toggle-pass {
+    position: absolute;
+    right: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #b0bac9;
+    font-size: 1rem;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+.toggle-pass:hover {
+    color: var(--azul-escuro);
+}
+
+/* Password strength */
+.pw-strength {
+    margin-top: 0.5rem;
+}
+
+.pw-bars {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 0.3rem;
+}
+
+.pw-bar {
+    height: 4px;
+    flex: 1;
+    border-radius: 50px;
+    background: var(--border-color);
+    transition: background 0.3s;
+}
+
+.pw-bar.weak {
+    background: var(--vermelho);
+}
+
+.pw-bar.medium {
+    background: var(--amarelo);
+}
+
+.pw-bar.strong {
+    background: var(--verde);
+}
+
+.pw-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Select */
+select.form-control-custom {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7a93' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
+}
+
+.form-control-custom {
+    border: 1.5px solid var(--text-muted);
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    font-size: 0.9rem;
+    color: var(--azul-escuro);
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
+    outline: none;
+}

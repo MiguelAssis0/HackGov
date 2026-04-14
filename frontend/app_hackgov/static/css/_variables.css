@@ -1,0 +1,39 @@
+/* VARIÁVEIS */
+:root {
+    --primary: #2e8bff;
+    --secondary: #e8f2ff;
+
+    --azul: #2e8bff;
+    --azul-claro: #e8f2ff;
+    --azul-escuro: #04152c;
+    --azul-meio-escuro: #12305c;
+    --branco: #ffffff;
+    --cinza-claro: #f7f9fc;
+    --text-muted: #6b7a93;
+    --cinza: rgba(255, 255, 255, 0.6);
+    --preto: #07111f;
+    --border-color: #e2e8f0;
+    --vermelho: #ff5f57;
+    --amarelo: #febc2e;
+    --verde: #16a34a;
+    
+    --error: #dc2626;
+
+    /* Borders */
+    --border1: 1px solid #e5eaf2;
+    --border1-5: 1.5px solid #e5eaf2;
+    --border1-5-hover: rgba(46, 139, 255, 0.3);
+
+    /* Gradientes */
+    --gradiente: linear-gradient(135deg, var(--azul-escuro) 0%, var(--azul-meio-escuro) 60%, #1a4a8a 100%);
+    --gradiente-radial: radial-gradient(circle at 70% 30%, rgba(46, 139, 255, 0.18) 0%, transparent 55%), radial-gradient(circle at 10% 80%, rgba(245, 166, 35, 0.1) 0%, transparent 40%);
+    
+    /* Shadows */
+    --shadow: 0 6px 16px rgba(11, 31, 58, 0.2);
+
+    /* Dashboard */
+    --sidebar-bg: #0d2240;
+    --sidebar-w: 250px;
+    --topbar-h: 60px;
+
+}
