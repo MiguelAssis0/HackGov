@@ -1,21 +1,18 @@
 package com.fiap.hackgov.cityhall_management.internal.controllers;
 
 import com.fiap.hackgov.cityhall_management.internal.DTOs.State.StateDTO;
-import com.fiap.hackgov.cityhall_management.internal.entities.State;
 import com.fiap.hackgov.cityhall_management.internal.mapper.StateMapper;
 import com.fiap.hackgov.cityhall_management.internal.services.StateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
 import java.util.UUID;
 
 @RestController
@@ -27,19 +24,6 @@ public class StateController {
 
     @Autowired
     private StateMapper stateMapper;
-
-    @Operation(summary = "Create State", description = "Create a new state")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "State created successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid input"),
-            @ApiResponse(responseCode = "409", description = "State with this UF already exists")
-    })
-    @PostMapping
-    public ResponseEntity<Void> createState(@RequestBody @Valid CreateStateDTO stateDTO) {
-        State createdState = stateService.save(stateDTO);
-        URI address = URI.create("/api/state/" + createdState.getId());
-        return ResponseEntity.created(address).build();
-    }
 
     @Operation(
             summary = "Get All States",
