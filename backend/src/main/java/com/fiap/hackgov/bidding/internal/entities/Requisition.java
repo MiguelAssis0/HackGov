@@ -1,6 +1,6 @@
 package com.fiap.hackgov.bidding.internal.entities;
 
-import com.fiap.hackgov.cityhall_management.internal.entities.enums.RequisitionStatus;
+import com.fiap.hackgov.bidding.internal.entities.enums.RequestStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,9 +8,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -26,35 +26,38 @@ public class Requisition {
 
     private String number;
 
-    private UUID cityhallId;
+    private UUID cityHallId;
     private UUID sectorId;
-
-    private String technicianDescription;
-    private String justification;
-    private String budgetAllocation;
-
-
-    private RequisitionStatus status;
-
     private UUID responsibleId;
     private UUID approvedById;
+
+    private String technicianDescription;
+
+    private String justification;
+
+    private String budgetAllocation;
+
+    @Column(nullable = false)
+    private boolean requiresEtp;
+
+    @Enumerated(EnumType.STRING)
+    private RequestStatus requestStatus;
+
+    @OneToOne
+    @JoinColumn(name = "etp_id")
+    private ETP etp;
+
+    @OneToMany(mappedBy = "requisition")
+    private List<Approval> approvals;
+
+    @OneToOne
+    @JoinColumn(name = "process_state_id")
+    private ProcessState processState;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-
-    @OneToOne
-    @JoinColumn(name = "etp_id")
-    private ETP etp;
-
-    @OneToOne
-    @JoinColumn(name = "approval_id")
-    private Approval approval;
-
-    @OneToOne
-    @JoinColumn(name = "process_state_id")
-    private ProcessState processState;
 
 }

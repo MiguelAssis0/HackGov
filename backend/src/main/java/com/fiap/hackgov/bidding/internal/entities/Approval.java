@@ -1,5 +1,6 @@
 package com.fiap.hackgov.bidding.internal.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fiap.hackgov.bidding.internal.entities.enums.ApprovalStage;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,7 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -24,11 +24,19 @@ public class Approval {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @ManyToOne
+    @JoinColumn(name = "requisition_id")
+    @JsonIgnore
+    private Requisition requisition;
+
+    @Enumerated(EnumType.STRING)
     private ApprovalStage stage;
+
     private UUID approvedById;
 
-    private LocalDateTime approvedAt;
     private String observation;
+
+    private LocalDateTime approvedAt;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -36,7 +44,4 @@ public class Approval {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @OneToOne
-    @JoinColumn(name = "requisition_id")
-    private Requisition requisition;
 }

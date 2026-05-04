@@ -1,5 +1,6 @@
 package com.fiap.hackgov.bidding.internal.DTOs;
 
+import com.fiap.hackgov.bidding.internal.DTOs.Requisiton.RequisitionDTO;
 import com.fiap.hackgov.bidding.internal.entities.enums.BiddingStatus;
 import com.fiap.hackgov.bidding.internal.entities.enums.ProcessType;
 
