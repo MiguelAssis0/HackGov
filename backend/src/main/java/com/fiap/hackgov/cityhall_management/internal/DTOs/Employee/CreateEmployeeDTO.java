@@ -8,6 +8,9 @@ import java.util.UUID;
 
 public record CreateEmployeeDTO(
 
+        @NotNull(message = "Token ID is required")
+        UUID tokenId,
+
         @NotNull(message = "Salary is required")
         @Min(value = 0, message = "Salary must be greater than or equal to 0")
         Double salary,
@@ -47,8 +50,5 @@ public record CreateEmployeeDTO(
         String phone,
 
         @NotNull(message = "Role is required")
-        int role,
-
-        @NotNull(message = "City hall ID is required")
-        UUID cityhallId
+        int role
 ) {}

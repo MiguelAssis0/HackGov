@@ -13,13 +13,10 @@ import java.util.UUID;
 @Mapper(componentModel = "spring")
 public interface EmployeeMapper {
 
-    @Mapping(target = "cityhallId", ignore = true)  // ✅ era "cityhall", corrigido
+    @Mapping(target = "cityHallId", ignore = true)
     Employee toEntity(CreateEmployeeDTO createEmployeeDTO);
 
-    @Mapping(target = "cityhallId", source = "cityhallId.id")  // ✅ corrigido
-    CreateEmployeeDTO toDTO(Employee employee);
-
-    @Mapping(target = "cityhallId", source = "cityhallId.id")  // ✅ corrigido
+    @Mapping(target = "cityHallId", source = "cityHallId.id")
     EmployeeDTO toEmployeeDTO(Employee employee);
 
     default CityHall map(UUID id) {

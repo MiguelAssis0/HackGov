@@ -1,5 +1,6 @@
 package com.fiap.hackgov.cityhall_management.internal.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -36,9 +37,11 @@ public class CityHall implements Serializable {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "state_id")
+    @JsonIgnore
     private State state;
 
-    @OneToMany(mappedBy = "cityhall", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "cityHall", cascade = CascadeType.ALL)
+    @JsonIgnore
     private final List<Sector> sectors = new ArrayList<>();
 
     private boolean isActive;
@@ -49,6 +52,7 @@ public class CityHall implements Serializable {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "cityhallId", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "cityHallId", cascade = CascadeType.ALL)
+    @JsonIgnore
     private final List<Employee> employees = new ArrayList<>();
 }

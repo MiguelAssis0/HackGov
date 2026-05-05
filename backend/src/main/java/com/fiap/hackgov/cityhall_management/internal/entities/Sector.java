@@ -34,8 +34,8 @@ public class Sector implements Serializable {
     private String name;
 
     @ManyToOne
-    @JoinColumn(name = "cityhall_id")
-    private CityHall cityhall;
+    @JoinColumn(name = "cityHall_id")
+    private CityHall cityHall;
 
     @OneToMany(mappedBy = "pk.sector", cascade = CascadeType.ALL)
     private List<JobLevelSector> jobLevels = new ArrayList<>();

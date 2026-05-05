@@ -1,13 +1,11 @@
 package com.fiap.hackgov.shared.infra.config;
 
-import com.fiap.hackgov.auth.internal.entities.User;
-import com.fiap.hackgov.auth.internal.repositories.UserRepository;
-import com.fiap.hackgov.cityhall_management.internal.entities.*;
-import com.fiap.hackgov.cityhall_management.internal.repositories.*;
-import com.fiap.hackgov.cityhall_management.internal.entities.enums.LevelJobLevel;
 import com.fiap.hackgov.auth.internal.entities.enums.Roles;
+import com.fiap.hackgov.cityhall_management.internal.entities.*;
+import com.fiap.hackgov.cityhall_management.internal.entities.enums.LevelJobLevel;
 import com.fiap.hackgov.cityhall_management.internal.entities.enums.TypeJobLevel;
 import com.fiap.hackgov.cityhall_management.internal.entities.enums.UF;
+import com.fiap.hackgov.cityhall_management.internal.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
@@ -28,7 +26,6 @@ public class Mocks implements CommandLineRunner {
     @Autowired private PermissionsRepository permissionsRepository;
     @Autowired private PermissionsJobLevelRepository permissionsJobLevelRepository;
     @Autowired private EmployeeRepository employeeRepository;
-    @Autowired private UserRepository userRepository; // ✅ adicione o UserRepository
     @Autowired private PasswordEncoder passwordEncoder;
 
     @Override
@@ -69,17 +66,17 @@ public class Mocks implements CommandLineRunner {
         // -------------------------
         Sector sectorTI = new Sector();
         sectorTI.setName("Tecnologia da Informação");
-        sectorTI.setCityhall(cityHallSP);
+        sectorTI.setCityHall(cityHallSP);
         sectorRepository.save(sectorTI);
 
         Sector sectorRH = new Sector();
         sectorRH.setName("Recursos Humanos");
-        sectorRH.setCityhall(cityHallSP);
+        sectorRH.setCityHall(cityHallSP);
         sectorRepository.save(sectorRH);
 
         Sector sectorFinanceiro = new Sector();
         sectorFinanceiro.setName("Financeiro");
-        sectorFinanceiro.setCityhall(cityHallRJ);
+        sectorFinanceiro.setCityHall(cityHallRJ);
         sectorRepository.save(sectorFinanceiro);
 
         // -------------------------
@@ -149,10 +146,7 @@ public class Mocks implements CommandLineRunner {
         permissionsJobLevelRepository.save(new PermissionsJobLevel(permAdmin, gerente));
         permissionsJobLevelRepository.save(new PermissionsJobLevel(permRead, assistente));
 
-        // -------------------------
-        // Users (apenas autenticação)
-        // -------------------------
-        User admin = new User();
+        Employee admin = new Employee();
         admin.setFirstName("Admin");
         admin.setLastName("Sistema");
         admin.setEmail("admin@admin.com");
@@ -161,62 +155,58 @@ public class Mocks implements CommandLineRunner {
         admin.setRole(Roles.ADMIN);
         admin.setCpf("123.456.789-00");
         admin.setTwoFactor(false);
-        userRepository.save(admin); // ✅ salva o User primeiro para ter o UUID
 
-        User userMaria = new User();
-        userMaria.setFirstName("Maria");
-        userMaria.setLastName("Oliveira");
-        userMaria.setEmail("maria.oliveira@sp.gov.br");
-        userMaria.setPassword(passwordEncoder.encode("senha123"));
-        userMaria.setStatus(true);
-        userMaria.setRole(Roles.ADMIN);
-        userMaria.setCpf("987.654.321-00");
-        userMaria.setTwoFactor(false);
-        userRepository.save(userMaria);
+        admin.setSalary(5500.00);
+        admin.setAdmissionDate(LocalDateTime.of(2020, 3, 15, 8, 0));
+        admin.setRegistrationNumber("SP-001");
+        admin.setHoursWorked(1840.0);
+        admin.setCityHallId(cityHallSP);
 
-        User userCarlos = new User();
-        userCarlos.setFirstName("Carlos");
-        userCarlos.setLastName("Mendes");
-        userCarlos.setEmail("carlos.mendes@rj.gov.br");
-        userCarlos.setPassword(passwordEncoder.encode("senha123"));
-        userCarlos.setStatus(true);
-        userCarlos.setRole(Roles.ADMIN);
-        userCarlos.setCpf("111.222.333-44");
-        userCarlos.setTwoFactor(false);
-        userRepository.save(userCarlos);
+        admin.getEmployeeJobLevels().add(new EmployeeJobLevel(admin, analista));
 
-        // -------------------------
-        // Employees (dados funcionais vinculados ao User via userId)
-        // -------------------------
-        Employee emp1 = new Employee();
-        emp1.setUserId(admin.getId()); // ✅ vincula ao User pelo UUID
-        emp1.setSalary(5500.00);
-        emp1.setAdmissionDate(LocalDateTime.of(2020, 3, 15, 8, 0));
-        emp1.setRegistrationNumber("SP-001");
-        emp1.setHoursWorked(1840.0);
-        emp1.setCityhallId(cityHallSP);
-        emp1.getEmployeeJobLevels().add(new EmployeeJobLevel(emp1, analista));
-        employeeRepository.save(emp1);
+        employeeRepository.save(admin);
 
-        Employee emp2 = new Employee();
-        emp2.setUserId(userMaria.getId());
-        emp2.setSalary(12000.00);
-        emp2.setAdmissionDate(LocalDateTime.of(2018, 6, 1, 8, 0));
-        emp2.setRegistrationNumber("SP-002");
-        emp2.setHoursWorked(2200.0);
-        emp2.setCityhallId(cityHallSP);
-        emp2.getEmployeeJobLevels().add(new EmployeeJobLevel(emp2, gerente));
-        employeeRepository.save(emp2);
 
-        Employee emp3 = new Employee();
-        emp3.setUserId(userCarlos.getId());
-        emp3.setSalary(3200.00);
-        emp3.setAdmissionDate(LocalDateTime.of(2022, 1, 10, 8, 0));
-        emp3.setRegistrationNumber("RJ-001");
-        emp3.setHoursWorked(920.0);
-        emp3.setCityhallId(cityHallRJ);
-        emp3.getEmployeeJobLevels().add(new EmployeeJobLevel(emp3, assistente));
-        employeeRepository.save(emp3);
+        Employee maria = new Employee();
+        maria.setFirstName("Maria");
+        maria.setLastName("Oliveira");
+        maria.setEmail("maria.oliveira@sp.gov.br");
+        maria.setPassword(passwordEncoder.encode("senha123"));
+        maria.setStatus(true);
+        maria.setRole(Roles.ADMIN);
+        maria.setCpf("987.654.321-00");
+        maria.setTwoFactor(false);
+
+        maria.setSalary(12000.00);
+        maria.setAdmissionDate(LocalDateTime.of(2018, 6, 1, 8, 0));
+        maria.setRegistrationNumber("SP-002");
+        maria.setHoursWorked(2200.0);
+        maria.setCityHallId(cityHallSP);
+
+        maria.getEmployeeJobLevels().add(new EmployeeJobLevel(maria, gerente));
+
+        employeeRepository.save(maria);
+
+
+        Employee carlos = new Employee();
+        carlos.setFirstName("Carlos");
+        carlos.setLastName("Mendes");
+        carlos.setEmail("carlos.mendes@rj.gov.br");
+        carlos.setPassword(passwordEncoder.encode("senha123"));
+        carlos.setStatus(true);
+        carlos.setRole(Roles.ADMIN);
+        carlos.setCpf("111.222.333-44");
+        carlos.setTwoFactor(false);
+
+        carlos.setSalary(3200.00);
+        carlos.setAdmissionDate(LocalDateTime.of(2022, 1, 10, 8, 0));
+        carlos.setRegistrationNumber("RJ-001");
+        carlos.setHoursWorked(920.0);
+        carlos.setCityHallId(cityHallRJ);
+
+        carlos.getEmployeeJobLevels().add(new EmployeeJobLevel(carlos, assistente));
+
+        employeeRepository.save(carlos);
 
         System.out.println("Mocks carregados com sucesso!");
     }

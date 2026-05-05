@@ -2,8 +2,8 @@ package com.fiap.hackgov.auth.internal.entities;
 
 import com.fiap.hackgov.auth.internal.entities.enums.Roles;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,11 +16,10 @@ import java.util.UUID;
 
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "users")
-public class User implements UserDetails {
+@Inheritance(strategy = InheritanceType.JOINED)
+public abstract class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -48,13 +47,15 @@ public class User implements UserDetails {
     private Roles role;
 
     private String avatarPath;
+
     @Column(unique = true)
     private String phone;
+
     private Boolean twoFactor = false;
 
     private Boolean acceptTerms = true;
 
-    private LocalDateTime lastLogin = null;
+    private LocalDateTime lastLogin;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -69,7 +70,27 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return "";
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return Boolean.TRUE.equals(status);
     }
 
     public String getFullName() {

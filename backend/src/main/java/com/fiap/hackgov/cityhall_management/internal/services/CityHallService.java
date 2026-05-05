@@ -24,6 +24,15 @@ public class CityHallService {
     @Autowired
     private StateRepository stateRepository;
 
+    public Page<CityHall> findAll(Pageable pageable) {
+        return cityHallRepository.findAll(pageable);
+    }
+
+    public CityHall findById(UUID id) {
+        return cityHallRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("CityHall not found: " + id));
+    }
+
     public CityHall save(CreateCityHallDTO dto) {
 
         cityHallRepository.findByCnpj(dto.cnpj()).ifPresent(cityHall -> {
@@ -39,14 +48,5 @@ public class CityHallService {
         cityHall.setState(state);
 
         return cityHallRepository.save(cityHall);
-    }
-
-    public Page<CityHall> findAll(Pageable pageable) {
-        return cityHallRepository.findAll(pageable);
-    }
-
-    public CityHall findById(UUID id) {
-        return cityHallRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("CityHall not found: " + id));
     }
 }

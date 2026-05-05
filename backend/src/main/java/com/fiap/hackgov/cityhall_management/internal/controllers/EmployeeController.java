@@ -5,6 +5,7 @@ import com.fiap.hackgov.cityhall_management.internal.DTOs.Employee.EmployeeDTO;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.cityhall_management.internal.mapper.EmployeeMapper;
 import com.fiap.hackgov.cityhall_management.internal.services.EmployeeService;
+import com.fiap.hackgov.shared.infra.services.TokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.UUID;
@@ -29,16 +31,17 @@ public class EmployeeController {
     @Autowired
     private EmployeeMapper employeeMapper;
 
-    @Operation(summary = "Create Employee", description = "Create a new employee")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Employee created successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid input"),
-            @ApiResponse(responseCode = "409", description = "Employee already exists")
-    })
+    @Autowired
+    private TokenService tokenService;
+
     @PostMapping
     public ResponseEntity<Void> createEmployee(@RequestBody @Valid CreateEmployeeDTO employeeDTO) {
         Employee registerEmployee = employeeService.save(employeeDTO);
-        URI address = URI.create("/api/employee/" + registerEmployee.getId());
+        URI address = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(registerEmployee.getId())
+                .toUri();
         return ResponseEntity.created(address).build();
     }
 
@@ -67,7 +70,7 @@ public class EmployeeController {
     })
     @GetMapping("/{id}")
     public ResponseEntity<EmployeeDTO> getEmployeeById(@PathVariable UUID id) {
-        return ResponseEntity.ok(employeeService.findById(id));
+        return ResponseEntity.ok(employeeMapper.toEmployeeDTO(employeeService.findById(id)));
     }
 
 

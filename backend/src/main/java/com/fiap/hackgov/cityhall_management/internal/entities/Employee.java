@@ -1,5 +1,6 @@
 package com.fiap.hackgov.cityhall_management.internal.entities;
 
+import com.fiap.hackgov.auth.internal.entities.User;
 import com.fiap.hackgov.cityhall_management.internal.entities.enums.RequisitionStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,12 +8,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -20,14 +19,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Entity
 @Table(name = "employees")
-public class Employee implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+public class Employee extends User implements Serializable {
 
     @OneToMany(mappedBy = "pk.employee", cascade = CascadeType.ALL)
     private final List<EmployeeJobLevel> employeeJobLevels = new ArrayList<>();
@@ -44,12 +36,8 @@ public class Employee implements Serializable {
 
     private Double hoursWorked;
 
-    private LocalDateTime createdAt;
-
-    private UUID userId;
-
     @ManyToOne
-    @JoinColumn(name = "cityhall_id")
-    private CityHall cityhallId;
+    @JoinColumn(name = "cityHall_id")
+    private CityHall cityHallId;
 
 }

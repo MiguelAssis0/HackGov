@@ -67,7 +67,7 @@ public class JwtAuthenticationFilterTest {
 
     @BeforeEach
     void setUp() {
-        jwtAuthenticationFilter = new JwtAuthenticationFilter(handlerExceptionResolver);
+        jwtAuthenticationFilter = new JwtAuthenticationFilter();
         ReflectionTestUtils.setField(jwtAuthenticationFilter, "tokenService", tokenService);
         ReflectionTestUtils.setField(jwtAuthenticationFilter, "userDetailsService", userDetailsService);
         ReflectionTestUtils.setField(jwtAuthenticationFilter, "tokenBlacklistService", tokenBlacklistService);

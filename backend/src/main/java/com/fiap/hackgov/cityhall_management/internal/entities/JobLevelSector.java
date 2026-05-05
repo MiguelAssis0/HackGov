@@ -1,5 +1,6 @@
 package com.fiap.hackgov.cityhall_management.internal.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fiap.hackgov.cityhall_management.internal.entities.embeddables.JobLevelSectorPK;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -25,6 +26,7 @@ public class JobLevelSector implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @EmbeddedId
+    @JsonIgnore
     private JobLevelSectorPK pk = new JobLevelSectorPK();
 
     public JobLevelSector(Sector sector, JobLevel jobLevel) {
