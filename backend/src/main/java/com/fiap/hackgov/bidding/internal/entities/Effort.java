@@ -24,6 +24,7 @@ public class Effort {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Enumerated(EnumType.STRING)
     private KindCommitment kindCommitment;
 
     @Column(precision = 15, scale = 2)

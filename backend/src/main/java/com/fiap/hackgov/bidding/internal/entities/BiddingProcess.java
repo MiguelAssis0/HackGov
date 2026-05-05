@@ -30,6 +30,7 @@ public class BiddingProcess {
     @JoinColumn(name = "requisition_id")
     private Requisition requisition;
 
+    @Enumerated(EnumType.STRING)
     private ProcessType type;
 
     private Date legalDeadline;
@@ -38,6 +39,7 @@ public class BiddingProcess {
     @OneToOne
     @JoinColumn(name = "edital_id")
     private Edital edital;
+    @Enumerated(EnumType.STRING)
     private BiddingStatus status;
     private UUID responsibleId;
 

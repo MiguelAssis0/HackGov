@@ -25,6 +25,7 @@ public class Supplier {
 
     private String socialReason;
 
+    @Column(unique = true, length = 14)
     private String cnpj;
     private String email;
     private String phone;

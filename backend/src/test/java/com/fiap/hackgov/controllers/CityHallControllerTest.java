@@ -6,10 +6,10 @@ import com.fiap.hackgov.cityhall_management.internal.DTOs.CityHall.CreateCityHal
 import com.fiap.hackgov.cityhall_management.internal.controllers.CityHallController;
 import com.fiap.hackgov.cityhall_management.internal.entities.CityHall;
 import com.fiap.hackgov.cityhall_management.internal.entities.State;
+import com.fiap.hackgov.cityhall_management.internal.mapper.ErpCityHallMapper;
 import com.fiap.hackgov.shared.infra.filters.JwtAuthenticationFilter;
 import com.fiap.hackgov.shared.infra.filters.RateLimitFilter;
 import com.fiap.hackgov.shared.infra.security.SecurityProperties;
-import com.fiap.hackgov.cityhall_management.internal.mapper.CityHallMapper;
 import com.fiap.hackgov.cityhall_management.internal.services.CityHallService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +56,7 @@ public class CityHallControllerTest {
     private CityHallService cityHallService;
 
     @MockBean
-    private CityHallMapper cityHallMapper;
+    private ErpCityHallMapper erpCityHallMapper;
 
     @MockBean
     private SecurityProperties securityProperties;
@@ -178,7 +178,7 @@ public class CityHallControllerTest {
         Page<CityHall> page = new PageImpl<>(List.of(cityHall1), PageRequest.of(0, 10), 1);
 
         when(cityHallService.findAll(any(Pageable.class))).thenReturn(page);
-        when(cityHallMapper.toCityHallDTO(cityHall1)).thenReturn(dto1);
+        when(erpCityHallMapper.toCityHallDTO(cityHall1)).thenReturn(dto1);
 
         mockMvc.perform(get("/api/cityhall")
                         .param("page", "0")
@@ -231,7 +231,7 @@ public class CityHallControllerTest {
         cityHall.getState().setName("São Paulo");
 
         when(cityHallService.findById(any(UUID.class))).thenReturn(cityHall);
-        when(cityHallMapper.toCityHallDTO(cityHall)).thenReturn(dto);
+        when(erpCityHallMapper.toCityHallDTO(cityHall)).thenReturn(dto);
 
         mockMvc.perform(get("/api/cityhall/" + cityHallId))
                 .andExpect(status().isOk())

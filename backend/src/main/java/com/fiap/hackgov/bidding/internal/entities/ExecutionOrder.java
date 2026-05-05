@@ -1,5 +1,6 @@
 package com.fiap.hackgov.bidding.internal.entities;
 
+import com.fiap.hackgov.bidding.internal.entities.enums.OrderStatus;
 import com.fiap.hackgov.bidding.internal.entities.enums.OrderType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -24,7 +25,14 @@ public class ExecutionOrder {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Enumerated(EnumType.STRING)
     private OrderType orderType;
+
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
+
+    private Date expectedDeliveryDate;
+    private Date actualDeliveryDate;
 
     private String number;
     private String description;

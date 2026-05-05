@@ -1,6 +1,7 @@
 package com.fiap.hackgov.bidding.internal.entities;
 
 import com.fiap.hackgov.bidding.internal.entities.enums.DeclarationType;
+import com.fiap.hackgov.bidding.internal.entities.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +10,9 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -23,9 +26,19 @@ public class PaymentStatement {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Enumerated(EnumType.STRING)
     private DeclarationType declarationType;
     private UUID responsibleId;
     private Boolean approved;
+
+    @Column(precision = 15, scale = 2)
+    private BigDecimal amount;
+
+    private Date dueDate;
+    private Date paymentDate;
+
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus status;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

@@ -1,28 +1,63 @@
 package com.fiap.hackgov.bidding.internal.services;
 
+import com.fiap.hackgov.bidding.internal.DTOs.Approval.ApprovalResponseDTO;
+import com.fiap.hackgov.bidding.internal.DTOs.Approval.CreateApprovalDTO;
+import com.fiap.hackgov.bidding.internal.DTOs.Approval.UpdateApprovalDTO;
 import com.fiap.hackgov.bidding.internal.entities.Approval;
+import com.fiap.hackgov.bidding.internal.mappers.ApprovalMapper;
 import com.fiap.hackgov.bidding.internal.repositories.ApprovalRepository;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class ApprovalService {
 
-    @Autowired
-    private ApprovalRepository approvalRepository;
+    private final ApprovalRepository repository;
+    private final ApprovalMapper mapper;
 
+    public ApprovalResponseDTO create(CreateApprovalDTO dto) {
+        Approval approval = mapper.toEntity(dto);
 
-    public Approval findById(UUID id) {
-        return approvalRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Approval not found:" + id));
+        approval.setApprovedAt(LocalDateTime.now());
+
+        return mapper.toDTO(repository.save(approval));
     }
 
-    public Approval save(Approval approval) {
-        return approvalRepository.save(approval);
+    public Page<ApprovalResponseDTO> findAll(Pageable pageable) {
+        return repository.findAll(pageable)
+                .map(mapper::toDTO);
     }
 
+    public ApprovalResponseDTO findById(UUID id) {
+        Approval approval = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Approval not found"));
+
+        return mapper.toDTO(approval);
+    }
+
+    public ApprovalResponseDTO update(UUID id, UpdateApprovalDTO dto) {
+        Approval approval = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Approval not found"));
+
+        approval.setStage(dto.stage());
+        approval.setApprovedById(dto.approvedById());
+        approval.setObservation(dto.observation());
+
+        return mapper.toDTO(repository.save(approval));
+    }
+
+    public void delete(UUID id) {
+        Approval approval = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Approval not found"));
+
+        repository.delete(approval);
+    }
 }

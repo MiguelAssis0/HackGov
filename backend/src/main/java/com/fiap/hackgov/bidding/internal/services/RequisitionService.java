@@ -7,6 +7,7 @@ import com.fiap.hackgov.bidding.internal.entities.ETP;
 import com.fiap.hackgov.bidding.internal.entities.Requisition;
 import com.fiap.hackgov.bidding.internal.entities.enums.RequestStatus;
 import com.fiap.hackgov.bidding.internal.mappers.ApprovalMapper;
+import com.fiap.hackgov.bidding.internal.mappers.ETPMapper;
 import com.fiap.hackgov.bidding.internal.mappers.RequisitionMapper;
 import com.fiap.hackgov.bidding.internal.repositories.RequisitionRepository;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceAlreadyExistsException;
@@ -31,13 +32,16 @@ public class RequisitionService {
     private ETPService etpService;
 
     @Autowired
+    private ApprovalMapper approvalMapper;
+
+    @Autowired
+    private ETPMapper etpMapper;
+
+    @Autowired
     private ApprovalService approvalService;
 
     @Autowired
     private RequisitionMapper requisitionMapper;
-
-    @Autowired
-    private ApprovalMapper approvalMapper;
 
     public Page<Requisition> findAll(Pageable pageable) {
         return requisitionRepository.findAll(pageable);
@@ -54,7 +58,7 @@ public class RequisitionService {
             ETP etp = new ETP();
             etp.setRequisition(requisition);
             etp.setContent(requisition.getTechnicianDescription());
-            etpService.save(etp);
+            etpService.create(etpMapper.toCreateETPDTO(etp));
         }
         return requisition;
     }
@@ -75,7 +79,7 @@ public class RequisitionService {
 
         approval.setRequisition(requisition);
         approval.setApprovedAt(LocalDateTime.now());
-        approvalService.save(approval);
+        approvalService.create(approvalMapper.toCreateApprovalDTO(approval));
         requisition.getApprovals().add(approval);
         requisitionRepository.save(requisition);
         return approval;

@@ -25,10 +25,12 @@ public class Accountability {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Enumerated(EnumType.STRING)
     private ProcessStage processStage;
+    @Enumerated(EnumType.STRING)
     private InstallmentStatus installmentStatus;
     private UUID responsibleId;
-    private Date analysisDate;
+    private LocalDateTime analysisDate;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

@@ -2,10 +2,10 @@ package com.fiap.hackgov.services;
 
 import com.fiap.hackgov.cityhall_management.internal.DTOs.CityHall.CityHallDTO;
 import com.fiap.hackgov.cityhall_management.internal.DTOs.CityHall.CreateCityHallDTO;
+import com.fiap.hackgov.cityhall_management.internal.mapper.ErpCityHallMapper;
 import com.fiap.hackgov.cityhall_management.internal.services.CityHallService;
 import com.fiap.hackgov.cityhall_management.internal.entities.CityHall;
 import com.fiap.hackgov.cityhall_management.internal.entities.State;
-import com.fiap.hackgov.cityhall_management.internal.mapper.CityHallMapper;
 import com.fiap.hackgov.cityhall_management.internal.repositories.CityHallRepository;
 import com.fiap.hackgov.cityhall_management.internal.repositories.StateRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +43,7 @@ public class CityHallServiceTest {
     private StateRepository stateRepository;
 
     @Mock
-    private CityHallMapper cityHallMapper;
+    private ErpCityHallMapper erpCityHallMapper;
 
     @InjectMocks
     private CityHallService cityHallService;
@@ -219,7 +219,7 @@ public class CityHallServiceTest {
                         assertThat(rse.getReason()).isEqualTo("CityHall not found");
                     });
 
-            verify(cityHallMapper, never()).toCityHallDTO(any());
+            verify(erpCityHallMapper, never()).toCityHallDTO(any());
         }
     }
 }

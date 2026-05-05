@@ -3,7 +3,7 @@ package com.fiap.hackgov.cityhall_management.internal.controllers;
 import com.fiap.hackgov.cityhall_management.internal.DTOs.CityHall.CityHallDTO;
 import com.fiap.hackgov.cityhall_management.internal.DTOs.CityHall.CreateCityHallDTO;
 import com.fiap.hackgov.cityhall_management.internal.entities.CityHall;
-import com.fiap.hackgov.cityhall_management.internal.mapper.CityHallMapper;
+import com.fiap.hackgov.cityhall_management.internal.mapper.ErpCityHallMapper;
 import com.fiap.hackgov.cityhall_management.internal.services.CityHallService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -27,7 +27,7 @@ public class CityHallController {
     private CityHallService cityHallService;
 
     @Autowired
-    private CityHallMapper cityHallMapper;
+    private ErpCityHallMapper erpCityHallMapper;
 
     @Operation(summary = "Create CityHall", description = "Create a new city hall")
     @ApiResponses(value = {
@@ -55,7 +55,7 @@ public class CityHallController {
     @GetMapping
     public ResponseEntity<Page<CityHallDTO>> getAllCityHalls(Pageable pageable) {
         Page<CityHallDTO> cityHallDTOs = cityHallService.findAll(pageable)
-                .map(cityHallMapper::toCityHallDTO);
+                .map(erpCityHallMapper::toCityHallDTO);
         return ResponseEntity.ok(cityHallDTOs);
     }
 
@@ -71,6 +71,6 @@ public class CityHallController {
     })
     @GetMapping("/{id}")
     public ResponseEntity<CityHallDTO> getCityHallById(@PathVariable UUID id) {
-        return ResponseEntity.ok(cityHallMapper.toCityHallDTO(cityHallService.findById(id)));
+        return ResponseEntity.ok(erpCityHallMapper.toCityHallDTO(cityHallService.findById(id)));
     }
 }
