@@ -69,6 +69,7 @@ public class JwtAuthenticationFilter extends BaseSecurityFilter {
             writeError(response, request, HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized", "Invalid token");
 
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             writeError(response, request, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal Server Error", "Authentication error");
         }
     }

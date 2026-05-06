@@ -1,9 +1,7 @@
 package com.fiap.hackgov.bidding.internal.controllers;
 
 import com.fiap.hackgov.bidding.internal.DTOs.Approval.CreateApprovalDTO;
-import com.fiap.hackgov.bidding.internal.DTOs.PageResponseDTO;
 import com.fiap.hackgov.bidding.internal.DTOs.Requisiton.CreateRequisitionDTO;
-import com.fiap.hackgov.bidding.internal.DTOs.Requisiton.RequisitionDTO;
 import com.fiap.hackgov.bidding.internal.entities.Approval;
 import com.fiap.hackgov.bidding.internal.entities.Requisition;
 import com.fiap.hackgov.bidding.internal.mappers.PageMapper;
@@ -34,9 +32,9 @@ public class RequisitionController {
 
 
     @GetMapping
-    public ResponseEntity<PageResponseDTO<RequisitionDTO>> getAllRequisitions(Pageable pageable) {
+    public ResponseEntity<Page<Requisition>> getAllRequisitions(Pageable pageable) {
         Page<Requisition> requisitions = requisitionService.findAll(pageable);
-        return ResponseEntity.ok(pageMapper.toPageResponseDto(requisitions, requisitionMapper::toDTO));
+        return ResponseEntity.ok(requisitions);
     }
 
     @PostMapping

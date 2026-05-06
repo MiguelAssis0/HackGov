@@ -4,21 +4,31 @@ import com.fiap.hackgov.bidding.internal.DTOs.Approval.CreateApprovalDTO;
 import com.fiap.hackgov.bidding.internal.DTOs.Requisiton.CreateRequisitionDTO;
 import com.fiap.hackgov.bidding.internal.entities.Approval;
 import com.fiap.hackgov.bidding.internal.entities.ETP;
+import com.fiap.hackgov.bidding.internal.entities.ProcessState;
 import com.fiap.hackgov.bidding.internal.entities.Requisition;
+import com.fiap.hackgov.bidding.internal.entities.enums.ApprovalSector;
+import com.fiap.hackgov.bidding.internal.entities.enums.ApprovalStatus;
+import com.fiap.hackgov.bidding.internal.entities.enums.ProcessStage;
 import com.fiap.hackgov.bidding.internal.entities.enums.RequestStatus;
 import com.fiap.hackgov.bidding.internal.mappers.ApprovalMapper;
-import com.fiap.hackgov.bidding.internal.mappers.ETPMapper;
 import com.fiap.hackgov.bidding.internal.mappers.RequisitionMapper;
+import com.fiap.hackgov.bidding.internal.repositories.ApprovalRepository;
+import com.fiap.hackgov.bidding.internal.repositories.ETPRepository;
+import com.fiap.hackgov.bidding.internal.repositories.ProcessStateRepository;
 import com.fiap.hackgov.bidding.internal.repositories.RequisitionRepository;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceAlreadyExistsException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -29,16 +39,19 @@ public class RequisitionService {
     private RequisitionRepository requisitionRepository;
 
     @Autowired
-    private ETPService etpService;
-
-    @Autowired
     private ApprovalMapper approvalMapper;
 
     @Autowired
-    private ETPMapper etpMapper;
+    private ApprovalService approvalService;
 
     @Autowired
-    private ApprovalService approvalService;
+    private ApprovalRepository approvalRepository;
+
+    @Autowired
+    private ProcessStateRepository processStateRepository;
+
+    @Autowired
+    private ETPRepository etpRepository;
 
     @Autowired
     private RequisitionMapper requisitionMapper;
@@ -51,25 +64,69 @@ public class RequisitionService {
         return requisitionRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Requisition not found:" + id));
     }
 
+    @Transactional
     public Requisition save(CreateRequisitionDTO createRequisitionDTO) {
-        Requisition requisition = requisitionRepository.save(requisitionMapper.toEntity(createRequisitionDTO));
+
+        Requisition requisition =
+                requisitionMapper.toEntity(createRequisitionDTO);
+
         requisition.setRequestStatus(RequestStatus.CADASTRADA);
-        if (createRequisitionDTO.requiresEtp()){
+        requisition.setNumber(generateRequisitionNumber());
+
+        requisition = requisitionRepository.save(requisition);
+
+        if (createRequisitionDTO.requiresEtp()) {
+
             ETP etp = new ETP();
+
             etp.setRequisition(requisition);
-            etp.setContent(requisition.getTechnicianDescription());
-            etpService.create(etpMapper.toCreateETPDTO(etp));
+            etp.setContent(requisition.getTechnicalDescription());
+
+            etp = etpRepository.save(etp);
+
+            requisition.setEtp(etp);
         }
-        return requisition;
+
+        List<Approval> approvals = new ArrayList<>();
+
+        for (ApprovalSector sector : ApprovalSector.values()) {
+
+            Approval approval = new Approval();
+
+            approval.setRequisition(requisition);
+            approval.setApprovalSector(sector);
+            approval.setApprovalStatus(ApprovalStatus.PENDENTE);
+
+            approvals.add(approval);
+        }
+
+        approvalRepository.saveAll(approvals);
+
+        requisition.setApprovals(approvals);
+
+        ProcessState processState = new ProcessState();
+
+        processState.setBiddingProcess(requisition);
+        processState.setCurrentStage(ProcessStage.REQUISICAO_CADASTRADA);
+        processState.setNumberStep(1);
+        processState.setStartedAt(LocalDateTime.now());
+        processState.setObservation("Requisição cadastrada no sistema");
+
+        processState = processStateRepository.save(processState);
+
+        requisition.setProcessState(processState);
+
+        return requisitionRepository.save(requisition);
     }
 
+    // provavelmente não precisaremos no futuro
     public Approval addApproval(UUID id, CreateApprovalDTO createApprovalDTO){
 
         Requisition requisition = findById(id);
 
         boolean alreadyApproved = requisition.getApprovals()
                 .stream()
-                .anyMatch(a -> a.getStage() == createApprovalDTO.stage());
+                .anyMatch(a -> a.getApprovalSector() == createApprovalDTO.stage());
 
         if (alreadyApproved) {
             throw new ResourceAlreadyExistsException("This stage has already been:" + createApprovalDTO.stage());
@@ -84,4 +141,30 @@ public class RequisitionService {
         requisitionRepository.save(requisition);
         return approval;
     }
+
+    public String generateRequisitionNumber() {
+
+        String year = String.valueOf(LocalDate.now().getYear());
+
+        List<Requisition> requisitions =
+                requisitionRepository.findLastRequisitionNumber(
+                        year,
+                        PageRequest.of(0, 1)
+                );
+
+        int nextNumber = 1;
+
+        if (!requisitions.isEmpty()) {
+
+            String lastNumber = requisitions.get(0).getNumber();
+
+            String numericPart =
+                    lastNumber.substring(lastNumber.lastIndexOf("-") + 1);
+
+            nextNumber = Integer.parseInt(numericPart) + 1;
+        }
+
+        return String.format("REQ-%s-%06d", year, nextNumber);
+    }
+
 }

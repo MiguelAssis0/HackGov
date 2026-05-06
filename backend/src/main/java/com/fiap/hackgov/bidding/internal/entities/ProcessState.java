@@ -1,5 +1,6 @@
 package com.fiap.hackgov.bidding.internal.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fiap.hackgov.bidding.internal.entities.enums.ProcessStage;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,7 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -26,6 +26,7 @@ public class ProcessState {
 
     @Enumerated(EnumType.STRING)
     private ProcessStage currentStage;
+
     private int numberStep;
 
     private LocalDateTime startedAt;
@@ -43,6 +44,7 @@ public class ProcessState {
 
     @OneToOne
     @JoinColumn(name = "bidding_process_id")
+    @JsonIgnore
     private Requisition biddingProcess;
 
 }

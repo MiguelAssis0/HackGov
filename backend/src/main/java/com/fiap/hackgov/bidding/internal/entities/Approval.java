@@ -1,7 +1,8 @@
 package com.fiap.hackgov.bidding.internal.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fiap.hackgov.bidding.internal.entities.enums.ApprovalStage;
+import com.fiap.hackgov.bidding.internal.entities.enums.ApprovalSector;
+import com.fiap.hackgov.bidding.internal.entities.enums.ApprovalStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,7 +31,10 @@ public class Approval {
     private Requisition requisition;
 
     @Enumerated(EnumType.STRING)
-    private ApprovalStage stage;
+    private ApprovalSector approvalSector;
+
+    @Enumerated(EnumType.STRING)
+    private ApprovalStatus approvalStatus;
 
     private UUID approvedById;
 

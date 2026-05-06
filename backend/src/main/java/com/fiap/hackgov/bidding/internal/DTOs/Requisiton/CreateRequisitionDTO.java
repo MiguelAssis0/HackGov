@@ -9,17 +9,13 @@ import java.util.UUID;
 
 public record CreateRequisitionDTO(
 
-        @NotBlank(message = "Number is required")
-        @Size(max = 50, message = "Number must have at most 50 characters")
-        String number,
+        @NotBlank(message = "Technical description is required")
+        @Size(max = 255, message = "Technical description  must have at most 255 characters")
+        String technicalDescription,
 
-        @NotBlank(message = "Description is required")
-        @Size(max = 255, message = "Description must have at most 255 characters")
-        String description,
-
-        @NotNull(message = "Amount is required")
-        @DecimalMin(value = "0.01", message = "Amount must be greater than zero")
-        BigDecimal amount,
+        @NotNull(message = "Budget allocation is required")
+        @DecimalMin(value = "0.01", message = "Budget allocation must be greater than zero")
+        BigDecimal budgetAllocation,
 
         @NotNull(message = "Requires ETP is required")
         boolean requiresEtp,

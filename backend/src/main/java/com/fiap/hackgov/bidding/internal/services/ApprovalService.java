@@ -47,7 +47,7 @@ public class ApprovalService {
         Approval approval = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Approval not found"));
 
-        approval.setStage(dto.stage());
+        approval.setApprovalSector(dto.stage());
         approval.setApprovedById(dto.approvedById());
         approval.setObservation(dto.observation());
 

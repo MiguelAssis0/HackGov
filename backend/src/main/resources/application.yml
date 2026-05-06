@@ -3,6 +3,22 @@ spring:
     show-sql: true
   application:
     name: HackGov
+  mail:
+    host: ${SPRING_EMAIL_HOST:smtp.gmail.com}
+    port: ${SPRING_EMAIL_PORT:587}
+    username: ${SPRING_EMAIL:smtp@gmail.com}
+    password: ${SPRING_EMAIL_PASSWORD:password}
+    expiration_hours: ${PASSWORD_EXPIRE_HOURS:24}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
 
 server:
   error:

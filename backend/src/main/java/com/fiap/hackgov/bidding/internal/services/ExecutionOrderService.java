@@ -1,13 +1,18 @@
 package com.fiap.hackgov.bidding.internal.services;
 
-import com.fiap.hackgov.bidding.internal.DTOs.ExecutionOrder.*;
-import com.fiap.hackgov.bidding.internal.entities.*;
+import com.fiap.hackgov.bidding.internal.DTOs.ExecutionOrder.CreateExecutionOrderDTO;
+import com.fiap.hackgov.bidding.internal.DTOs.ExecutionOrder.ExecutionOrderDTO;
+import com.fiap.hackgov.bidding.internal.DTOs.ExecutionOrder.UpdateExecutionOrderDTO;
+import com.fiap.hackgov.bidding.internal.entities.ExecutionOrder;
 import com.fiap.hackgov.bidding.internal.entities.enums.OrderStatus;
 import com.fiap.hackgov.bidding.internal.mappers.ExecutionOrderMapper;
-import com.fiap.hackgov.bidding.internal.repositories.*;
+import com.fiap.hackgov.bidding.internal.repositories.ContractRepository;
+import com.fiap.hackgov.bidding.internal.repositories.EffortRepository;
+import com.fiap.hackgov.bidding.internal.repositories.ExecutionOrderRepository;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;

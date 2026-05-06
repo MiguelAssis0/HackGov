@@ -31,7 +31,7 @@ public class Requisition {
     private UUID responsibleId;
     private UUID approvedById;
 
-    private String technicianDescription;
+    private String technicalDescription;
 
     private String justification;
 
