@@ -3,6 +3,7 @@ package com.fiap.hackgov.bidding.internal.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fiap.hackgov.bidding.internal.entities.enums.ApprovalSector;
 import com.fiap.hackgov.bidding.internal.entities.enums.ApprovalStatus;
+import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -36,7 +37,9 @@ public class Approval {
     @Enumerated(EnumType.STRING)
     private ApprovalStatus approvalStatus;
 
-    private UUID approvedById;
+    @ManyToOne
+    @JoinColumn(name = "approved_by_id")
+    private Employee approvedBy;
 
     private String observation;
 

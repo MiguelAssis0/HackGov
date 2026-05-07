@@ -1,10 +1,8 @@
 package com.fiap.hackgov.bidding.internal.controllers;
 
-import com.fiap.hackgov.bidding.internal.DTOs.Approval.CreateApprovalDTO;
 import com.fiap.hackgov.bidding.internal.DTOs.Requisiton.CreateRequisitionDTO;
-import com.fiap.hackgov.bidding.internal.entities.Approval;
+import com.fiap.hackgov.bidding.internal.DTOs.Requisiton.RequisitionResponseDTO;
 import com.fiap.hackgov.bidding.internal.entities.Requisition;
-import com.fiap.hackgov.bidding.internal.mappers.PageMapper;
 import com.fiap.hackgov.bidding.internal.mappers.RequisitionMapper;
 import com.fiap.hackgov.bidding.internal.services.RequisitionService;
 import jakarta.validation.Valid;
@@ -15,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/requisition")
@@ -27,14 +24,19 @@ public class RequisitionController {
     @Autowired
     private RequisitionMapper requisitionMapper;
 
-    @Autowired
-    private PageMapper pageMapper;
-
 
     @GetMapping
-    public ResponseEntity<Page<Requisition>> getAllRequisitions(Pageable pageable) {
-        Page<Requisition> requisitions = requisitionService.findAll(pageable);
-        return ResponseEntity.ok(requisitions);
+    public ResponseEntity<Page<RequisitionResponseDTO>> getAllRequisitions(
+            Pageable pageable
+    ) {
+
+        Page<Requisition> requisitions =
+                requisitionService.findAll(pageable);
+
+        Page<RequisitionResponseDTO> response =
+                requisitions.map(requisitionMapper::toDTO);
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping
@@ -44,14 +46,4 @@ public class RequisitionController {
         return ResponseEntity.created(uri).build();
     }
 
-    @PostMapping("/{id}/approvals")
-    public ResponseEntity<?> addApproval(
-            @PathVariable UUID id,
-            @RequestBody @Valid CreateApprovalDTO approvalDTO
-    ) {
-
-        Approval approval = requisitionService.addApproval(id, approvalDTO);
-        URI uri = URI.create("/api/requisition/" + approval.getId());
-        return ResponseEntity.created(uri).build();
-    }
 }

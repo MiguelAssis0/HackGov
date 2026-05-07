@@ -1,13 +1,14 @@
 package com.fiap.hackgov.bidding.internal.controllers;
 
-import com.fiap.hackgov.bidding.internal.DTOs.Approval.CreateApprovalDTO;
 import com.fiap.hackgov.bidding.internal.DTOs.Approval.ApprovalResponseDTO;
+import com.fiap.hackgov.bidding.internal.DTOs.Approval.CreateApprovalDTO;
 import com.fiap.hackgov.bidding.internal.DTOs.Approval.UpdateApprovalDTO;
 import com.fiap.hackgov.bidding.internal.services.ApprovalService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.sql.Update;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +17,7 @@ import java.net.URI;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/approval")
+@RequestMapping("/api/approvals")
 @RequiredArgsConstructor
 public class ApprovalController {
 
@@ -44,12 +45,12 @@ public class ApprovalController {
         return ResponseEntity.ok(service.findById(id));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ApprovalResponseDTO> update(
+    @PatchMapping("/{id}")
+    public ResponseEntity<ApprovalResponseDTO> processApproval(
             @PathVariable UUID id,
             @RequestBody @Valid UpdateApprovalDTO dto
     ) {
-        return ResponseEntity.ok(service.update(id, dto));
+        return ResponseEntity.ok(service.processApproval(id, dto));
     }
 
     @DeleteMapping("/{id}")
