@@ -30,12 +30,13 @@
                 </div>
             </div>
 
-            <div class="col-lg-6 fade-up visible delay-2 d-none d-lg-flex">
-                <img src="{% static 'img/brasil.png' %}" alt="imagem do brasil" class="img-fluid hero-img">
+            <div class="col-lg-6 fade-up visible delay-2 d-none d-lg-flex justify-content-center hero-img-col">
+                <div class="hero-img-wrapper">
+                    <img src="{% static 'img/brasil.png' %}" alt="imagem do brasil" class="img-fluid hero-img">
+                </div>
             </div>
 
         </div>
-
     </div>
 </section>
 
@@ -259,147 +260,110 @@
             Desenvolvedores
         </h2>
 
-        <div class="row justify-content-center g-3">
-            <div class="col-auto fade-up delay-1">
-                <div class="equipe-card">
-                    <div class="equipe-card-img overflow-hidden">
-                        <img src="{% static 'img/michel.png' %}" alt="card image" class="img-fluid ">
-                    </div>
+        <div class="equipe-swiper swiper">
+            <div class="swiper-wrapper">
 
-                    <h3 class="equipe-card-name">Michel</h3>
-                    <span class="equipe-card-profession">Desenvolvedor Backend</span>
-
-                    <div class="equipe-info">
-                        <div class="equipe-info-icon">
-                            <i class="ri-information-line"></i>
-                        </div>
-
-                        <div class="equipe-info-img overflow-hidden">
+                <div class="swiper-slide">
+                    <div class="equipe-card">
+                        <div class="equipe-card-img overflow-hidden">
                             <img src="{% static 'img/michel.png' %}" alt="card image" class="img-fluid">
                         </div>
-
-                        <div class="equipe-info-data">
-                            <h3 class="equipe-info-name">Michel Pereira Dos Santos</h3>
-                            <span class="equipe-info-profession">Aluno de SI na FIAP</span>
-                            <span class="equipe-info-location">São Paulo - SP</span>
-                        </div>
-
-                        <div class="equipe-info-social">
-                            <a href="https://www.linkedin.com/" target="_blank" class="equipe-info-social-link">
-                                <span class="equipe-info-social-icon">
-                                    <i class="ri-linkedin-box-line"></i>
-                                </span>
-                            </a>
-
-                            <a href="https://instagram.com/" target="_blank" class="equipe-info-social-link">
-                                <span class="equipe-info-social-icon">
-                                    <i class="ri-instagram-fill"></i>
-                                </span>
-                            </a>
-
-                            <a href="https://github.com/" target="_blank" class="equipe-info-social-link">
-                                <span class="equipe-info-social-icon">
-                                    <i class="ri-github-fill"></i>
-                                </span>
-                            </a>
+                        <h3 class="equipe-card-name">Michel</h3>
+                        <span class="equipe-card-profession">Desenvolvedor Backend</span>
+                        <div class="equipe-info">
+                            <div class="equipe-info-icon"><i class="ri-information-line"></i></div>
+                            <div class="equipe-info-img overflow-hidden">
+                                <img src="{% static 'img/michel.png' %}" alt="card image" class="img-fluid">
+                            </div>
+                            <div class="equipe-info-data">
+                                <h3 class="equipe-info-name">Michel Pereira Dos Santos</h3>
+                                <span class="equipe-info-profession">Aluno de SI na FIAP</span>
+                                <span class="equipe-info-location">São Paulo - SP</span>
+                            </div>
+                            <div class="equipe-info-social">
+                                <a href="https://www.linkedin.com/" target="_blank" class="equipe-info-social-link">
+                                    <span class="equipe-info-social-icon"><i class="ri-linkedin-box-line"></i></span>
+                                </a>
+                                <a href="https://instagram.com/" target="_blank" class="equipe-info-social-link">
+                                    <span class="equipe-info-social-icon"><i class="ri-instagram-fill"></i></span>
+                                </a>
+                                <a href="https://github.com/" target="_blank" class="equipe-info-social-link">
+                                    <span class="equipe-info-social-icon"><i class="ri-github-fill"></i></span>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="col-auto fade-up delay-2">
-                <div class="equipe-card">
-                    <div class="equipe-card-img overflow-hidden">
-                        <img src="{% static 'img/miguel.png' %}" alt="card image" class="img-fluid ">
-                    </div>
-
-                    <h3 class="equipe-card-name">Miguel</h3>
-                    <span class="equipe-card-profession">Desenvolvedor Backend</span>
-
-                    <div class="equipe-info">
-                        <div class="equipe-info-icon">
-                            <i class="ri-information-line"></i>
+                <div class="swiper-slide">
+                    <div class="equipe-card">
+                        <div class="equipe-card-img overflow-hidden">
+                            <img src="{% static 'img/miguel.jpeg' %}" alt="card image" class="img-fluid">
                         </div>
-
-                        <div class="equipe-info-img overflow-hidden">
-                            <img src="{% static 'img/miguel.png' %}" alt="card image" class="img-fluid">
-                        </div>
-
-                        <div class="equipe-info-data">
-                            <h3 class="equipe-info-name">Miguel Kawe Dos Anjos Assis</h3>
-                            <span class="equipe-info-profession">Aluno de SI na FIAP</span>
-                            <span class="equipe-info-location">Caçapava - SP</span>
-                        </div>
-
-                        <div class="equipe-info-social">
-                            <a href="https://www.linkedin.com/" target="_blank" class="equipe-info-social-link">
-                                <span class="equipe-info-social-icon">
-                                    <i class="ri-linkedin-box-line"></i>
-                                </span>
-                            </a>
-
-                            <a href="https://instagram.com/" target="_blank" class="equipe-info-social-link">
-                                <span class="equipe-info-social-icon">
-                                    <i class="ri-instagram-fill"></i>
-                                </span>
-                            </a>
-
-                            <a href="https://github.com/" target="_blank" class="equipe-info-social-link">
-                                <span class="equipe-info-social-icon">
-                                    <i class="ri-github-fill"></i>
-                                </span>
-                            </a>
+                        <h3 class="equipe-card-name">Miguel</h3>
+                        <span class="equipe-card-profession">Desenvolvedor Backend</span>
+                        <div class="equipe-info">
+                            <div class="equipe-info-icon"><i class="ri-information-line"></i></div>
+                            <div class="equipe-info-img overflow-hidden">
+                                <img src="{% static 'img/miguel.jpeg' %}" alt="card image" class="img-fluid">
+                            </div>
+                            <div class="equipe-info-data">
+                                <h3 class="equipe-info-name">Miguel Kawe Dos Anjos Assis</h3>
+                                <span class="equipe-info-profession">Aluno de SI na FIAP</span>
+                                <span class="equipe-info-location">Caçapava - SP</span>
+                            </div>
+                            <div class="equipe-info-social">
+                                <a href="https://www.linkedin.com/" target="_blank" class="equipe-info-social-link">
+                                    <span class="equipe-info-social-icon"><i class="ri-linkedin-box-line"></i></span>
+                                </a>
+                                <a href="https://instagram.com/" target="_blank" class="equipe-info-social-link">
+                                    <span class="equipe-info-social-icon"><i class="ri-instagram-fill"></i></span>
+                                </a>
+                                <a href="https://github.com/" target="_blank" class="equipe-info-social-link">
+                                    <span class="equipe-info-social-icon"><i class="ri-github-fill"></i></span>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="col-auto fade-up delay-3">
-                <div class="equipe-card">
-                    <div class="equipe-card-img overflow-hidden">
-                        <img src="{% static 'img/rodrigo.png' %}" alt="card image" class="img-fluid ">
-                    </div>
-
-                    <h3 class="equipe-card-name">Rodrigo</h3>
-                    <span class="equipe-card-profession">Desenvolvedor Frontend</span>
-
-                    <div class="equipe-info">
-                        <div class="equipe-info-icon">
-                            <i class="ri-information-line"></i>
-                        </div>
-
-                        <div class="equipe-info-img overflow-hidden">
+                <div class="swiper-slide">
+                    <div class="equipe-card">
+                        <div class="equipe-card-img overflow-hidden">
                             <img src="{% static 'img/rodrigo.png' %}" alt="card image" class="img-fluid">
                         </div>
-
-                        <div class="equipe-info-data">
-                            <h3 class="equipe-info-name">Rodrigo Froehlich Machado</h3>
-                            <span class="equipe-info-profession">Aluno de SI na FIAP</span>
-                            <span class="equipe-info-location">São Gabriel - RS</span>
-                        </div>
-
-                        <div class="equipe-info-social">
-                            <a href="https://www.linkedin.com/" target="_blank" class="equipe-info-social-link">
-                                <span class="equipe-info-social-icon">
-                                    <i class="ri-linkedin-box-line"></i>
-                                </span>
-                            </a>
-
-                            <a href="https://instagram.com/" target="_blank" class="equipe-info-social-link">
-                                <span class="equipe-info-social-icon">
-                                    <i class="ri-instagram-fill"></i>
-                                </span>
-                            </a>
-
-                            <a href="https://github.com/" target="_blank" class="equipe-info-social-link">
-                                <span class="equipe-info-social-icon">
-                                    <i class="ri-github-fill"></i>
-                                </span>
-                            </a>
+                        <h3 class="equipe-card-name">Rodrigo</h3>
+                        <span class="equipe-card-profession">Desenvolvedor Frontend</span>
+                        <div class="equipe-info">
+                            <div class="equipe-info-icon"><i class="ri-information-line"></i></div>
+                            <div class="equipe-info-img overflow-hidden">
+                                <img src="{% static 'img/rodrigo.png' %}" alt="card image" class="img-fluid">
+                            </div>
+                            <div class="equipe-info-data">
+                                <h3 class="equipe-info-name">Rodrigo Froehlich Machado</h3>
+                                <span class="equipe-info-profession">Aluno de SI na FIAP</span>
+                                <span class="equipe-info-location">São Gabriel - RS</span>
+                            </div>
+                            <div class="equipe-info-social">
+                                <a href="https://www.linkedin.com/" target="_blank" class="equipe-info-social-link">
+                                    <span class="equipe-info-social-icon"><i class="ri-linkedin-box-line"></i></span>
+                                </a>
+                                <a href="https://instagram.com/" target="_blank" class="equipe-info-social-link">
+                                    <span class="equipe-info-social-icon"><i class="ri-instagram-fill"></i></span>
+                                </a>
+                                <a href="https://github.com/" target="_blank" class="equipe-info-social-link">
+                                    <span class="equipe-info-social-icon"><i class="ri-github-fill"></i></span>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
+
             </div>
+
+            <!-- Paginação -->
+            <div class="swiper-pagination"></div>
+
         </div>
 
     </div>
@@ -417,12 +381,14 @@
 
             <div class="row g-3">
                 <div class="col fade-up delay-1">
-                    <a href="{% static 'docs/HackGov_Fase_1.pdf' %}" target="_blank" class="btn btn-primary btn-primary-lg">
+                    <a href="{% static 'docs/HackGov_Fase_1.pdf' %}" target="_blank"
+                        class="btn btn-primary btn-primary-lg">
                         Fase 1 <i class="bi bi-download"></i>
                     </a>
                 </div>
                 <div class="col fade-up delay-2">
-                    <a href="{% static 'docs/HackGov_Fase_2.pdf' %}" target="_blank" class="btn btn-primary btn-primary-lg">
+                    <a href="{% static 'docs/HackGov_Fase_2.pdf' %}" target="_blank"
+                        class="btn btn-primary btn-primary-lg">
                         Fase 2 <i class="bi bi-download"></i>
                     </a>
                 </div>
@@ -477,5 +443,28 @@
 
     </div>
 </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const wrapper = document.querySelector('.hero-img-wrapper');
+    if (!wrapper) return;
+
+    wrapper.addEventListener('mousemove', (e) => {
+        const rect    = wrapper.getBoundingClientRect();
+        const x       = (e.clientX - rect.left) / rect.width  - 0.5;
+        const y       = (e.clientY - rect.top)  / rect.height - 0.5;
+        const rotateY =  x * 25;
+        const rotateX = -y * 25;
+
+        wrapper.style.transform = `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.04,1.04,1.04)`;
+    });
+
+    wrapper.addEventListener('mouseleave', () => {
+        wrapper.style.transition = 'transform 0.6s ease';
+        wrapper.style.transform  = 'perspective(900px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)';
+        setTimeout(() => { wrapper.style.transition = 'transform 0.1s ease'; }, 600);
+    });
+});
+</script>
 
 {% endblock content %}

@@ -46,9 +46,38 @@
     letter-spacing: 0.3px;
 }
 
-.hero-img {
+/* HERO IMG */
+.hero-img-col {
+    position: relative;
+    z-index: 3;
+}
+
+.hero-img-wrapper {
+    position: relative;
     width: 520px;
-    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.1s ease;
+    cursor: pointer;
+}
+
+.hero-img {
+    width: 100%;
+    display: block;
+    animation: float 6s ease-in-out infinite;
+    filter: drop-shadow(0 0 36px rgba(46, 139, 255, 0.4));
+    pointer-events: none;
+}
+
+.hero-img-wrapper:hover .hero-img {
+    animation-play-state: paused;
+    filter: drop-shadow(0 0 52px rgba(46, 139, 255, 0.65));
+    transition: 0.4s ease;
+}
+
+@keyframes float {
+    0%   { transform: translateY(0px); }
+    50%  { transform: translateY(-18px); }
+    100% { transform: translateY(0px); }
 }
 
 /* LINHA DE STATUS */
@@ -168,7 +197,7 @@
 /* EQUIPE */
 .equipe-card {
     position: relative;
-    width: 290px ;
+    width: 290px;
     background: linear-gradient(135deg, var(--azul-escuro) 0%, var(--azul-meio-escuro) 60%, #1a4a8a 100%);
     border-radius: 1rem 1rem 11rem 11rem;
     border: 1px solid var(--branco);
@@ -178,6 +207,9 @@
 }
 
 .equipe-card-img {
+    display: block;
+    max-width: 100%;
+    height: auto;
     width: 124px;
     height: 124px;
     background-color: var(--branco);
@@ -253,6 +285,7 @@
     font-size: 0.88rem;
     line-height: 1.65;
 }
+
 .equipe-info-social {
     display: flex;
     justify-content: center;
@@ -297,4 +330,34 @@
 .equipe-info:hover .equipe-info-data,
 .equipe-info:hover .equipe-info-social {
     transform: translateX(0);
+}
+
+/* EQUIPE SWIPER */
+/* EQUIPE SWIPER */
+.equipe-swiper {
+    padding-bottom: 5rem !important;
+    overflow: hidden;            /* era "visible", por isso vazava */
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.equipe-swiper .swiper-slide {
+    display: flex;
+    justify-content: center;
+}
+
+/* Paginação */
+.equipe .swiper-pagination {
+    bottom: 1.5rem;
+}
+
+.equipe .swiper-pagination-bullet {
+    background-color: var(--azul);
+    opacity: 0.4;
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.equipe .swiper-pagination-bullet-active {
+    opacity: 1;
+    transform: scale(1.3);
 }
