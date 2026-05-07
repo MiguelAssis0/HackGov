@@ -1,0 +1,790 @@
+{% extends 'index_dashboard.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/processos.css' %}" />
+
+<div class="dashboard">
+    <div class="container">
+
+        <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+            <div>
+                <p class="section-label mb-0">Processos</p>
+                <h3 class="mb-0" style="font-size:1.4rem; color:var(--azul-escuro);">Acompanhamento</h3>
+            </div>
+            <button class="btn-primary d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalNovoProcesso">
+                <i class="bi bi-plus-circle"></i> Novo Processo
+            </button>
+        </div>
+
+        <div class="row g-3">
+
+            <div class="col-12 col-lg-8 d-flex flex-column gap-3">
+
+                <div class="processo-header">
+                    <div class="d-flex align-items-flex-start justify-content-between gap-2 flex-wrap">
+                        <h3 class="processo-titulo">Processo nº 001/2026 - Setor de Obras</h3>
+                        <div class="d-flex gap-2">
+                            <a href="#" class="btn-acao" title="Copiar link"><i class="bi bi-link-45deg"></i></a>
+                            <a href="#" class="btn-acao" title="Imprimir"><i class="bi bi-printer"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="processo-meta-grid">
+                        <div>
+                            <div class="meta-label">Setor Responsável</div>
+                            <div class="meta-valor">Secretaria de Obras</div>
+                        </div>
+                        <div>
+                            <div class="meta-label">Tipo</div>
+                            <div class="meta-valor">Pregão Eletrônico</div>
+                        </div>
+                        <div>
+                            <div class="meta-label">Abertura</div>
+                            <div class="meta-valor">01/04/2026</div>
+                        </div>
+                        <div>
+                            <div class="meta-label">Situação</div>
+                            <div class="meta-valor">
+                                <span class="status-badge status-andamento">Em Andamento</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="meta-label">Valor Estimado</div>
+                            <div class="meta-valor">R$ 48.500,00</div>
+                        </div>
+                        <div>
+                            <div class="meta-label">Etapa Atual</div>
+                            <div class="meta-valor">04 - Análise da Requisição</div>
+                        </div>
+                        <div style="grid-column: 1 / -1;">
+                            <div class="meta-label">Objeto</div>
+                            <div class="meta-valor descricao-completa">
+                                Aquisição de materiais de construção civil para manutenção de vias públicas
+                                no perímetro urbano, conforme especificações técnicas do Termo de Referência
+                                e demais documentos anexos ao processo.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="processo-card delay-1">
+                    <div class="stepper-wrap">
+
+                        <div class="stepper-nav">
+
+                            <div class="step-section-label ms-3">Secretaria de Origem</div>
+
+                            <button class="step-btn concluido-btn" data-panel="p01">
+                                <div class="step-indicator concluido"><i class="bi bi-check"></i></div>
+                                <div>
+                                    <div class="step-label">01. Cadastro da Requisição</div>
+                                    <div class="step-sublabel">01/04/2026</div>
+                                </div>
+                            </button>
+                            <div class="step-connector concluido"></div>
+
+                            <button class="step-btn concluido-btn" data-panel="p02">
+                                <div class="step-indicator concluido"><i class="bi bi-check"></i></div>
+                                <div>
+                                    <div class="step-label">02. Homologação Secretário</div>
+                                    <div class="step-sublabel">02/04/2026</div>
+                                </div>
+                            </button>
+                            <div class="step-connector concluido"></div>
+
+                            <div class="step-section-label ms-3">Setor de Compras</div>
+
+                            <button class="step-btn concluido-btn" data-panel="p03">
+                                <div class="step-indicator concluido"><i class="bi bi-check"></i></div>
+                                <div>
+                                    <div class="step-label">03. Recebimento Compras</div>
+                                    <div class="step-sublabel">03/04/2026</div>
+                                </div>
+                            </button>
+                            <div class="step-connector atual"></div>
+
+                            <button class="step-btn active" data-panel="p04">
+                                <div class="step-indicator atual"><i class="bi bi-circle-fill" style="font-size:0.35rem;"></i></div>
+                                <div>
+                                    <div class="step-label">04. Análise da Requisição</div>
+                                    <div class="step-sublabel">Em andamento</div>
+                                </div>
+                            </button>
+                            <div class="step-connector"></div>
+
+                            <button class="step-btn" data-panel="p05">
+                                <div class="step-indicator pendente"><i class="bi bi-circle" style="font-size:0.45rem;"></i></div>
+                                <div>
+                                    <div class="step-label">05. Homologação Compras</div>
+                                    <div class="step-sublabel">Aguardando</div>
+                                </div>
+                            </button>
+                            <div class="step-connector"></div>
+
+                            <button class="step-btn" data-panel="p06">
+                                <div class="step-indicator pendente"><i class="bi bi-circle" style="font-size:0.45rem;"></i></div>
+                                <div>
+                                    <div class="step-label">06. Composição do Processo</div>
+                                    <div class="step-sublabel">Aguardando</div>
+                                </div>
+                            </button>
+                            <div class="step-connector"></div>
+
+                            <button class="step-btn" data-panel="p07">
+                                <div class="step-indicator pendente"><i class="bi bi-circle" style="font-size:0.45rem;"></i></div>
+                                <div>
+                                    <div class="step-label">07. Processo Licitatório</div>
+                                    <div class="step-sublabel">Aguardando</div>
+                                </div>
+                            </button>
+                            <div class="step-connector"></div>
+
+                            <button class="step-btn" data-panel="p08">
+                                <div class="step-indicator pendente"><i class="bi bi-circle" style="font-size:0.45rem;"></i></div>
+                                <div>
+                                    <div class="step-label">08. Setor de Contrato</div>
+                                    <div class="step-sublabel">Aguardando</div>
+                                </div>
+                            </button>
+                            <div class="step-connector"></div>
+
+                            <div class="step-section-label ms-3">Secretaria de Origem</div>
+
+                            <button class="step-btn" data-panel="p09">
+                                <div class="step-indicator pendente"><i class="bi bi-circle" style="font-size:0.45rem;"></i></div>
+                                <div>
+                                    <div class="step-label">09. Início dos Serviços</div>
+                                    <div class="step-sublabel">Aguardando</div>
+                                </div>
+                            </button>
+                            <div class="step-connector"></div>
+
+                            <button class="step-btn" data-panel="p10">
+                                <div class="step-indicator pendente"><i class="bi bi-circle" style="font-size:0.45rem;"></i></div>
+                                <div>
+                                    <div class="step-label">10. Emissão de Empenho</div>
+                                    <div class="step-sublabel">Aguardando</div>
+                                </div>
+                            </button>
+                            <div class="step-connector"></div>
+
+                            <button class="step-btn" data-panel="p11">
+                                <div class="step-indicator pendente"><i class="bi bi-circle" style="font-size:0.45rem;"></i></div>
+                                <div>
+                                    <div class="step-label">11. Declaração p/ Pagamento</div>
+                                    <div class="step-sublabel">Aguardando</div>
+                                </div>
+                            </button>
+                            <div class="step-connector"></div>
+
+                            <div class="step-section-label ms-3">Secretaria da Fazenda</div>
+
+                            <button class="step-btn" data-panel="p12">
+                                <div class="step-indicator pendente"><i class="bi bi-circle" style="font-size:0.45rem;"></i></div>
+                                <div>
+                                    <div class="step-label">12. Execução do Pagamento</div>
+                                    <div class="step-sublabel">Aguardando</div>
+                                </div>
+                            </button>
+                            <div class="step-connector"></div>
+
+                            <div class="step-section-label ms-3">Controle / Prestação</div>
+
+                            <button class="step-btn" data-panel="p13">
+                                <div class="step-indicator pendente"><i class="bi bi-circle" style="font-size:0.45rem;"></i></div>
+                                <div>
+                                    <div class="step-label">13. Enc. Prestação de Contas</div>
+                                    <div class="step-sublabel">Aguardando</div>
+                                </div>
+                            </button>
+                            <div class="step-connector"></div>
+
+                            <button class="step-btn" data-panel="p14">
+                                <div class="step-indicator pendente"><i class="bi bi-circle" style="font-size:0.45rem;"></i></div>
+                                <div>
+                                    <div class="step-label">14. Análise Prestação Contas</div>
+                                    <div class="step-sublabel">Aguardando</div>
+                                </div>
+                            </button>
+                            <div class="step-connector"></div>
+
+                            <button class="step-btn" data-panel="p15">
+                                <div class="step-indicator pendente"><i class="bi bi-circle" style="font-size:0.45rem;"></i></div>
+                                <div>
+                                    <div class="step-label">15. Homologação Prestação</div>
+                                    <div class="step-sublabel">Aguardando</div>
+                                </div>
+                            </button>
+
+                        </div>
+
+                        <div class="stepper-content" id="stepperContent">
+
+                            <div class="step-panel" id="p01">
+                                <div class="secao-titulo"><i class="bi bi-check-circle-fill"></i> 01 - Cadastro da Requisição</div>
+                                <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 mb-3" style="background:#dcfce7;">
+                                    <i class="bi bi-check-circle-fill" style="color:#16a34a;"></i>
+                                    <span style="font-size:0.82rem;font-weight:600;color:#16a34a;">Concluído em 01/04/2026</span>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Responsável</div>
+                                    <div class="detalhe-valor">João da Silva - Secretaria de Obras</div>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Nº da Requisição</div>
+                                    <div class="detalhe-valor">REQ-2026-00147</div>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Dotação Orçamentária</div>
+                                    <div class="detalhe-valor">02.004.1520.44905200.00</div>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Justificativa</div>
+                                    <div class="detalhe-valor">Necessidade de manutenção emergencial de vias urbanas deterioradas pelo período de chuvas.</div>
+                                </div>
+                                <div class="mt-3">
+                                    <div class="secao-titulo"><i class="bi bi-paperclip"></i> Documentos da Requisição</div>
+                                    <div class="docs-grid">
+                                        <a href="#" class="doc-item">
+                                            <div class="doc-icon"><i class="bi bi-file-earmark-pdf-fill"></i></div>
+                                            <span class="doc-nome">Descrição Técnica</span>
+                                            <span class="doc-tamanho">PDF · 180 KB</span>
+                                        </a>
+                                        <a href="#" class="doc-item">
+                                            <div class="doc-icon"><i class="bi bi-file-earmark-word-fill"></i></div>
+                                            <span class="doc-nome">Justificativa</span>
+                                            <span class="doc-tamanho">DOCX · 45 KB</span>
+                                        </a>
+                                        <a href="#" class="doc-item">
+                                            <div class="doc-icon"><i class="bi bi-file-earmark-pdf-fill"></i></div>
+                                            <span class="doc-nome">ETP</span>
+                                            <span class="doc-tamanho">PDF · 512 KB</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="step-panel" id="p02">
+                                <div class="secao-titulo"><i class="bi bi-check-circle-fill"></i> 02 - Homologação pelo Secretário</div>
+                                <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 mb-3" style="background:#dcfce7;">
+                                    <i class="bi bi-check-circle-fill" style="color:#16a34a;"></i>
+                                    <span style="font-size:0.82rem;font-weight:600;color:#16a34a;">Aprovado em 02/04/2026</span>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Aprovado por</div>
+                                    <div class="detalhe-valor">Carlos Mendes - Secretário de Obras</div>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Data de aprovação</div>
+                                    <div class="detalhe-valor">02/04/2026 às 10:30h</div>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Observação</div>
+                                    <div class="detalhe-valor">Requisição aprovada pelo secretário. Processo encaminhado ao setor de compras para análise.</div>
+                                </div>
+                            </div>
+
+                            <div class="step-panel" id="p03">
+                                <div class="secao-titulo"><i class="bi bi-check-circle-fill"></i> 03 - Recebimento pela Área de Compras</div>
+                                <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 mb-3" style="background:#dcfce7;">
+                                    <i class="bi bi-check-circle-fill" style="color:#16a34a;"></i>
+                                    <span style="font-size:0.82rem;font-weight:600;color:#16a34a;">Recebido em 03/04/2026</span>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Recebido por</div>
+                                    <div class="detalhe-valor">Maria Souza - Setor de Compras</div>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Data de recebimento</div>
+                                    <div class="detalhe-valor">03/04/2026 às 08:15h</div>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">E-mail de confirmação</div>
+                                    <div class="detalhe-valor">Enviado automaticamente ao setor de origem em 03/04/2026 às 08:16h</div>
+                                </div>
+                            </div>
+
+                            <div class="step-panel active" id="p04">
+                                <div class="secao-titulo"><i class="bi bi-clock-fill"></i> 04 - Análise da Requisição</div>
+                                <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 mb-3" style="background:#e8f2ff;">
+                                    <i class="bi bi-hourglass-split" style="color:var(--azul);"></i>
+                                    <span style="font-size:0.82rem;font-weight:600;color:var(--azul);">Em análise - aguardando resultado</span>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Analista responsável</div>
+                                    <div class="detalhe-valor">Maria Souza - Setor de Compras</div>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Início da análise</div>
+                                    <div class="detalhe-valor">05/04/2026 às 09:00h</div>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Prazo para conclusão</div>
+                                    <div class="detalhe-valor">15/05/2026</div>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Possíveis resultados</div>
+                                    <div class="detalhe-valor">
+                                        <div class="d-flex flex-wrap gap-1 mt-1">
+                                            <span class="status-badge status-aberto">Aprovada</span>
+                                            <span class="status-badge status-andamento">Necessita Correção</span>
+                                            <span class="status-badge status-encerrado">Reprovada</span>
+                                            <span class="status-badge status-suspenso">Cancelada</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="step-panel" id="p05">
+                                <div class="secao-titulo"><i class="bi bi-patch-check"></i> 05 - Homologação pela Área de Compras</div>
+                                <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 mb-3" style="background:var(--cinza-claro);">
+                                    <i class="bi bi-hourglass" style="color:var(--text-muted);"></i>
+                                    <span style="font-size:0.82rem;font-weight:500;color:var(--text-muted);">Aguardando conclusão da etapa anterior</span>
+                                </div>
+                                <p style="font-size:0.85rem;color:var(--text-muted);">Após aprovação na análise, o responsável da área de compras homologa o processo e dispara e-mail de resultado ao setor de origem.</p>
+                            </div>
+
+                            <div class="step-panel" id="p06">
+                                <div class="secao-titulo"><i class="bi bi-file-earmark-ruled"></i> 06 - Composição do Processo</div>
+                                <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 mb-3" style="background:var(--cinza-claro);">
+                                    <i class="bi bi-hourglass" style="color:var(--text-muted);"></i>
+                                    <span style="font-size:0.82rem;font-weight:500;color:var(--text-muted);">Aguardando etapas anteriores</span>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Base legal</div>
+                                    <div class="detalhe-valor">Lei nº 14.133/2021</div>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Modalidades previstas</div>
+                                    <div class="detalhe-valor">Chamada Pública, Concorrência, Pregão Eletrônico, Pregão Presencial, Tomada de Preços, Extrato de Fomento, Convite, Outros</div>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Modalidade provável</div>
+                                    <div class="detalhe-valor">Pregão Eletrônico (valor estimado: R$ 48.500,00)</div>
+                                </div>
+                            </div>
+
+                            <div class="step-panel" id="p07">
+                                <div class="secao-titulo"><i class="bi bi-gavel"></i> 07 - Processo Licitatório</div>
+                                <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 mb-3" style="background:var(--cinza-claro);">
+                                    <i class="bi bi-hourglass" style="color:var(--text-muted);"></i>
+                                    <span style="font-size:0.82rem;font-weight:500;color:var(--text-muted);">Aguardando etapas anteriores</span>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Fases</div>
+                                    <div class="detalhe-valor">Publicação do Edital → Realização da Licitação → Divulgação do Resultado</div>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Status possíveis</div>
+                                    <div class="detalhe-valor">
+                                        <div class="d-flex flex-wrap gap-1 mt-1">
+                                            <span class="status-badge status-andamento">Andamento</span>
+                                            <span class="status-badge status-aberto">Finalizado</span>
+                                            <span class="status-badge status-encerrado">Impugnado</span>
+                                            <span class="status-badge status-suspenso">Postergado</span>
+                                            <span class="status-badge status-encerrado">Encerrado</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="step-panel" id="p08">
+                                <div class="secao-titulo"><i class="bi bi-file-earmark-text"></i> 08 - Setor de Contrato</div>
+                                <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 mb-3" style="background:var(--cinza-claro);">
+                                    <i class="bi bi-hourglass" style="color:var(--text-muted);"></i>
+                                    <span style="font-size:0.82rem;font-weight:500;color:var(--text-muted);">Aguardando etapas anteriores</span>
+                                </div>
+                                <p style="font-size:0.85rem;color:var(--text-muted);">Após definição da empresa vencedora, o setor de contratos realiza o contato, encaminhamento e assinatura do contrato administrativo entre as partes. Ao concluir, o setor de origem é notificado por e-mail.</p>
+                            </div>
+
+                            <div class="step-panel" id="p09">
+                                <div class="secao-titulo"><i class="bi bi-play-circle"></i> 09 - Início dos Serviços</div>
+                                <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 mb-3" style="background:var(--cinza-claro);">
+                                    <i class="bi bi-hourglass" style="color:var(--text-muted);"></i>
+                                    <span style="font-size:0.82rem;font-weight:500;color:var(--text-muted);">Aguardando etapas anteriores</span>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Para aquisição</div>
+                                    <div class="detalhe-valor">Emissão de Ordem de Fornecimento</div>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Para serviço</div>
+                                    <div class="detalhe-valor">Emissão de Ordem de Serviço</div>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Encaminhamento</div>
+                                    <div class="detalhe-valor">Pelo servidor competente do setor de origem</div>
+                                </div>
+                            </div>
+
+                            <div class="step-panel" id="p10">
+                                <div class="secao-titulo"><i class="bi bi-receipt"></i> 10 - Emissão de Empenho</div>
+                                <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 mb-3" style="background:var(--cinza-claro);">
+                                    <i class="bi bi-hourglass" style="color:var(--text-muted);"></i>
+                                    <span style="font-size:0.82rem;font-weight:500;color:var(--text-muted);">Aguardando etapas anteriores</span>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Bens tombados</div>
+                                    <div class="detalhe-valor">Empenho emitido pelo Patrimônio</div>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Expediente / consumo</div>
+                                    <div class="detalhe-valor">Empenho emitido pela secretaria de origem</div>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Serviços</div>
+                                    <div class="detalhe-valor">Empenho para pagamento emitido pela secretaria de origem</div>
+                                </div>
+                            </div>
+
+                            <div class="step-panel" id="p11">
+                                <div class="secao-titulo"><i class="bi bi-file-earmark-check"></i> 11 - Emissão da Declaração para Pagamento</div>
+                                <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 mb-3" style="background:var(--cinza-claro);">
+                                    <i class="bi bi-hourglass" style="color:var(--text-muted);"></i>
+                                    <span style="font-size:0.82rem;font-weight:500;color:var(--text-muted);">Aguardando etapas anteriores</span>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Para itens adquiridos</div>
+                                    <div class="detalhe-valor">Declaração de recebimento dos itens</div>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Para serviços</div>
+                                    <div class="detalhe-valor">Medição dos serviços prestados</div>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Aprovação</div>
+                                    <div class="detalhe-valor">Pelo Secretário da Pasta</div>
+                                </div>
+                            </div>
+
+                            <div class="step-panel" id="p12">
+                                <div class="secao-titulo"><i class="bi bi-bank"></i> 12 - Execução do Pagamento</div>
+                                <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 mb-3" style="background:var(--cinza-claro);">
+                                    <i class="bi bi-hourglass" style="color:var(--text-muted);"></i>
+                                    <span style="font-size:0.82rem;font-weight:500;color:var(--text-muted);">Aguardando etapas anteriores</span>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Executor</div>
+                                    <div class="detalhe-valor">Secretaria da Fazenda</div>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Modalidades</div>
+                                    <div class="detalhe-valor">Pagamento direto / Medição para serviços</div>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Aprovação</div>
+                                    <div class="detalhe-valor">Pelo Secretário da Fazenda</div>
+                                </div>
+                            </div>
+
+                            <div class="step-panel" id="p13">
+                                <div class="secao-titulo"><i class="bi bi-send"></i> 13 - Encaminhamento da Prestação de Contas</div>
+                                <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 mb-3" style="background:var(--cinza-claro);">
+                                    <i class="bi bi-hourglass" style="color:var(--text-muted);"></i>
+                                    <span style="font-size:0.82rem;font-weight:500;color:var(--text-muted);">Aguardando etapas anteriores</span>
+                                </div>
+                                <p style="font-size:0.85rem;color:var(--text-muted);">Documentação completa encaminhada à área de controle para análise da prestação de contas.</p>
+                            </div>
+
+                            <div class="step-panel" id="p14">
+                                <div class="secao-titulo"><i class="bi bi-search"></i> 14 - Análise da Prestação de Contas</div>
+                                <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 mb-3" style="background:var(--cinza-claro);">
+                                    <i class="bi bi-hourglass" style="color:var(--text-muted);"></i>
+                                    <span style="font-size:0.82rem;font-weight:500;color:var(--text-muted);">Aguardando etapas anteriores</span>
+                                </div>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Status possíveis</div>
+                                    <div class="detalhe-valor">
+                                        <div class="d-flex flex-wrap gap-1 mt-1">
+                                            <span class="status-badge status-andamento">Em Análise</span>
+                                            <span class="status-badge status-suspenso">Pendente</span>
+                                            <span class="status-badge status-suspenso">Em Diligência</span>
+                                            <span class="status-badge status-encerrado">Reprovada</span>
+                                            <span class="status-badge status-aberto">Aprovada</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="step-panel" id="p15">
+                                <div class="secao-titulo"><i class="bi bi-trophy"></i> 15 - Homologação da Prestação de Contas</div>
+                                <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 mb-3" style="background:var(--cinza-claro);">
+                                    <i class="bi bi-hourglass" style="color:var(--text-muted);"></i>
+                                    <span style="font-size:0.82rem;font-weight:500;color:var(--text-muted);">Aguardando etapas anteriores</span>
+                                </div>
+                                <p style="font-size:0.85rem;color:var(--text-muted);">Etapa final do processo. Quando encerrada ou aprovada, o responsável da área homologa e dispara e-mail ao setor de origem confirmando a conclusão.</p>
+                                <div class="detalhe-row">
+                                    <div class="detalhe-chave">Aprovação</div>
+                                    <div class="detalhe-valor">Pelo responsável da Área de Controle</div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-12 col-lg-4 painel-lista delay-2">
+
+                <div class="filtros-wrap">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <h4 class="mb-0" style="font-size:0.9rem;">
+                            <i class="bi bi-grid-fill primary me-1"></i> Processos
+                        </h4>
+                        <button class="btn-acao" title="Filtros avançados"><i class="bi bi-funnel"></i></button>
+                    </div>
+                    <div class="lista-busca-wrap">
+                        <i class="bi bi-search"></i>
+                        <input type="text" class="lista-busca" placeholder="Buscar processo..." id="buscaLista" />
+                    </div>
+                </div>
+
+                <div class="lista-processos">
+                    <div class="processo-item active" onclick="selecionarProcesso(this)">
+                        <div class="processo-item-titulo">Processo 001/2026 - Obras</div>
+                        <div class="d-flex align-items-center justify-content-between gap-1">
+                            <span class="processo-item-orgao">Secretaria de Obras</span>
+                            <span class="processo-item-status andamento">Andamento</span>
+                        </div>
+                    </div>
+                    <div class="processo-item" onclick="selecionarProcesso(this)">
+                        <div class="processo-item-titulo">Processo 002/2026 - Educação</div>
+                        <div class="d-flex align-items-center justify-content-between gap-1">
+                            <span class="processo-item-orgao">Secretaria de Educação</span>
+                            <span class="processo-item-status aberto">Aberto</span>
+                        </div>
+                    </div>
+                    <div class="processo-item" onclick="selecionarProcesso(this)">
+                        <div class="processo-item-titulo">Processo 003/2026 - Saúde</div>
+                        <div class="d-flex align-items-center justify-content-between gap-1">
+                            <span class="processo-item-orgao">Secretaria de Saúde</span>
+                            <span class="processo-item-status andamento">Andamento</span>
+                        </div>
+                    </div>
+                    <div class="processo-item" onclick="selecionarProcesso(this)">
+                        <div class="processo-item-titulo">Processo 004/2026 - Fazenda</div>
+                        <div class="d-flex align-items-center justify-content-between gap-1">
+                            <span class="processo-item-orgao">Secretaria da Fazenda</span>
+                            <span class="processo-item-status encerrado">Encerrado</span>
+                        </div>
+                    </div>
+                    <div class="processo-item" onclick="selecionarProcesso(this)">
+                        <div class="processo-item-titulo">Processo 005/2026 - Administração</div>
+                        <div class="d-flex align-items-center justify-content-between gap-1">
+                            <span class="processo-item-orgao">Administração Geral</span>
+                            <span class="processo-item-status suspenso">Suspenso</span>
+                        </div>
+                    </div>
+                    <div class="processo-item" onclick="selecionarProcesso(this)">
+                        <div class="processo-item-titulo">Processo 006/2026 - Assistência</div>
+                        <div class="d-flex align-items-center justify-content-between gap-1">
+                            <span class="processo-item-orgao">Assistência Social</span>
+                            <span class="processo-item-status aberto">Aberto</span>
+                        </div>
+                    </div>
+                    <div class="processo-item" onclick="selecionarProcesso(this)">
+                        <div class="processo-item-titulo">Processo 007/2026 - Meio Ambiente</div>
+                        <div class="d-flex align-items-center justify-content-between gap-1">
+                            <span class="processo-item-orgao">Sec. de Meio Ambiente</span>
+                            <span class="processo-item-status encerrado">Encerrado</span>
+                        </div>
+                    </div>
+                    <div class="processo-item" onclick="selecionarProcesso(this)">
+                        <div class="processo-item-titulo">Processo 008/2026 - Urbanismo</div>
+                        <div class="d-flex align-items-center justify-content-between gap-1">
+                            <span class="processo-item-orgao">Secretaria de Urbanismo</span>
+                            <span class="processo-item-status andamento">Andamento</span>
+                        </div>
+                    </div>
+                    <div class="processo-item" onclick="selecionarProcesso(this)">
+                        <div class="processo-item-titulo">Processo 009/2026 - Cultura</div>
+                        <div class="d-flex align-items-center justify-content-between gap-1">
+                            <span class="processo-item-orgao">Secretaria de Cultura</span>
+                            <span class="processo-item-status aberto">Aberto</span>
+                        </div>
+                    </div>
+                    <div class="processo-item" onclick="selecionarProcesso(this)">
+                        <div class="processo-item-titulo">Processo 010/2026 - Transporte</div>
+                        <div class="d-flex align-items-center justify-content-between gap-1">
+                            <span class="processo-item-orgao">Sec. de Transporte</span>
+                            <span class="processo-item-status suspenso">Suspenso</span>
+                        </div>
+                    </div>
+
+                    <div class="lista-paginacao">
+                        <span class="pag-info">1–10 de 248</span>
+                        <div class="pag-btns">
+                            <button class="pag-btn" disabled><i class="bi bi-chevron-double-left"></i></button>
+                            <button class="pag-btn" disabled><i class="bi bi-chevron-left"></i></button>
+                            <button class="pag-btn"><i class="bi bi-chevron-right"></i></button>
+                            <button class="pag-btn"><i class="bi bi-chevron-double-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" id="modalNovoProcesso" tabindex="-1" aria-labelledby="modalNovoProcessoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content" style="border-radius:16px;border:var(--border1-5);">
+
+            <div class="modal-header" style="border-bottom:var(--border1);padding:1.25rem 1.5rem;">
+                <div>
+                    <h5 class="modal-title mb-0" id="modalNovoProcessoLabel" style="font-weight:700;color:var(--azul-escuro);">
+                        <i class="bi bi-plus-circle primary me-2"></i>Nova Requisição de Processo
+                    </h5>
+                    <small style="color:var(--text-muted);font-size:0.78rem;">Etapa 01 - Cadastro da Requisição</small>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+
+            <div class="modal-body" style="padding:1.5rem;">
+                <form id="formNovoProcesso" method="post" action="#">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label" style="font-size:0.82rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;">Objeto / Título da Requisição</label>
+                        <input type="text" class="form-control" name="titulo" placeholder="Ex: Aquisição de materiais de construção civil" required
+                            style="border:var(--border1-5);border-radius:8px;font-size:0.9rem;">
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label" style="font-size:0.82rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;">Secretaria / Setor de Origem</label>
+                            <select class="form-select" name="setor" required style="border:var(--border1-5);border-radius:8px;font-size:0.9rem;">
+                                <option value="">Selecionar...</option>
+                                <option>Administração Geral</option>
+                                <option>Secretaria de Obras</option>
+                                <option>Secretaria de Educação</option>
+                                <option>Secretaria de Saúde</option>
+                                <option>Secretaria da Fazenda</option>
+                                <option>Assistência Social</option>
+                                <option>Secretaria de Urbanismo</option>
+                                <option>Secretaria de Meio Ambiente</option>
+                                <option>Secretaria de Cultura</option>
+                                <option>Secretaria de Transporte</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label" style="font-size:0.82rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;">Tipo de Aquisição</label>
+                            <select class="form-select" name="tipo" required style="border:var(--border1-5);border-radius:8px;font-size:0.9rem;">
+                                <option value="">Selecionar...</option>
+                                <option>Bem Móvel</option>
+                                <option>Bem Imóvel</option>
+                                <option>Serviço (PJ)</option>
+                                <option>Emenda Impositiva</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label" style="font-size:0.82rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;">Servidor Requisitante</label>
+                            <input type="text" class="form-control" name="requisitante" placeholder="Nome do servidor" required
+                                style="border:var(--border1-5);border-radius:8px;font-size:0.9rem;">
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label" style="font-size:0.82rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;">Valor Estimado (R$)</label>
+                            <input type="text" class="form-control" name="valor" placeholder="Ex: 48.500,00"
+                                style="border:var(--border1-5);border-radius:8px;font-size:0.9rem;">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" style="font-size:0.82rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;">Dotação Orçamentária</label>
+                        <input type="text" class="form-control" name="dotacao" placeholder="Ex: 02.004.1520.44905200.00"
+                            style="border:var(--border1-5);border-radius:8px;font-size:0.9rem;">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" style="font-size:0.82rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;">Justificativa da Necessidade</label>
+                        <textarea class="form-control" name="justificativa" rows="3" placeholder="Descreva a necessidade e motivação da aquisição..." required
+                            style="border:var(--border1-5);border-radius:8px;font-size:0.9rem;resize:none;"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" style="font-size:0.82rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;">Descrição Técnica do Item / Serviço</label>
+                        <textarea class="form-control" name="descricao_tecnica" rows="3" placeholder="Especificações técnicas detalhadas..."
+                            style="border:var(--border1-5);border-radius:8px;font-size:0.9rem;resize:none;"></textarea>
+                    </div>
+
+                    <div class="mb-1">
+                        <label class="form-label" style="font-size:0.82rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;">Documentos Anexos</label>
+                        <small class="d-block mb-2" style="font-size:0.75rem;color:var(--text-muted);">Justificativa, Descrição Técnica, ETP (Estudo Técnico Preliminar)</small>
+                        <div class="d-flex align-items-center justify-content-center gap-2 p-4 rounded-3" style="border:2px dashed var(--border-color);cursor:pointer;background:var(--cinza-claro);" onclick="document.getElementById('inputArquivos').click()">
+                            <i class="bi bi-cloud-arrow-up" style="font-size:1.4rem;color:var(--text-muted);"></i>
+                            <div>
+                                <div style="font-size:0.85rem;font-weight:600;color:var(--azul-escuro);">Clique para anexar arquivos</div>
+                                <div style="font-size:0.75rem;color:var(--text-muted);">PDF, DOCX, XLSX - máx. 10 MB cada</div>
+                            </div>
+                        </div>
+                        <input type="file" id="inputArquivos" name="documentos" multiple accept=".pdf,.doc,.docx,.xls,.xlsx" class="d-none">
+                        <div id="listaArquivos" class="mt-2 d-flex flex-wrap gap-2"></div>
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="modal-footer" style="border-top:var(--border1);padding:1rem 1.5rem;gap:0.5rem;">
+                <button type="button" class="btn-outline-primary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" form="formNovoProcesso" class="btn-primary d-flex align-items-center gap-2">
+                    <i class="bi bi-send"></i> Enviar Requisição
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.step-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.step-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            const panel = document.getElementById(btn.dataset.panel);
+            panel.classList.add('active');
+            document.getElementById('stepperContent').scrollTop = 0;
+        });
+    });
+
+    document.getElementById('buscaLista').addEventListener('input', function () {
+        const termo = this.value.toLowerCase();
+        document.querySelectorAll('.processo-item').forEach(item => {
+            const txt = item.querySelector('.processo-item-titulo').textContent.toLowerCase()
+                + item.querySelector('.processo-item-orgao').textContent.toLowerCase();
+            item.style.display = txt.includes(termo) ? '' : 'none';
+        });
+    });
+
+    function selecionarProcesso(el) {
+        document.querySelectorAll('.processo-item').forEach(i => i.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    document.getElementById('inputArquivos').addEventListener('change', function () {
+        const lista = document.getElementById('listaArquivos');
+        lista.innerHTML = '';
+        [...this.files].forEach(file => {
+            const tag = document.createElement('div');
+            tag.className = 'd-flex align-items-center gap-1 px-2 py-1 rounded-3';
+            tag.style.cssText = 'background:var(--cinza-claro);border:var(--border1-5);font-size:0.75rem;color:var(--azul-escuro);';
+            tag.innerHTML = `<i class="bi bi-file-earmark" style="color:var(--azul);"></i>${file.name}`;
+            lista.appendChild(tag);
+        });
+    });
+
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
+
+{% endblock content %}

@@ -25,7 +25,7 @@
         <!-- SIDEBAR -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-brand">
-                <a href="{% url 'home' %}" class="brand-txt text-white">ERP <span>Municipal</span></a>
+                <a href="{% url 'dashboard' %}" class="brand-txt text-white">ERP <span>Municipal</span></a>
             </div>
 
             <div class="sidebar-setor">
@@ -48,38 +48,38 @@
 
             <nav class="sidebar-nav">
                 <div class="nav-section-label">Principal</div>
-                <a class="nav-item active" href="#">
+                <a class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
                     <i class="bi bi-house-fill"></i> Início
                 </a>
-                <a class="nav-item" href="#">
+                <a class="nav-item {% if request.resolver_match.url_name == 'ferramentas' %}active{% endif %}" href="#">
                     <i class="bi bi-wrench-adjustable"></i> Ferramentas
                 </a>
-                <a class="nav-item" href="#">
+                <a class="nav-item {% if request.resolver_match.url_name == 'processos' %}active{% endif %}" href="{% url 'processos' %}">
                     <i class="bi bi-diagram-3"></i> Processos
-                    <span class="nav-badge">8</span>
+                    <!-- <span class="nav-badge">8</span> -->
                 </a>
-                <a class="nav-item" href="#">
+                <a class="nav-item {% if request.resolver_match.url_name == 'tarefas' %}active{% endif %}" href="#">
                     <i class="bi bi-check2-square"></i> Tarefas
-                    <span class="nav-badge">5</span>
+                    <!-- <span class="nav-badge">5</span> -->
                 </a>
 
                 <div class="nav-section-label" style="margin-top: 0.5rem">
                     Administração
                 </div>
-                <a class="nav-item" href="#"> <i class="bi bi-people"></i> Gestão </a>
-                <a class="nav-item" href="#">
+                <a class="nav-item {% if request.resolver_match.url_name == 'gestao' %}active{% endif %}" href="#"> <i class="bi bi-people"></i> Gestão </a>
+                <a class="nav-item {% if request.resolver_match.url_name == 'notificacoes' %}active{% endif %}" href="#">
                     <i class="bi bi-bell"></i> Notificações
-                    <span class="nav-badge">13</span>
+                    <!-- <span class="nav-badge">13</span> -->
 
                 </a>
-                <a class="nav-item" href="#">
+                <a class="nav-item {% if request.resolver_match.url_name == 'configuracoes' %}active{% endif %}" href="#">
                     <i class="bi bi-gear"></i> Configurações
                 </a>
             </nav>
 
             <div class="sidebar-footer">
                 <div class="user-row">
-                    <div class="user-avatar">JS</div>
+                    <div class="user-avatar">Vc</div>
                     <div class="user-info">
                         <div class="user-name">Você</div>
                         <div class="user-role">Administrador</div>
@@ -123,8 +123,8 @@
         <div class="chat-widget is-collapsed" id="chatWidget">
             <div class="chat-widget-header">
                 <div class="chat-widget-title-wrap">
-                    <h5 class="chat-widget-title"><i class="bi bi-chat-dots-fill"></i> Mensagens</h5>
-                    <small class="chat-widget-subtitle">Chats e Contatos</small>
+                    <h5 class="chat-widget-title"><i class="bi bi-chat-dots-fill me-1"></i> Mensagens</h5>
+                    <!-- <small class="chat-widget-subtitle">Chats e Contatos</small> -->
                 </div>
 
                 <div class="chat-widget-actions">

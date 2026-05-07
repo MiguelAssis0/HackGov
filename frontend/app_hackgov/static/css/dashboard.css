@@ -1,21 +1,3 @@
-/* DASHBOARD */
-.dashboard {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    margin-left: var(--sidebar-w);
-    background: var(--cinza-claro);
-    padding-top: 0.9rem;
-    padding-bottom: 0.9rem;
-}
-
-@media (max-width: 768px) {
-    .dashboard {
-        margin-left: 0;
-    }
-}
-
 /* HERO BANNER */
 .dash-hero {
     background: linear-gradient(135deg, var(--azul-escuro) 0%, #1a4a8a 100%);
@@ -146,9 +128,9 @@
 }
 
 /* COLUNA DIREITA */
-.coluna-direita {
+/* .coluna-direita {
     margin-top: 0.9rem;
-}
+} */
 
 /* CALENDÁRIO */
 .cal-nav {
