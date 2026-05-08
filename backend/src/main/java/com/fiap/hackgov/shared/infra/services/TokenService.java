@@ -23,97 +23,109 @@ public class TokenService {
     @Value("${api.security.token.refresh-secret}")
     private String REFRESH_SECRET_KEY;
 
-    private static final String ISSUER              = "HackGov";
-    private static final int    ACCESS_TOKEN_MINUTES = 15;
-    private static final int    REFRESH_TOKEN_DAYS   = 7;
+    private static final String ISSUER = "HackGov";
+
+    private static final int ACCESS_TOKEN_MINUTES = 60;
+
+    private static final int REFRESH_TOKEN_DAYS = 7;
 
     public String generateToken(User user) {
-        Algorithm algorithm = Algorithm.HMAC256(SECRET_KEY);
+
         LocalDateTime expiration = LocalDateTime.now().plusMinutes(ACCESS_TOKEN_MINUTES);
 
-        return JWT.create()
-                .withIssuer(ISSUER)
-                .withSubject(user.getEmail())
-                .withClaim("role", "ROLE_" + user.getRole().name())
-                .withClaim("type", "access")
-                .withExpiresAt(expiration.toInstant(ZoneOffset.of("-03:00")))
-                .sign(algorithm);
+        return JWT.create().withIssuer(ISSUER).withSubject(user.getEmail()).withClaim("role", "ROLE_" + user.getRole().name()).withClaim("type", "access").withExpiresAt(expiration.toInstant(ZoneOffset.of("-03:00"))).sign(accessAlgorithm());
+    }
+
+    public String generateRefreshToken(User user) {
+
+        LocalDateTime expiration = LocalDateTime.now().plusDays(REFRESH_TOKEN_DAYS);
+
+        return JWT.create().withIssuer(ISSUER).withSubject(user.getEmail()).withClaim("type", "refresh").withExpiresAt(expiration.toInstant(ZoneOffset.of("-03:00"))).sign(refreshAlgorithm());
     }
 
     public String getSubject(String token) {
-        try {
-            Algorithm algorithm = Algorithm.HMAC256(SECRET_KEY);
-            DecodedJWT decoded = JWT.require(algorithm)
-                    .withIssuer(ISSUER)
-                    .withClaim("type", "access")
-                    .build()
-                    .verify(token);
-            return decoded.getSubject();
-        } catch (JWTVerificationException e) {
-            throw new TokenInvalidException("Token invalid or expired");
-        }
-    }
 
-    public Date getExpiration(String token) {
-        try {
-            Algorithm algorithm = Algorithm.HMAC256(SECRET_KEY);
-            return JWT.require(algorithm)
-                    .withIssuer(ISSUER)
-                    .build()
-                    .verify(token)
-                    .getExpiresAt();
-        } catch (JWTVerificationException e) {
-            throw new TokenInvalidException("Token invalid or expired");
-        }
-    }
-
-    public LocalDateTime getExpirationAsLocalDateTime(String token) {
-        return getExpiration(token)
-                .toInstant()
-                .atOffset(ZoneOffset.of("-03:00"))
-                .toLocalDateTime();
-    }
-
-
-    public String generateRefreshToken(User user) {
-        Algorithm algorithm = Algorithm.HMAC256(REFRESH_SECRET_KEY);
-        LocalDateTime expiration = LocalDateTime.now().plusDays(REFRESH_TOKEN_DAYS);
-
-        return JWT.create()
-                .withIssuer(ISSUER)
-                .withSubject(user.getEmail())
-                .withClaim("type", "refresh")
-                .withExpiresAt(expiration.toInstant(ZoneOffset.of("-03:00")))
-                .sign(algorithm);
+        return verifyAccessToken(token).getSubject();
     }
 
     public String getSubjectFromRefreshToken(String refreshToken) {
-        try {
-            Algorithm algorithm = Algorithm.HMAC256(REFRESH_SECRET_KEY);
-            DecodedJWT decoded = JWT.require(algorithm)
-                    .withIssuer(ISSUER)
-                    .withClaim("type", "refresh")
-                    .build()
-                    .verify(refreshToken);
-            return decoded.getSubject();
-        } catch (JWTVerificationException e) {
-            throw new TokenInvalidException("Refresh token invalid or expired");
-        }
+
+        return verifyRefreshToken(refreshToken).getSubject();
+    }
+
+    public Date getExpiration(String token) {
+
+        return verifyAccessToken(token).getExpiresAt();
+    }
+
+    public LocalDateTime getExpirationAsLocalDateTime(String token) {
+
+        return getExpiration(token).toInstant().atOffset(ZoneOffset.of("-03:00")).toLocalDateTime();
     }
 
     public String extractToken(HttpServletRequest request) {
-        String authorization = request.getHeader("Authorization");
-        if (authorization != null && authorization.startsWith("Bearer ")) {
-            return authorization.substring(7);
+
+        return extractToken(request.getHeader("Authorization"));
+    }
+
+    public String extractToken(String authorization) {
+
+        if (authorization == null || authorization.isBlank()) {
+
+            return null;
         }
-        return null;
+
+        if (!authorization.startsWith("Bearer ")) {
+
+            return null;
+        }
+
+        return authorization.replace("Bearer ", "").trim();
     }
 
     public void validateToken(HttpServletRequest request) {
+
         String token = extractToken(request);
+
         if (token == null) {
+
             throw new TokenInvalidException("Authorization header missing or malformed");
         }
+
         getSubject(token);
+    }
+
+    private Algorithm accessAlgorithm() {
+
+        return Algorithm.HMAC256(SECRET_KEY);
+    }
+
+    private Algorithm refreshAlgorithm() {
+
+        return Algorithm.HMAC256(REFRESH_SECRET_KEY);
+    }
+
+    private DecodedJWT verifyAccessToken(String token) {
+
+        try {
+
+            return JWT.require(accessAlgorithm()).withIssuer(ISSUER).withClaim("type", "access").build().verify(token);
+
+        } catch (JWTVerificationException e) {
+
+            throw new TokenInvalidException("Token invalid or expired");
+        }
+    }
+
+    private DecodedJWT verifyRefreshToken(String token) {
+
+        try {
+
+            return JWT.require(refreshAlgorithm()).withIssuer(ISSUER).withClaim("type", "refresh").build().verify(token);
+
+        } catch (JWTVerificationException e) {
+
+            throw new TokenInvalidException("Refresh token invalid or expired");
+        }
     }
 }

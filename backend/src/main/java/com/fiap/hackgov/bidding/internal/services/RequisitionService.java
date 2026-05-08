@@ -1,6 +1,5 @@
 package com.fiap.hackgov.bidding.internal.services;
 
-import com.fiap.hackgov.bidding.internal.DTOs.Approval.CreateApprovalDTO;
 import com.fiap.hackgov.bidding.internal.DTOs.Requisiton.CreateRequisitionDTO;
 import com.fiap.hackgov.bidding.internal.entities.Approval;
 import com.fiap.hackgov.bidding.internal.entities.ETP;
@@ -10,13 +9,11 @@ import com.fiap.hackgov.bidding.internal.entities.enums.ApprovalSector;
 import com.fiap.hackgov.bidding.internal.entities.enums.ApprovalStatus;
 import com.fiap.hackgov.bidding.internal.entities.enums.ProcessStage;
 import com.fiap.hackgov.bidding.internal.entities.enums.RequestStatus;
-import com.fiap.hackgov.bidding.internal.mappers.ApprovalMapper;
 import com.fiap.hackgov.bidding.internal.mappers.RequisitionMapper;
 import com.fiap.hackgov.bidding.internal.repositories.ApprovalRepository;
 import com.fiap.hackgov.bidding.internal.repositories.ETPRepository;
 import com.fiap.hackgov.bidding.internal.repositories.ProcessStateRepository;
 import com.fiap.hackgov.bidding.internal.repositories.RequisitionRepository;
-import com.fiap.hackgov.shared.infra.exceptions.ResourceAlreadyExistsException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -37,12 +34,6 @@ public class RequisitionService {
 
     @Autowired
     private RequisitionRepository requisitionRepository;
-
-    @Autowired
-    private ApprovalMapper approvalMapper;
-
-    @Autowired
-    private ApprovalService approvalService;
 
     @Autowired
     private ApprovalRepository approvalRepository;
@@ -117,29 +108,6 @@ public class RequisitionService {
         requisition.setProcessState(processState);
 
         return requisitionRepository.save(requisition);
-    }
-
-    // provavelmente não precisaremos no futuro
-    public Approval addApproval(UUID id, CreateApprovalDTO createApprovalDTO){
-
-        Requisition requisition = findById(id);
-
-        boolean alreadyApproved = requisition.getApprovals()
-                .stream()
-                .anyMatch(a -> a.getApprovalSector() == createApprovalDTO.stage());
-
-        if (alreadyApproved) {
-            throw new ResourceAlreadyExistsException("This stage has already been:" + createApprovalDTO.stage());
-        }
-
-        Approval approval = approvalMapper.toEntity(createApprovalDTO);
-
-        approval.setRequisition(requisition);
-        approval.setApprovedAt(LocalDateTime.now());
-        approvalService.create(approvalMapper.toCreateApprovalDTO(approval));
-        requisition.getApprovals().add(approval);
-        requisitionRepository.save(requisition);
-        return approval;
     }
 
     public String generateRequisitionNumber() {

@@ -16,6 +16,18 @@ public interface ApprovalMapper {
     @Mapping(target = "updatedAt", ignore = true)
     Approval toEntity(CreateApprovalDTO dto);
 
+    @Mapping(
+            target = "approvedById",
+            source = "approvedBy.id"
+    )
+    @Mapping(
+            target = "sector",
+            source = "approvalSector"
+    )
+    @Mapping(
+            target = "status",
+            source = "approvalStatus"
+    )
     ApprovalResponseDTO toDTO(Approval approval);
 
     CreateApprovalDTO toCreateApprovalDTO(Approval approval);
