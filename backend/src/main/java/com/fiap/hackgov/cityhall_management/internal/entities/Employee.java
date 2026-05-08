@@ -1,5 +1,6 @@
 package com.fiap.hackgov.cityhall_management.internal.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fiap.hackgov.auth.internal.entities.User;
 import com.fiap.hackgov.cityhall_management.internal.entities.enums.RequisitionStatus;
 import jakarta.persistence.*;
@@ -22,6 +23,7 @@ import java.util.List;
 public class Employee extends User implements Serializable {
 
     @OneToMany(mappedBy = "pk.employee", cascade = CascadeType.ALL)
+    @JsonIgnore
     private final List<EmployeeJobLevel> employeeJobLevels = new ArrayList<>();
 
     private Double salary;
@@ -38,6 +40,7 @@ public class Employee extends User implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "cityHall_id")
+    @JsonIgnore
     private CityHall cityHallId;
 
 }
