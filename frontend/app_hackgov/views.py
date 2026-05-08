@@ -13,10 +13,10 @@ def login_view(request):
         return redirect("dashboard")
 
     if request.method == "POST":
-        username = request.POST.get("username", "").strip()
+        email = request.POST.get("email", "").strip()
         password = request.POST.get("password", "").strip()
 
-        data, erro = services.auth_login(username, password)
+        data, erro = services.auth_login(email, password)
 
         if erro:
             messages.error(request, erro)
@@ -24,7 +24,7 @@ def login_view(request):
 
         request.session["jwt_token"] = data.get("token") or data.get("accessToken")
         request.session["user"] = {
-            "nome": data.get("nome") or data.get("name") or username,
+            "nome": data.get("nome") or data.get("name") or email,
             "cargo": data.get("cargo") or data.get("role") or "",
             "setor": data.get("setor") or "",
         }
@@ -39,30 +39,30 @@ def logout_view(request):
     return redirect("login")
 
 
-def register_view(request):
-    if request.session.get("jwt_token"):
-        return redirect("dashboard")
+# def register_view(request):
+#     if request.session.get("jwt_token"):
+#         return redirect("dashboard")
 
-    if request.method == "POST":
-        data = {
-            "nome": request.POST.get("nome", "").strip(),
-            "username": request.POST.get("username", "").strip(),
-            "email": request.POST.get("email", "").strip(),
-            "password": request.POST.get("password", "").strip(),
-            "setor": request.POST.get("setor", "").strip(),
-            "cargo": request.POST.get("cargo", "").strip(),
-        }
+#     if request.method == "POST":
+#         data = {
+#             "nome": request.POST.get("nome", "").strip(),
+#             "username": request.POST.get("username", "").strip(),
+#             "email": request.POST.get("email", "").strip(),
+#             "password": request.POST.get("password", "").strip(),
+#             "setor": request.POST.get("setor", "").strip(),
+#             "cargo": request.POST.get("cargo", "").strip(),
+#         }
 
-        _, erro = services.auth_register(data)
+#         _, erro = services.auth_register(data)
 
-        if erro:
-            messages.error(request, erro)
-            return render(request, "register.html")
+#         if erro:
+#             messages.error(request, erro)
+#             return render(request, "register.html")
 
-        messages.success(request, "Cadastro realizado! Faça login para continuar.")
-        return redirect("login")
+#         messages.success(request, "Cadastro realizado! Faça login para continuar.")
+#         return redirect("login")
 
-    return render(request, "register.html")
+#     return render(request, "register.html")
 
 
 @jwt_login_required

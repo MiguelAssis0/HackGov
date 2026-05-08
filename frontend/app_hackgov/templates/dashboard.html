@@ -118,24 +118,6 @@
                         <h4><i class="bi bi-wrench-adjustable primary me-1"></i> Ferramentas</h4>
                         <a href="#"><h4 class="primary">Ver todas</h4></a>
                     </div>
-
-                    {% if dashboard.ferramentas %}
-                        {% for f in dashboard.ferramentas %}
-                        <div class="tool-item">
-                            <i class="bi bi-grid-3x3-gap-fill tool-icon"></i>
-                            <span class="tool-nome">{{ f.nome }}</span>
-                            <i class="bi bi-chevron-right tool-arrow"></i>
-                        </div>
-                        {% endfor %}
-                    {% else %}
-                        {% for nome in "Ferramenta 1,Ferramenta 2,Ferramenta 3,Ferramenta 4"|split:"," %}
-                        <div class="tool-item">
-                            <i class="bi bi-grid-3x3-gap-fill tool-icon"></i>
-                            <span class="tool-nome">{{ nome }}</span>
-                            <i class="bi bi-chevron-right tool-arrow"></i>
-                        </div>
-                        {% endfor %}
-                    {% endif %}
                 </div>
             </div>
 

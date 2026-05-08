@@ -54,12 +54,12 @@ def _post(endpoint, data, token=None):
         return None, str(e)
 
 
-def auth_login(username, password):
-    return _post("/auth/login", {"username": username, "password": password})
+def auth_login(email, password):
+    return _post("/auth/login", {"email": email, "password": password})
 
 
-def auth_register(data):
-    return _post("/auth/register", data)
+# def auth_register(data):
+#     return _post("/auth/register", data)
 
 
 def get_processos(token, page=1, search="", setor="", status=""):
