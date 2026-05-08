@@ -15,23 +15,34 @@
                 <h1 class="auth-title">Criar conta</h1>
                 <p class="text-muted mb-3">Preencha o formulário abaixo para criar sua conta.</p>
 
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 mb-3"
+                             style="background:{% if message.tags == 'success' %}#dcfce7; color:#16a34a{% else %}#fee2e2; color:#dc2626{% endif %}; font-size:0.85rem; font-weight:500;">
+                            <i class="bi bi-{% if message.tags == 'success' %}check-circle-fill{% else %}exclamation-circle-fill{% endif %}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
                 <form method="POST" action="{% url 'register' %}" id="registerForm">
                     {% csrf_token %}
-                    <input type="hidden" name="csrfmiddlewaretoken" value="CSRF_TOKEN_PLACEHOLDER" />
 
                     <div class="form-group-row">
                         <div class="form-group">
-                            <label class="form-label" for="first_name">Nome</label>
+                            <label class="form-label" for="nome">Nome completo</label>
                             <div class="input-icon-wrap">
                                 <i class="bi bi-person input-icon"></i>
-                                <input type="text" id="first_name" name="first_name" class="form-control-custom"
-                                    placeholder="Digite seu nome" required />
+                                <input type="text" id="nome" name="nome" class="form-control-custom"
+                                    placeholder="Seu nome completo" required
+                                    value="{{ request.POST.nome }}" />
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="form-label" for="last_name">Sobrenome</label>
-                            <input type="text" id="last_name" name="last_name" class="form-control-custom"
-                                placeholder="E seu sobrenome" required />
+                            <label class="form-label" for="cargo">Cargo</label>
+                            <input type="text" id="cargo" name="cargo" class="form-control-custom"
+                                placeholder="Ex: Analista" required
+                                value="{{ request.POST.cargo }}" />
                         </div>
                     </div>
 
@@ -40,7 +51,8 @@
                         <div class="input-icon-wrap">
                             <i class="bi bi-at input-icon"></i>
                             <input type="text" id="username" name="username" class="form-control-custom"
-                                placeholder="Digite um nome de usuário" autocomplete="username" required />
+                                placeholder="Digite um nome de usuário" autocomplete="username" required
+                                value="{{ request.POST.username }}" />
                         </div>
                     </div>
 
@@ -49,18 +61,31 @@
                         <div class="input-icon-wrap">
                             <i class="bi bi-envelope input-icon"></i>
                             <input type="email" id="email" name="email" class="form-control-custom"
-                                placeholder="seu.email@email.gov.br" autocomplete="email" required />
+                                placeholder="seu.email@email.gov.br" autocomplete="email" required
+                                value="{{ request.POST.email }}" />
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label" for="password1">Senha</label>
+                        <label class="form-label" for="setor">Secretaria / Setor</label>
+                        <select id="setor" name="setor" class="form-control-custom" required>
+                            <option value="">Selecionar setor...</option>
+                            {% with setores="Administração Geral,Secretaria de Obras,Secretaria de Educação,Secretaria de Saúde,Secretaria da Fazenda,Assistência Social,Secretaria de Urbanismo,Secretaria de Meio Ambiente,Secretaria de Cultura,Secretaria de Transporte" %}
+                                {% for s in setores.split %}
+                                    <option value="{{ s }}" {% if request.POST.setor == s %}selected{% endif %}>{{ s }}</option>
+                                {% endfor %}
+                            {% endwith %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="password">Senha</label>
                         <div class="input-icon-wrap">
                             <i class="bi bi-lock input-icon"></i>
-                            <input type="password" id="password1" name="password1" class="form-control-custom"
+                            <input type="password" id="password" name="password" class="form-control-custom"
                                 placeholder="Digite uma senha" autocomplete="new-password" required
                                 oninput="checkStrength(this.value)" />
-                            <button type="button" class="toggle-pass" onclick="togglePassword('password1', this)"
+                            <button type="button" class="toggle-pass" onclick="togglePassword('password', this)"
                                 aria-label="Mostrar senha">
                                 <i class="bi bi-eye"></i>
                             </button>
@@ -72,33 +97,35 @@
                                 <div class="pw-bar" id="bar3"></div>
                                 <div class="pw-bar" id="bar4"></div>
                             </div>
-                            <span class="pw-label" id="pwLabel">Digite uma senha com mínimo de 8 caracteres, 1 letra maiúscula,
-                                1 número e 1 caractere especial.</span>
+                            <span class="pw-label" id="pwLabel">Mínimo 8 caracteres, 1 maiúscula, 1 número e 1 caractere especial.</span>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label" for="password2">Confirmar senha</label>
+                        <label class="form-label" for="password_confirm">Confirmar senha</label>
                         <div class="input-icon-wrap">
                             <i class="bi bi-lock-fill input-icon"></i>
-                            <input type="password" id="password2" name="password2" class="form-control-custom"
+                            <input type="password" id="password_confirm" name="password_confirm" class="form-control-custom"
                                 placeholder="Repita a senha" autocomplete="new-password" required />
-                            <button type="button" class="toggle-pass" onclick="togglePassword('password2', this)"
+                            <button type="button" class="toggle-pass" onclick="togglePassword('password_confirm', this)"
                                 aria-label="Mostrar senha">
                                 <i class="bi bi-eye"></i>
                             </button>
+                        </div>
+                        <div id="senhaErro" class="mt-1" style="display:none; font-size:0.78rem; color:#dc2626;">
+                            <i class="bi bi-exclamation-circle-fill"></i> As senhas não coincidem.
                         </div>
                     </div>
 
                     <label class="pb-3 pt-2">
                         <input type="checkbox" name="accept_terms" required />
-                        Concordo com os <a href="#" class="text-decoration-none"><span>Termos de Uso</span></a> e a
-                        <a href="#" class="text-decoration-none"><span>Política de Privacidade</span></a> do ERP Municipal
+                        Concordo com os <a href="#" class="text-decoration-none">Termos de Uso</a> e a
+                        <a href="#" class="text-decoration-none">Política de Privacidade</a> do ERP Municipal
                     </label>
 
-                    <a href="{% url 'dashboard' %}" class="btn btn-primary">
-                        Criar conta <i class="bi bi-person-plus-fill me-1"></i>
-                    </a>
+                    <button type="submit" class="btn btn-primary w-100" id="btnRegistrar">
+                        Criar conta <i class="bi bi-person-plus-fill ms-1"></i>
+                    </button>
                 </form>
 
                 <div class="pt-3">
@@ -109,7 +136,6 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     function togglePassword(id, btn) {
         const input = document.getElementById(id);
@@ -120,28 +146,45 @@
     }
 
     function checkStrength(val) {
-        const bars = [
-            document.getElementById("bar1"),
-            document.getElementById("bar2"),
-            document.getElementById("bar3"),
-            document.getElementById("bar4"),
-        ];
+        const bars = ["bar1","bar2","bar3","bar4"].map(id => document.getElementById(id));
         const label = document.getElementById("pwLabel");
-        bars.forEach((b) => {
-            b.className = "pw-bar";
-        });
-
+        bars.forEach(b => b.className = "pw-bar");
         let score = 0;
         if (val.length >= 8) score++;
         if (/[A-Z]/.test(val)) score++;
         if (/[0-9]/.test(val)) score++;
         if (/[^a-zA-Z0-9]/.test(val)) score++;
-
         const cls = score <= 1 ? "weak" : score <= 3 ? "medium" : "strong";
         const labels = { weak: "Fraca", medium: "Média", strong: "Forte" };
         for (let i = 0; i < score; i++) bars[i].classList.add(cls);
-        label.textContent =
-            val.length === 0 ? "Digite uma senha com mínimo de 8 caracteres, 1 letra maiúscula, 1 número e 1 caractere especial." : `Senha ${labels[cls]}`;
+        label.textContent = val.length === 0
+            ? "Mínimo 8 caracteres, 1 maiúscula, 1 número e 1 caractere especial."
+            : `Senha ${labels[cls]}`;
     }
+
+    document.getElementById("registerForm").addEventListener("submit", function(e) {
+        const p1 = document.getElementById("password").value;
+        const p2 = document.getElementById("password_confirm").value;
+        const erro = document.getElementById("senhaErro");
+        if (p1 !== p2) {
+            e.preventDefault();
+            erro.style.display = "block";
+            document.getElementById("password_confirm").classList.add("is-invalid");
+        } else {
+            erro.style.display = "none";
+        }
+    });
+
+    document.getElementById("password_confirm").addEventListener("input", function() {
+        const p1 = document.getElementById("password").value;
+        const erro = document.getElementById("senhaErro");
+        if (this.value && this.value !== p1) {
+            erro.style.display = "block";
+            this.classList.add("is-invalid");
+        } else {
+            erro.style.display = "none";
+            this.classList.remove("is-invalid");
+        }
+    });
 </script>
 {% endblock %}

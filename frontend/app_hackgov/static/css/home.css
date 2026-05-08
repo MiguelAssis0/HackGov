@@ -64,14 +64,8 @@
     width: 100%;
     display: block;
     animation: float 6s ease-in-out infinite;
-    filter: drop-shadow(0 0 36px rgba(46, 139, 255, 0.4));
+    /* filter: drop-shadow(0 0 36px rgba(46, 139, 255, 0.4)); */
     pointer-events: none;
-}
-
-.hero-img-wrapper:hover .hero-img {
-    animation-play-state: paused;
-    filter: drop-shadow(0 0 52px rgba(46, 139, 255, 0.65));
-    transition: 0.4s ease;
 }
 
 @keyframes float {
