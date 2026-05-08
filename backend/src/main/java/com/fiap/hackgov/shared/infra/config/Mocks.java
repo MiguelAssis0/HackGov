@@ -6,6 +6,12 @@ import com.fiap.hackgov.cityhall_management.internal.entities.enums.LevelJobLeve
 import com.fiap.hackgov.cityhall_management.internal.entities.enums.TypeJobLevel;
 import com.fiap.hackgov.cityhall_management.internal.entities.enums.UF;
 import com.fiap.hackgov.cityhall_management.internal.repositories.*;
+import com.fiap.hackgov.messages.internal.entities.Chat;
+import com.fiap.hackgov.messages.internal.entities.ChatParticipant;
+import com.fiap.hackgov.messages.internal.entities.enums.ChatRole;
+import com.fiap.hackgov.messages.internal.entities.enums.ChatType;
+import com.fiap.hackgov.messages.internal.repositories.ChatParticipantRepository;
+import com.fiap.hackgov.messages.internal.repositories.ChatRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
@@ -13,20 +19,34 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Configuration
 @Profile("dev")
 public class Mocks implements CommandLineRunner {
 
-    @Autowired private StateRepository stateRepository;
-    @Autowired private CityHallRepository cityHallRepository;
-    @Autowired private SectorRepository sectorRepository;
-    @Autowired private JobLevelRepository jobLevelRepository;
-    @Autowired private JobLevelSectorRepository jobLevelSectorRepository;
-    @Autowired private PermissionsRepository permissionsRepository;
-    @Autowired private PermissionsJobLevelRepository permissionsJobLevelRepository;
-    @Autowired private EmployeeRepository employeeRepository;
-    @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired
+    private StateRepository stateRepository;
+    @Autowired
+    private CityHallRepository cityHallRepository;
+    @Autowired
+    private SectorRepository sectorRepository;
+    @Autowired
+    private JobLevelRepository jobLevelRepository;
+    @Autowired
+    private JobLevelSectorRepository jobLevelSectorRepository;
+    @Autowired
+    private PermissionsRepository permissionsRepository;
+    @Autowired
+    private PermissionsJobLevelRepository permissionsJobLevelRepository;
+    @Autowired
+    private EmployeeRepository employeeRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private ChatRepository chatRepository;
+    @Autowired
+    private ChatParticipantRepository chatParticipantRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -207,6 +227,196 @@ public class Mocks implements CommandLineRunner {
         carlos.getEmployeeJobLevels().add(new EmployeeJobLevel(carlos, assistente));
 
         employeeRepository.save(carlos);
+
+        Employee ana = new Employee();
+        ana.setFirstName("Ana");
+        ana.setLastName("Souza");
+        ana.setEmail("ana.souza@sp.gov.br");
+        ana.setPassword(passwordEncoder.encode("senha123"));
+        ana.setStatus(true);
+        ana.setRole(Roles.ADMIN);
+        ana.setCpf("999.888.777-66");
+        ana.setTwoFactor(false);
+
+        ana.setSalary(4300.00);
+        ana.setAdmissionDate(LocalDateTime.of(2023, 5, 5, 8, 0));
+        ana.setRegistrationNumber("SP-004");
+        ana.setHoursWorked(700.0);
+        ana.setCityHallId(cityHallSP);
+
+        ana.getEmployeeJobLevels().add(new EmployeeJobLevel(ana, assistente));
+
+        employeeRepository.save(ana);
+
+        Employee joao = new Employee();
+        joao.setFirstName("João");
+        joao.setLastName("Silva");
+        joao.setEmail("joao.silva@sp.gov.br");
+        joao.setPassword(passwordEncoder.encode("senha123"));
+        joao.setStatus(true);
+        joao.setRole(Roles.ADMIN);
+        joao.setCpf("555.666.777-88");
+        joao.setTwoFactor(false);
+
+        joao.setSalary(4800.00);
+        joao.setAdmissionDate(LocalDateTime.of(2021, 2, 20, 8, 0));
+        joao.setRegistrationNumber("SP-003");
+        joao.setHoursWorked(1600.0);
+        joao.setCityHallId(cityHallSP);
+
+        joao.getEmployeeJobLevels().add(new EmployeeJobLevel(joao, analista));
+
+        employeeRepository.save(joao);
+
+        Employee fernanda = new Employee();
+        fernanda.setFirstName("Fernanda");
+        fernanda.setLastName("Costa");
+        fernanda.setEmail("fernanda.costa@rj.gov.br");
+        fernanda.setPassword(passwordEncoder.encode("senha123"));
+        fernanda.setStatus(true);
+        fernanda.setRole(Roles.ADMIN);
+        fernanda.setCpf("444.555.666-77");
+        fernanda.setTwoFactor(false);
+
+        fernanda.setSalary(6100.00);
+        fernanda.setAdmissionDate(LocalDateTime.of(2019, 9, 12, 8, 0));
+        fernanda.setRegistrationNumber("RJ-002");
+        fernanda.setHoursWorked(2100.0);
+        fernanda.setCityHallId(cityHallRJ);
+
+        fernanda.getEmployeeJobLevels().add(new EmployeeJobLevel(fernanda, analista));
+
+        employeeRepository.save(fernanda);
+
+        Employee lucas = new Employee();
+        lucas.setFirstName("Lucas");
+        lucas.setLastName("Pereira");
+        lucas.setEmail("lucas.pereira@rj.gov.br");
+        lucas.setPassword(passwordEncoder.encode("senha123"));
+        lucas.setStatus(true);
+        lucas.setRole(Roles.ADMIN);
+        lucas.setCpf("222.333.444-55");
+        lucas.setTwoFactor(false);
+
+        lucas.setSalary(3900.00);
+        lucas.setAdmissionDate(LocalDateTime.of(2024, 1, 8, 8, 0));
+        lucas.setRegistrationNumber("RJ-003");
+        lucas.setHoursWorked(300.0);
+        lucas.setCityHallId(cityHallRJ);
+
+        lucas.getEmployeeJobLevels().add(new EmployeeJobLevel(lucas, assistente));
+
+        employeeRepository.save(lucas);
+
+        LocalDateTime now = LocalDateTime.now();
+
+        Chat privateSP = new Chat();
+        privateSP.setType(ChatType.PRIVATE);
+        privateSP.setCityHall(cityHallSP);
+        privateSP.setCreatedAt(now);
+
+        chatRepository.save(privateSP);
+
+        ChatParticipant privateSPAdmin = new ChatParticipant();
+        privateSPAdmin.setChat(privateSP);
+        privateSPAdmin.setEmployee(admin);
+        privateSPAdmin.setJoinedAt(now);
+        privateSPAdmin.setRole(ChatRole.MEMBER);
+
+        ChatParticipant privateSPJoao = new ChatParticipant();
+        privateSPJoao.setChat(privateSP);
+        privateSPJoao.setEmployee(joao);
+        privateSPJoao.setJoinedAt(now);
+        privateSPJoao.setRole(ChatRole.MEMBER);
+
+        chatParticipantRepository.saveAll(List.of(privateSPAdmin, privateSPJoao));
+
+        privateSP.getParticipants().add(privateSPAdmin);
+        privateSP.getParticipants().add(privateSPJoao);
+
+        Chat privateRJ = new Chat();
+        privateRJ.setType(ChatType.PRIVATE);
+        privateRJ.setCityHall(cityHallRJ);
+        privateRJ.setCreatedAt(now);
+
+        chatRepository.save(privateRJ);
+
+        ChatParticipant privateRJCarlos = new ChatParticipant();
+        privateRJCarlos.setChat(privateRJ);
+        privateRJCarlos.setEmployee(carlos);
+        privateRJCarlos.setJoinedAt(now);
+        privateRJCarlos.setRole(ChatRole.MEMBER);
+
+        ChatParticipant privateRJFernanda = new ChatParticipant();
+        privateRJFernanda.setChat(privateRJ);
+        privateRJFernanda.setEmployee(fernanda);
+        privateRJFernanda.setJoinedAt(now);
+        privateRJFernanda.setRole(ChatRole.MEMBER);
+
+        chatParticipantRepository.saveAll(List.of(privateRJCarlos, privateRJFernanda));
+
+        privateRJ.getParticipants().add(privateRJCarlos);
+        privateRJ.getParticipants().add(privateRJFernanda);
+
+        Chat groupSP = new Chat();
+        groupSP.setTitle("TI São Paulo");
+        groupSP.setType(ChatType.GROUP);
+        groupSP.setCityHall(cityHallSP);
+        groupSP.setCreatedAt(now);
+
+        chatRepository.save(groupSP);
+
+        ChatParticipant groupSPAdmin = new ChatParticipant();
+        groupSPAdmin.setChat(groupSP);
+        groupSPAdmin.setEmployee(admin);
+        groupSPAdmin.setJoinedAt(now);
+        groupSPAdmin.setRole(ChatRole.ADMIN);
+
+        ChatParticipant groupSPMaria = new ChatParticipant();
+        groupSPMaria.setChat(groupSP);
+        groupSPMaria.setEmployee(maria);
+        groupSPMaria.setJoinedAt(now);
+        groupSPMaria.setRole(ChatRole.MEMBER);
+
+        ChatParticipant groupSPAna = new ChatParticipant();
+        groupSPAna.setChat(groupSP);
+        groupSPAna.setEmployee(ana);
+        groupSPAna.setJoinedAt(now);
+        groupSPAna.setRole(ChatRole.MEMBER);
+
+        chatParticipantRepository.saveAll(List.of(groupSPAdmin, groupSPMaria, groupSPAna));
+
+        groupSP.getParticipants().addAll(List.of(groupSPAdmin, groupSPMaria, groupSPAna));
+
+        Chat groupRJ = new Chat();
+        groupRJ.setTitle("Financeiro RJ");
+        groupRJ.setType(ChatType.GROUP);
+        groupRJ.setCityHall(cityHallRJ);
+        groupRJ.setCreatedAt(now);
+
+        chatRepository.save(groupRJ);
+
+        ChatParticipant groupRJCarlos = new ChatParticipant();
+        groupRJCarlos.setChat(groupRJ);
+        groupRJCarlos.setEmployee(carlos);
+        groupRJCarlos.setJoinedAt(now);
+        groupRJCarlos.setRole(ChatRole.ADMIN);
+
+        ChatParticipant groupRJFernanda = new ChatParticipant();
+        groupRJFernanda.setChat(groupRJ);
+        groupRJFernanda.setEmployee(fernanda);
+        groupRJFernanda.setJoinedAt(now);
+        groupRJFernanda.setRole(ChatRole.MEMBER);
+
+        ChatParticipant groupRJLucas = new ChatParticipant();
+        groupRJLucas.setChat(groupRJ);
+        groupRJLucas.setEmployee(lucas);
+        groupRJLucas.setJoinedAt(now);
+        groupRJLucas.setRole(ChatRole.MEMBER);
+
+        chatParticipantRepository.saveAll(List.of(groupRJCarlos, groupRJFernanda, groupRJLucas));
+
+        groupRJ.getParticipants().addAll(List.of(groupRJCarlos, groupRJFernanda, groupRJLucas));
 
         System.out.println("Mocks carregados com sucesso!");
     }

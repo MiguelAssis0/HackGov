@@ -1,22 +1,25 @@
 package com.fiap.hackgov.messages.internal.services;
 
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
-import com.fiap.hackgov.cityhall_management.internal.services.EmployeeService;
-import com.fiap.hackgov.messages.internal.DTOs.MessageResponseDTO;
-import com.fiap.hackgov.messages.internal.DTOs.SendMessageRequestDTO;
-import com.fiap.hackgov.messages.internal.entities.Conversation;
+import com.fiap.hackgov.messages.internal.DTOs.message.MessageDTO;
+import com.fiap.hackgov.messages.internal.DTOs.message.SendMessageDTO;
+import com.fiap.hackgov.messages.internal.entities.Chat;
 import com.fiap.hackgov.messages.internal.entities.Message;
 import com.fiap.hackgov.messages.internal.mapper.MessageMapper;
-import com.fiap.hackgov.messages.internal.repositories.ConversationParticipantRepository;
-import com.fiap.hackgov.messages.internal.repositories.ConversationRepository;
+import com.fiap.hackgov.messages.internal.repositories.ChatParticipantRepository;
+import com.fiap.hackgov.messages.internal.repositories.ChatRepository;
 import com.fiap.hackgov.messages.internal.repositories.MessageRepository;
-import com.fiap.hackgov.shared.infra.services.TokenService;
-import jakarta.servlet.http.HttpServletRequest;
+import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
+import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
+import com.fiap.hackgov.shared.infra.pagination.PageResponseDTO;
+import com.fiap.hackgov.shared.infra.pagination.PaginationMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -25,66 +28,59 @@ public class MessageService {
 
     private final MessageRepository messageRepository;
 
-    private final ConversationRepository conversationRepository;
+    private final ChatRepository chatRepository;
 
-    private final ConversationParticipantRepository participantRepository;
+    private final ChatParticipantRepository chatParticipantRepository;
 
-    private final EmployeeService employeeService;
+    private final MessageMapper messageMapper;
 
-    private final TokenService tokenService;
+    private final PaginationMapper paginationMapper;
 
-    private final MessageMapper mapper;
+    @Transactional
+    public MessageDTO sendMessage(Employee authenticatedEmployee, SendMessageDTO dto) {
 
-    public Message save(SendMessageRequestDTO dto, HttpServletRequest request) {
+        Chat chat = chatRepository.findById(dto.chatId()).orElseThrow(() -> new ResourceNotFoundException("Chat not found"));
 
-        String token = tokenService.extractToken(request);
-
-        String email = tokenService.getSubject(token);
-
-        Employee sender = employeeService.findByEmail(email);
-
-        return createMessage(sender, dto.conversationId(), dto.content());
-    }
-
-    public List<MessageResponseDTO> getLastMessages(UUID conversationId, int page, int size, HttpServletRequest request) {
-        String token = tokenService.extractToken(request);
-        String email = tokenService.getSubject(token);
-        Employee employee = employeeService.findByEmail(email);
-
-        Conversation conversation = conversationRepository.findByIdAndCityHallId(conversationId, employee.getCityHallId().getId()).orElseThrow(() -> new RuntimeException("Conversation not found"));
-
-        boolean participant = participantRepository.existsByConversationAndEmployee(conversation, employee);
+        boolean participant = chatParticipantRepository.existsByChatIdAndEmployeeId(chat.getId(), authenticatedEmployee.getId());
 
         if (!participant) {
-            throw new RuntimeException("Access denied");
-        }
-
-        return messageRepository.findByConversationIdOrderBySentAtAsc(conversationId).stream().map(mapper::toDTO).toList();
-    }
-
-    public Message createMessage(Employee sender, UUID conversationId, String content) {
-
-        Conversation conversation = conversationRepository.findByIdAndCityHallId(conversationId, sender.getCityHallId().getId()).orElseThrow(() -> new RuntimeException("Conversation not found"));
-
-        boolean participant = participantRepository.existsByConversationAndEmployee(conversation, sender);
-
-        if (!participant) {
-
-            throw new RuntimeException("Access denied");
+            throw new BusinessException("You are not a participant of this chat");
         }
 
         Message message = new Message();
 
-        message.setSender(sender);
-
-        message.setConversation(conversation);
-
-        message.setContent(content);
-
+        message.setChat(chat);
+        message.setSender(authenticatedEmployee);
+        message.setContent(dto.content());
         message.setSentAt(LocalDateTime.now());
 
-        message.setReadMessage(false);
+        Message savedMessage = messageRepository.save(message);
 
-        return messageRepository.save(message);
+        return messageMapper.toDTO(savedMessage);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponseDTO<MessageDTO> getChatMessages(
+
+            Employee authenticatedEmployee,
+
+            UUID chatId,
+
+            Pageable pageable) {
+
+        Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new ResourceNotFoundException("Chat not found"));
+
+        boolean isParticipant = chatParticipantRepository.existsByChatIdAndEmployeeId(chat.getId(), authenticatedEmployee.getId());
+
+        if (!isParticipant) {
+
+            throw new BusinessException("You are not a participant of this chat");
+        }
+
+        Page<Message> messages = messageRepository.findByChatIdOrderBySentAtDesc(chatId, pageable);
+
+        Page<MessageDTO> dtoPage = messages.map(messageMapper::toDTO);
+
+        return paginationMapper.toDTO(dtoPage);
     }
 }

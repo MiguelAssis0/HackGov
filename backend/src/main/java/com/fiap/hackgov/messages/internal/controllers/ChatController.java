@@ -1,44 +1,84 @@
 package com.fiap.hackgov.messages.internal.controllers;
 
-import com.fiap.hackgov.messages.internal.DTOs.MessageResponseDTO;
-import com.fiap.hackgov.messages.internal.DTOs.SendMessageRequestDTO;
-import com.fiap.hackgov.messages.internal.entities.Message;
+import com.fiap.hackgov.auth.internal.entities.User;
+import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
+import com.fiap.hackgov.messages.internal.DTOs.chat.ChatDTO;
+import com.fiap.hackgov.messages.internal.DTOs.chat.CreatePrivateChatDTO;
+import com.fiap.hackgov.messages.internal.DTOs.group.CreateGroupChatDTO;
+import com.fiap.hackgov.messages.internal.DTOs.message.MessageDTO;
+import com.fiap.hackgov.messages.internal.services.ChatService;
 import com.fiap.hackgov.messages.internal.services.MessageService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import jakarta.servlet.http.HttpServletRequest;
+import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
+import com.fiap.hackgov.shared.infra.pagination.PageResponseDTO;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/chat")
+@RequestMapping("api/chats")
 @RequiredArgsConstructor
 public class ChatController {
 
+    private final ChatService chatService;
     private final MessageService messageService;
 
-    @Operation(summary = "Send a message", security = @SecurityRequirement(name = "bearer-key"), description = "Send a message to a conversation")
-    @PostMapping
-    public ResponseEntity<?> sendMessage(@RequestBody SendMessageRequestDTO dto, HttpServletRequest request) {
+    @GetMapping
+    public ResponseEntity<List<ChatDTO>> getChats(@AuthenticationPrincipal User authenticatedUser) {
 
-        Message response = messageService.save(dto, request);
+        if (!(authenticatedUser instanceof Employee employee)) {
+            throw new BusinessException("Only employees can access chats");
+        }
 
-        URI location = URI.create("/api/chat/" + response.getId());
-
-        return ResponseEntity.created(location).body(response);
-    }
-
-    @Operation(summary = "Get last messages from a conversation", security = @SecurityRequirement(name = "bearer-key"), description = "Get last messages from a conversation")
-    @GetMapping("/{conversationId}/messages")
-    public ResponseEntity<List<MessageResponseDTO>> getMessages(@PathVariable UUID conversationId, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size, HttpServletRequest request) {
-
-        List<MessageResponseDTO> response = messageService.getLastMessages(conversationId, page, size, request);
+        List<ChatDTO> response = chatService.getEmployeeChats(employee);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/chat/{chatId}")
+    public ResponseEntity<PageResponseDTO<MessageDTO>> getMessages(
+
+            @AuthenticationPrincipal User authenticatedUser,
+
+            @PathVariable UUID chatId,
+
+            Pageable pageable) {
+
+        if (!(authenticatedUser instanceof Employee employee)) {
+
+            throw new BusinessException("Only employees can access messages");
+        }
+
+        return ResponseEntity.ok(messageService.getChatMessages(employee, chatId, pageable));
+    }
+
+    @PostMapping("/private")
+    public ResponseEntity<ChatDTO> createPrivateChat(@AuthenticationPrincipal User authenticatedUser, @RequestBody @Valid CreatePrivateChatDTO dto) {
+
+        if (!(authenticatedUser instanceof Employee employee)) {
+            throw new BusinessException("Only employees can create chats");
+        }
+
+        ChatDTO response = chatService.createPrivateChat(employee, dto);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/group")
+    public ResponseEntity<ChatDTO> createGroupChat(@AuthenticationPrincipal User authenticatedUser, @RequestBody @Valid CreateGroupChatDTO dto) {
+
+        if (!(authenticatedUser instanceof Employee employee)) {
+            throw new BusinessException("Only employees can create chats");
+        }
+
+        ChatDTO response = chatService.createGroupChat(employee, dto);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

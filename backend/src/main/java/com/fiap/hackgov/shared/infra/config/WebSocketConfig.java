@@ -4,50 +4,34 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.web.socket.config.annotation.*;
+import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
+import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
+import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
-@RequiredArgsConstructor
 @Configuration
 @EnableWebSocketMessageBroker
-public class WebSocketConfig
-        implements WebSocketMessageBrokerConfigurer {
+@RequiredArgsConstructor
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    private final WebSocketAuthInterceptor authInterceptor;
+    private final JwtChannelInterceptor jwtChannelInterceptor;
 
     @Override
-    public void configureClientInboundChannel(
-            ChannelRegistration registration
-    ) {
+    public void configureMessageBroker(MessageBrokerRegistry config) {
 
-        registration.interceptors(authInterceptor);
+        config.enableSimpleBroker("/topic");
+
+        config.setApplicationDestinationPrefixes("/app");
     }
 
     @Override
-    public void configureMessageBroker(
-            MessageBrokerRegistry registry
-    ) {
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
 
-
-        registry.enableSimpleBroker("/topic");
-
-        registry.setApplicationDestinationPrefixes(
-                "/app"
-        );
+        registry.addEndpoint("/ws").setAllowedOrigins("http://127.0.0.1:5500").withSockJS();
     }
 
-
     @Override
-    public void registerStompEndpoints(
-            StompEndpointRegistry registry
-    ) {
+    public void configureClientInboundChannel(ChannelRegistration registration) {
 
-
-        registry.addEndpoint("/ws-chat")
-                .setAllowedOriginPatterns("*");
-
-
-        registry.addEndpoint("/ws-chat")
-                .setAllowedOriginPatterns("*")
-                .withSockJS();
+        registration.interceptors(jwtChannelInterceptor);
     }
 }

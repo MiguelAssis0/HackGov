@@ -39,6 +39,11 @@ public class ControllerExceptionHandler {
         return handleException("Auth Exception", HttpStatus.BAD_REQUEST, e, request);
     }
 
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<StandardError> handleBusinessException(BusinessException e, HttpServletRequest request) {
+        return handleException("Business Exception", HttpStatus.BAD_REQUEST, e, request);
+    }
+
     @ExceptionHandler(JWTVerificationException.class)
     public ResponseEntity<StandardError> handleJWTVerificationException(JWTVerificationException e, HttpServletRequest request) {
         return handleException("JWT Verification Exception", HttpStatus.BAD_REQUEST, e, request);
