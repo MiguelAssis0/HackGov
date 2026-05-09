@@ -53,7 +53,7 @@ public class ChatService {
             throw new BusinessException("You cannot create a chat with yourself");
         }
 
-        if (!verificationService.verifySameCityHall(authenticatedEmployee, target.getCityHallId())) {
+        if (!verificationService.isSameCityHall(authenticatedEmployee, target.getCityHallId())) {
 
             throw new BusinessException("Employees must belong to the same city hall");
         }

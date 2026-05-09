@@ -1,0 +1,55 @@
+package com.fiap.hackgov.cityhall_management.internal.controllers;
+
+import com.fiap.hackgov.cityhall_management.internal.DTOs.Sector.CreateSectorDTO;
+import com.fiap.hackgov.cityhall_management.internal.DTOs.Sector.SectorResponseDTO;
+import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
+import com.fiap.hackgov.cityhall_management.internal.services.SectorService;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import org.springframework.data.domain.Pageable;
+import java.net.URI;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/sectors")
+@AllArgsConstructor
+public class SectorController {
+
+    private final SectorService sectorService;
+
+    @PostMapping
+    @PreAuthorize("hasAuthority('CREATE_SECTORS')")
+    public ResponseEntity<SectorResponseDTO> createSector(@RequestBody @Valid CreateSectorDTO createSectorDTO, @AuthenticationPrincipal Employee employee) {
+        SectorResponseDTO response = sectorService.createSector(createSectorDTO, employee);
+
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(response.id()).toUri();
+
+        return ResponseEntity.created(location).body(response);
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAuthority('VIEW_SECTORS')")
+    public ResponseEntity<Page<SectorResponseDTO>> getAllSectors(Pageable pageable, @AuthenticationPrincipal Employee employee) {
+        return ResponseEntity.ok(sectorService.getAllSectors(pageable, employee));
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('VIEW_SECTORS')")
+    public ResponseEntity<SectorResponseDTO> getById(@PathVariable UUID id, @AuthenticationPrincipal Employee employee) {
+        return ResponseEntity.ok(sectorService.getById(id, employee));
+    }
+
+    @GetMapping("/name/{name}")
+    @PreAuthorize("hasAuthority('VIEW_SECTORS')")
+    public ResponseEntity<SectorResponseDTO> getByName(@PathVariable String name, @AuthenticationPrincipal Employee employee) {
+        return ResponseEntity.ok(sectorService.getByName(name, employee));
+    }
+}
