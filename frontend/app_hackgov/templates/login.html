@@ -28,11 +28,11 @@
                 {% csrf_token %}
 
                 <div class="form-group">
-                    <label class="form-label" for="email">Usuário</label>
+                    <label class="form-label" for="email">Email</label>
                     <div class="input-icon-wrap">
                         <i class="bi bi-person input-icon"></i>
                         <input type="text" id="email" name="email" class="form-control-custom"
-                            placeholder="seu.usuario" autocomplete="email" required
+                            placeholder="seu.email@email.com" autocomplete="email" required
                             value="{{ request.POST.email }}" />
                     </div>
                 </div>
@@ -59,7 +59,7 @@
             </form>
 
             <div class="pt-3">
-                Ainda não tem conta? <a href="#" class="text-decoration-none">Criar conta agora</a>
+                Ainda não tem conta? <a href="#" class="text-decoration-none">Entre em contato</a>
             </div>
         </div>
     </div>

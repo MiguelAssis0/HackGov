@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect
-from django.contrib import messages
 from . import services
 from .decorators import jwt_login_required
+from django.contrib import messages
+from django.core.mail import send_mail
+from django.conf import settings
 
 
 def home(request):
@@ -130,3 +132,49 @@ def processos(request):
         "api_error": erro_lista or erro_detalhe,
     }
     return render(request, "processos.html", ctx)
+
+def contato(request):
+    if request.method == "POST":
+        nome     = request.POST.get("nome", "").strip()
+        email    = request.POST.get("email", "").strip()
+        assunto  = request.POST.get("assunto", "").strip()
+        mensagem = request.POST.get("mensagem", "").strip()
+ 
+        if not all([nome, email, assunto, mensagem]):
+            messages.error(request, "Por favor, preencha todos os campos obrigatórios.")
+            return render(request, "contato.html")
+ 
+        assuntos_labels = {
+            "suporte":  "Suporte técnico",
+            "acesso":   "Problema de acesso / login",
+            "processo": "Dúvida sobre processos",
+            "sugestao": "Sugestão de melhoria",
+            "bug":      "Reportar um problema",
+            "outro":    "Outro",
+        }
+        assunto_label = assuntos_labels.get(assunto, assunto)
+ 
+        corpo = (
+            f"Nova mensagem recebida pelo formulário de contato do ERP Municipal.\n"
+            f"{'-' * 50}\n\n"
+            f"Nome:    {nome}\n"
+            f"E-mail:  {email}\n"
+            f"Assunto: {assunto_label}\n\n"
+            f"Mensagem:\n{mensagem}\n"
+        )
+ 
+        try:
+            send_mail(
+                subject=f"[ERP Municipal] {assunto_label} - {nome}",
+                message=corpo,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[settings.CONTATO_EMAIL],
+                fail_silently=False,
+            )
+            messages.success(request, "Mensagem enviada com sucesso! Responderemos em breve.")
+        except Exception:
+            messages.error(request, "Não foi possível enviar a mensagem. Tente novamente mais tarde.")
+ 
+        return redirect("contato")
+ 
+    return render(request, "contato.html")

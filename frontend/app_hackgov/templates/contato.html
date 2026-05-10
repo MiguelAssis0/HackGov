@@ -1,0 +1,186 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/login.css' %}" />
+<link rel="stylesheet" href="{% static 'css/contato.css' %}">
+
+<section class="contato-hero gradiente-bg">
+    <div class="container py-5">
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-6 fade-up visible">
+                <p class="section-label" style="color:rgba(255,255,255,0.6);">Atendimento e Suporte</p>
+                <h1 style="margin-bottom:0.75rem;">Entre em <span class="primary">contato</span></h1>
+                <p class="subtitle mx-auto" style="text-align:center;">
+                    Quer contratar o serviço, tem dúvidas, sugestões ou precisa de ajuda? Preencha o formulário e responderemos em breve.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="contato-body cinza-claro-bg py-5" style="border-top:none; min-height:60vh;">
+    <div class="container">
+        <div class="row g-4 justify-content-center align-items-start">
+
+            <div class="col-12 col-lg-4 d-flex flex-column gap-3">
+
+                <div class="contato-info-card fade-up visible">
+                    <div class="contato-info-icon">
+                        <i class="bi bi-envelope-fill"></i>
+                    </div>
+                    <div>
+                        <div class="contato-info-label">E-mail</div>
+                        <div class="contato-info-valor">erpmunicipal@gmail.com</div>
+                    </div>
+                </div>
+
+                <div class="contato-info-card fade-up visible delay-1">
+                    <div class="contato-info-icon">
+                        <i class="bi bi-clock-fill"></i>
+                    </div>
+                    <div>
+                        <div class="contato-info-label">Horário de atendimento</div>
+                        <div class="contato-info-valor">Seg à Sex, das 8h às 18h</div>
+                    </div>
+                </div>
+
+                <div class="contato-info-card fade-up visible delay-2">
+                    <div class="contato-info-icon">
+                        <i class="bi bi-telephone-fill"></i>
+                    </div>
+                    <div>
+                        <div class="contato-info-label">Telefone</div>
+                        <div class="contato-info-valor">(55) 99999-9999</div>
+                    </div>
+                </div>
+
+                <div class="card-2 fade-up visible delay-3" style="padding:1.25rem 1.5rem;">
+                    <p class="section-label mb-2">Perguntas frequentes</p>
+                    <div class="d-flex flex-column gap-2">
+                        <a href="#" class="contato-faq-link">
+                            <i class="bi bi-chevron-right" style="color:var(--azul); font-size:0.75rem;"></i>
+                            Como funciona o ERP Municipal?
+                        </a>
+                        <a href="#" class="contato-faq-link">
+                            <i class="bi bi-chevron-right" style="color:var(--azul); font-size:0.75rem;"></i>
+                            Como criar um novo usuário?
+                        </a>
+                        <a href="#" class="contato-faq-link">
+                            <i class="bi bi-chevron-right" style="color:var(--azul); font-size:0.75rem;"></i>
+                            Quais setores têm acesso ao sistema?
+                        </a>
+                        <a href="#" class="contato-faq-link">
+                            <i class="bi bi-chevron-right" style="color:var(--azul); font-size:0.75rem;"></i>
+                            Como exportar relatórios?
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-12 col-lg-7">
+                <div class="card-2 fade-up visible delay-1" style="padding:2rem 2.25rem;">
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 mb-4"
+                                 style="background:{% if message.tags == 'success' %}#dcfce7; color:#16a34a; border:1px solid #bbf7d0{% else %}#fee2e2; color:#dc2626; border:1px solid #fecaca{% endif %}; font-size:0.9rem; font-weight:500;">
+                                <i class="bi bi-{% if message.tags == 'success' %}check-circle-fill{% else %}exclamation-circle-fill{% endif %}"></i>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <h3 style="font-size:1.2rem; margin-bottom:0.25rem;">Envie sua mensagem</h3>
+                    <p style="font-size:0.88rem; margin-bottom:1.75rem;">Todos os campos marcados com * são obrigatórios.</p>
+
+                    <form method="POST" action="{% url 'contato' %}" id="formContato">
+                        {% csrf_token %}
+
+                        <div class="form-group mb-3">
+                            <label class="form-label" for="nome">Nome completo *</label>
+                            <div class="input-icon-wrap">
+                                <i class="bi bi-person input-icon"></i>
+                                <input type="text" id="nome" name="nome" class="form-control-custom"
+                                    placeholder="Seu nome completo" required
+                                    value="{{ request.POST.nome }}" />
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label" for="email">E-mail *</label>
+                            <div class="input-icon-wrap">
+                                <i class="bi bi-envelope input-icon"></i>
+                                <input type="email" id="email" name="email" class="form-control-custom"
+                                    placeholder="seu.email@email.gov.br" required
+                                    value="{{ request.POST.email }}" />
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label" for="assunto">Assunto *</label>
+                            <div class="input-icon-wrap">
+                                <i class="bi bi-tag input-icon"></i>
+                                <select id="assunto" name="assunto" class="form-control-custom" required
+                                    style="padding-left:2.5rem;">
+                                    <option value="">Selecione um assunto...</option>
+                                    <option value="compra" {% if request.POST.assunto == 'compra' %}selected{% endif %}>Desejo comprar o serviço</option>
+                                    <option value="suporte" {% if request.POST.assunto == 'suporte' %}selected{% endif %}>Suporte técnico</option>
+                                    <option value="acesso" {% if request.POST.assunto == 'acesso' %}selected{% endif %}>Problema de acesso / login</option>
+                                    <option value="processo" {% if request.POST.assunto == 'processo' %}selected{% endif %}>Dúvida sobre processos</option>
+                                    <option value="sugestao" {% if request.POST.assunto == 'sugestao' %}selected{% endif %}>Sugestão de melhoria</option>
+                                    <option value="bug" {% if request.POST.assunto == 'bug' %}selected{% endif %}>Reportar um problema</option>
+                                    <option value="outro" {% if request.POST.assunto == 'outro' %}selected{% endif %}>Outro</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label class="form-label" for="mensagem">Mensagem *</label>
+                            <textarea id="mensagem" name="mensagem" class="form-control-custom"
+                                placeholder="Descreva sua dúvida ou problema com o máximo de detalhes possível..."
+                                rows="5" required
+                                style="resize:vertical; min-height:130px;">{{ request.POST.mensagem }}</textarea>
+                            <div class="d-flex justify-content-end mt-1">
+                                <span id="charCount" style="font-size:0.75rem; color:var(--text-muted);">0 / 1000</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                            <span style="font-size:0.8rem; color:var(--text-muted);">
+                                <i class="bi bi-shield-check" style="color:var(--azul);"></i>
+                                Suas informações são tratadas com segurança conforme a LGPD.
+                            </span>
+                            <button type="submit" class="btn-primary d-flex align-items-center gap-2" id="btnEnviar">
+                                <i class="bi bi-send"></i> Enviar mensagem
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<script>
+    const mensagemInput = document.getElementById("mensagem");
+    const charCount     = document.getElementById("charCount");
+
+    mensagemInput.addEventListener("input", () => {
+        const len = mensagemInput.value.length;
+        charCount.textContent = `${len} / 1000`;
+        charCount.style.color = len > 900 ? "var(--vermelho)" : "var(--text-muted)";
+        if (len > 1000) mensagemInput.value = mensagemInput.value.slice(0, 1000);
+    });
+
+    document.getElementById("formContato").addEventListener("submit", function(e) {
+        const btn = document.getElementById("btnEnviar");
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Enviando...';
+        btn.disabled = true;
+    });
+</script>
+
+{% endblock content %}

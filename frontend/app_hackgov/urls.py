@@ -8,4 +8,5 @@ urlpatterns = [
     # path('register/', views.register_view, name='register'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('processos/', views.processos, name='processos'),
+    path('contato/', views.contato, name='contato'),
 ]
