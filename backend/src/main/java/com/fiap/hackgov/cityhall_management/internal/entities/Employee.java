@@ -27,7 +27,7 @@ public class Employee extends User implements Serializable {
 
     @OneToMany(mappedBy = "pk.employee", cascade = CascadeType.ALL)
     @JsonIgnore
-    private final List<EmployeeJobLevel> employeeJobLevels = new ArrayList<>();
+    private List<EmployeeJobLevel> employeeJobLevels = new ArrayList<>();
 
     private Double salary;
 
@@ -46,16 +46,10 @@ public class Employee extends User implements Serializable {
     @JsonIgnore
     private CityHall cityHallId;
 
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-
-        return this.getEmployeeJobLevels().stream()
-                .map(ejl -> ejl.getPk().getJobLevel())
-                .flatMap(jl -> jl.getPermissions().stream())
-                .map(pjl -> pjl.getPk().getPermission())
-                .map(permission -> new SimpleGrantedAuthority(permission.getCodename()))
-                .distinct()
-                .toList();
+        return List.of(new SimpleGrantedAuthority("ROLE_EMPLOYEE"));
     }
 
 }

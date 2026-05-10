@@ -1,8 +1,8 @@
 package com.fiap.hackgov.bidding.internal.controllers;
 
-import com.fiap.hackgov.bidding.internal.DTOs.Approval.ApprovalResponseDTO;
-import com.fiap.hackgov.bidding.internal.DTOs.Approval.CreateApprovalDTO;
-import com.fiap.hackgov.bidding.internal.DTOs.Approval.UpdateApprovalDTO;
+import com.fiap.hackgov.bidding.internal.DTOs.approval.ApprovalResponseDTO;
+import com.fiap.hackgov.bidding.internal.DTOs.approval.CreateApprovalDTO;
+import com.fiap.hackgov.bidding.internal.DTOs.approval.UpdateApprovalDTO;
 import com.fiap.hackgov.bidding.internal.services.ApprovalService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

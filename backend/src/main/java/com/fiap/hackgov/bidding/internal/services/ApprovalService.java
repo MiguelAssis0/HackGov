@@ -1,8 +1,8 @@
 package com.fiap.hackgov.bidding.internal.services;
 
-import com.fiap.hackgov.bidding.internal.DTOs.Approval.ApprovalResponseDTO;
-import com.fiap.hackgov.bidding.internal.DTOs.Approval.CreateApprovalDTO;
-import com.fiap.hackgov.bidding.internal.DTOs.Approval.UpdateApprovalDTO;
+import com.fiap.hackgov.bidding.internal.DTOs.approval.ApprovalResponseDTO;
+import com.fiap.hackgov.bidding.internal.DTOs.approval.CreateApprovalDTO;
+import com.fiap.hackgov.bidding.internal.DTOs.approval.UpdateApprovalDTO;
 import com.fiap.hackgov.bidding.internal.entities.Approval;
 import com.fiap.hackgov.bidding.internal.mappers.ApprovalMapper;
 import com.fiap.hackgov.bidding.internal.repositories.ApprovalRepository;

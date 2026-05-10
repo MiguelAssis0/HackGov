@@ -1,6 +1,9 @@
 package com.fiap.hackgov.bidding.internal.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fiap.hackgov.bidding.internal.entities.enums.RequestStatus;
+import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
+import com.fiap.hackgov.cityhall_management.internal.entities.Sector;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,6 +13,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,12 +28,15 @@ public class Requisition {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    private String number;
+    private String registerNumber;
 
-    private UUID cityHallId;
-    private UUID sectorId;
-    private UUID responsibleId;
-    private UUID approvedById;
+    @ManyToOne
+    @JoinColumn(name = "sector_id")
+    private Sector sector;
+
+    @ManyToOne
+    @JoinColumn(name = "responsible_id")
+    private Employee responsible;
 
     private String technicalDescription;
 
@@ -43,21 +50,32 @@ public class Requisition {
     @Enumerated(EnumType.STRING)
     private RequestStatus requestStatus;
 
-    @OneToOne
-    @JoinColumn(name = "etp_id")
+    @OneToOne(
+            mappedBy = "requisition",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     private ETP etp;
 
     @OneToMany(mappedBy = "requisition")
     private List<Approval> approvals;
 
-    @OneToOne
-    @JoinColumn(name = "process_state_id")
-    private ProcessState processState;
+    @OneToOne(mappedBy = "requisition",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private ProcessStatus processStatus;
+
+    @OneToMany(mappedBy = "requisition",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<ProcessHistory> histories = new ArrayList<>();
 
     @CreationTimestamp
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
 
 }

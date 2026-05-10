@@ -28,4 +28,30 @@ public enum ProcessStage {
         this.step = step;
         this.description = description;
     }
+
+    public boolean canTransitionTo(ProcessStage nextStage) {
+
+        return switch (this) {
+
+            case REQUISICAO_CADASTRADA ->
+                    nextStage == HOMOLOGACAO_SECRETARIO;
+
+            case HOMOLOGACAO_SECRETARIO ->
+                    nextStage == RECEBIMENTO_COMPRAS;
+
+            case RECEBIMENTO_COMPRAS ->
+                    nextStage == ANALISE_REQUISICAO;
+
+            case ANALISE_REQUISICAO ->
+                    nextStage == HOMOLOGACAO_COMPRAS;
+
+            case HOMOLOGACAO_COMPRAS ->
+                    nextStage == COMPOSICAO_PROCESSO;
+
+            case COMPOSICAO_PROCESSO ->
+                    nextStage == PROCESSO_LICITATORIO;
+
+            default -> false;
+        };
+    }
 }

@@ -54,8 +54,6 @@ public class SectorService {
 
     public SectorResponseDTO getById(UUID id, Employee employee) {
 
-
-
         verificationService.checkPermission(employee, "VIEW_SECTORS");
 
         Sector sector = sectorRepository

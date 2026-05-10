@@ -1,49 +1,56 @@
 package com.fiap.hackgov.bidding.internal.controllers;
 
-import com.fiap.hackgov.bidding.internal.DTOs.Requisiton.CreateRequisitionDTO;
-import com.fiap.hackgov.bidding.internal.DTOs.Requisiton.RequisitionResponseDTO;
-import com.fiap.hackgov.bidding.internal.entities.Requisition;
-import com.fiap.hackgov.bidding.internal.mappers.RequisitionMapper;
+import com.fiap.hackgov.bidding.internal.DTOs.processHistory.ProcessHistoryDTO;
+import com.fiap.hackgov.bidding.internal.DTOs.processStatus.AdvanceRequisitionStageDTO;
+import com.fiap.hackgov.bidding.internal.DTOs.requisiton.CreateRequisitionDTO;
+import com.fiap.hackgov.bidding.internal.DTOs.requisiton.RequisitionResponseDTO;
 import com.fiap.hackgov.bidding.internal.services.RequisitionService;
+import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
+import com.fiap.hackgov.shared.infra.pagination.PageResponseDTO;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
+import java.util.List;
+import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/requisition")
+@RequestMapping("/api/requisitions")
 public class RequisitionController {
 
     @Autowired
     private RequisitionService requisitionService;
 
-    @Autowired
-    private RequisitionMapper requisitionMapper;
-
-
     @GetMapping
-    public ResponseEntity<Page<RequisitionResponseDTO>> getAllRequisitions(
-            Pageable pageable
-    ) {
+    public ResponseEntity<PageResponseDTO<RequisitionResponseDTO>> getAllRequisitions(Pageable pageable) {
 
-        Page<Requisition> requisitions =
-                requisitionService.findAll(pageable);
+        return ResponseEntity.ok(requisitionService.findAll(pageable));
+    }
 
-        Page<RequisitionResponseDTO> response =
-                requisitions.map(requisitionMapper::toDTO);
 
-        return ResponseEntity.ok(response);
+    @GetMapping("/{id}/history")
+    public ResponseEntity<List<ProcessHistoryDTO>> getHistory(@PathVariable UUID id) {
+
+        return ResponseEntity.ok(requisitionService.getHistory(id));
     }
 
     @PostMapping
-    public ResponseEntity<?> createRequisition(@RequestBody @Valid CreateRequisitionDTO createRequisitionDTO) {
-        Requisition requisition = requisitionService.save(createRequisitionDTO);
-        URI uri = URI.create("/api/requisition/" + requisition.getId());
-        return ResponseEntity.created(uri).build();
+    public ResponseEntity<RequisitionResponseDTO> create(@AuthenticationPrincipal Employee employee, @RequestBody CreateRequisitionDTO dto) {
+
+        RequisitionResponseDTO requisition = requisitionService.create(employee, dto);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(requisition);
     }
 
+    @PatchMapping("/{id}/advance-stage")
+    public ResponseEntity<RequisitionResponseDTO> advanceStage(@PathVariable UUID id, @Valid @RequestBody AdvanceRequisitionStageDTO dto, @AuthenticationPrincipal Employee employee) {
+
+        RequisitionResponseDTO response = requisitionService.advanceStage(id, dto, employee);
+
+        return ResponseEntity.ok(response);
+    }
 }
