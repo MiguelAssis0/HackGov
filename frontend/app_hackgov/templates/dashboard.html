@@ -6,14 +6,6 @@
 <div class="dashboard">
     <div class="container">
 
-        {% if api_error %}
-        <div class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 mb-3"
-             style="background:#fef3c7; color:#d97706; font-size:0.85rem; font-weight:500; border:1px solid #fde68a;">
-            <i class="bi bi-wifi-off"></i>
-            Não foi possível carregar os dados do servidor. Exibindo informações em cache.
-        </div>
-        {% endif %}
-
         <div class="row">
             <div class="col-12 col-lg-8 d-flex flex-column gap-3">
 
@@ -22,7 +14,8 @@
                         <div class="col-12 col-md-8">
                             <h2 class="hero-h2">
                                 Olá, {{ user.nome|default:"Usuário" }}
-                                {% if user.setor %}<small style="font-size:0.9rem;opacity:0.7;font-weight:400;"> — {{ user.setor }}</small>{% endif %}
+                                {% if user.setor %}<small style="font-size:0.9rem;opacity:0.7;font-weight:400;"> — {{
+                                    user.setor }}</small>{% endif %}
                             </h2>
                             <p class="hero-p">Bem-vindo ao ERP Municipal. Acompanhe seus processos e tarefas.</p>
 
@@ -47,76 +40,60 @@
                 </div>
 
                 <div class="row g-2">
-                    {% if dashboard.entregas %}
-                        {% for entrega in dashboard.entregas %}
-                        <div class="col">
-                            <a href="#" class="card">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <h4>{{ entrega.nome }}</h4>
-                                    <button class="card-menu-btn"><i class="bi bi-three-dots"></i></button>
+                    <div class="col">
+                        <a href="#" class="card">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <h4>Entrega 2</h4>
+                                <button class="card-menu-btn"><i class="bi bi-three-dots"></i></button>
+                            </div>
+                            <div class="mx-auto text-center">
+                                <div class="anel-container">
+                                    <svg class="anel-svg" width="90" height="90" viewBox="0 0 90 90">
+                                        <circle class="anel-bg" cx="45" cy="45" r="36" />
+                                        <circle class="anel-fill" cx="45" cy="45" r="36" stroke="var(--primary)"
+                                            stroke-dasharray="226.2" stroke-dashoffset="90.5" />
+                                    </svg>
+                                    <div class="anel-progresso">60%</div>
                                 </div>
-                                <div class="mx-auto text-center">
-                                    <div class="anel-container">
-                                        <svg class="anel-svg" width="90" height="90" viewBox="0 0 90 90">
-                                            <circle class="anel-bg" cx="45" cy="45" r="36" />
-                                            <circle class="anel-fill" cx="45" cy="45" r="36"
-                                                stroke="var(--primary)"
-                                                stroke-dasharray="226.2"
-                                                stroke-dashoffset="{{ entrega.dashoffset }}" />
-                                        </svg>
-                                        <div class="anel-progresso">{{ entrega.progresso }}%</div>
-                                    </div>
-                                    <span class="anel-status">{{ entrega.status }}</span>
+                                <span class="anel-status">Em progresso</span>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a href="#" class="card">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <h4>Entrega 1</h4>
+                                <button class="card-menu-btn"><i class="bi bi-three-dots"></i></button>
+                            </div>
+                            <div class="mx-auto text-center">
+                                <div class="anel-container">
+                                    <svg class="anel-svg" width="90" height="90" viewBox="0 0 90 90">
+                                        <circle class="anel-bg" cx="45" cy="45" r="36" />
+                                        <circle class="anel-fill" cx="45" cy="45" r="36" stroke="var(--primary)"
+                                            stroke-dasharray="226.2" stroke-dashoffset="22.6" />
+                                    </svg>
+                                    <div class="anel-progresso">90%</div>
                                 </div>
-                            </a>
-                        </div>
-                        {% endfor %}
-                    {% else %}
-                        <div class="col">
-                            <a href="#" class="card">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <h4>Entrega 2</h4>
-                                    <button class="card-menu-btn"><i class="bi bi-three-dots"></i></button>
-                                </div>
-                                <div class="mx-auto text-center">
-                                    <div class="anel-container">
-                                        <svg class="anel-svg" width="90" height="90" viewBox="0 0 90 90">
-                                            <circle class="anel-bg" cx="45" cy="45" r="36" />
-                                            <circle class="anel-fill" cx="45" cy="45" r="36" stroke="var(--primary)"
-                                                stroke-dasharray="226.2" stroke-dashoffset="90.5" />
-                                        </svg>
-                                        <div class="anel-progresso">60%</div>
-                                    </div>
-                                    <span class="anel-status">Em progresso</span>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="col">
-                            <a href="#" class="card">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <h4>Entrega 1</h4>
-                                    <button class="card-menu-btn"><i class="bi bi-three-dots"></i></button>
-                                </div>
-                                <div class="mx-auto text-center">
-                                    <div class="anel-container">
-                                        <svg class="anel-svg" width="90" height="90" viewBox="0 0 90 90">
-                                            <circle class="anel-bg" cx="45" cy="45" r="36" />
-                                            <circle class="anel-fill" cx="45" cy="45" r="36" stroke="var(--primary)"
-                                                stroke-dasharray="226.2" stroke-dashoffset="22.6" />
-                                        </svg>
-                                        <div class="anel-progresso">90%</div>
-                                    </div>
-                                    <span class="anel-status">Quase pronto</span>
-                                </div>
-                            </a>
-                        </div>
-                    {% endif %}
+                                <span class="anel-status">Quase pronto</span>
+                            </div>
+                        </a>
+                    </div>
                 </div>
 
                 <div class="card-2">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h4><i class="bi bi-wrench-adjustable primary me-1"></i> Ferramentas</h4>
-                        <a href="#"><h4 class="primary">Ver todas</h4></a>
+                        <a href="#">
+                            <h4 class="primary">Ver todas</h4>
+                        </a>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-12">
+                            <a href="{% url 'ferramentas' %}" class="card card-2">
+                                <h3 class="azul-escuro mb-0"><i class="bi bi-wrench-adjustable"></i> Ferramentas</h3>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -162,10 +139,10 @@
                             <div class="cal-dia">15</div>
                             <div class="cal-dia">16</div>
                             <div class="cal-dia">17</div>
-                            <div class="cal-dia has-event hoje">18</div>
+                            <div class="cal-dia has-event">18</div>
                             <div class="cal-dia">19</div>
                             <div class="cal-dia has-event">20</div>
-                            <div class="cal-dia has-event">21</div>
+                            <div class="cal-dia has-event hoje">21</div>
                             <div class="cal-dia">22</div>
                             <div class="cal-dia">23</div>
                             <div class="cal-dia">24</div>
@@ -184,42 +161,32 @@
                     <div class="card-2">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <h4><i class="bi bi-check-square-fill primary me-1"></i> Suas tarefas</h4>
-                            <a href="#"><h4 class="primary">Ver todas</h4></a>
+                            <a href="#">
+                                <h4 class="primary">Ver todas</h4>
+                            </a>
                         </div>
 
-                        {% if dashboard.tarefas %}
-                            {% for tarefa in dashboard.tarefas %}
-                            <div class="item-tarefa">
-                                <div class="nome-tarefa">{{ tarefa.nome }}</div>
-                                <div class="tarefa-meta">
-                                    <span class="{{ tarefa.cor }}"><i class="bi bi-clock-fill"></i></span>
-                                    {{ tarefa.prazo }}
-                                </div>
+                        <div class="item-tarefa">
+                            <div class="nome-tarefa">Entrega 1</div>
+                            <div class="tarefa-meta">
+                                <span class="amarelo"><i class="bi bi-clock-fill"></i></span>
+                                Até dia 14 de Abril, 13:00h
                             </div>
-                            {% endfor %}
-                        {% else %}
-                            <div class="item-tarefa">
-                                <div class="nome-tarefa">Entrega 1</div>
-                                <div class="tarefa-meta">
-                                    <span class="amarelo"><i class="bi bi-clock-fill"></i></span>
-                                    Até dia 14 de Abril, 13:00h
-                                </div>
+                        </div>
+                        <div class="item-tarefa">
+                            <div class="nome-tarefa">Reunião</div>
+                            <div class="tarefa-meta">
+                                <span class="primary"><i class="bi bi-clock-fill"></i></span>
+                                Dia 17 de Abril, 13:30h
                             </div>
-                            <div class="item-tarefa">
-                                <div class="nome-tarefa">Reunião</div>
-                                <div class="tarefa-meta">
-                                    <span class="primary"><i class="bi bi-clock-fill"></i></span>
-                                    Dia 17 de Abril, 13:30h
-                                </div>
+                        </div>
+                        <div class="item-tarefa">
+                            <div class="nome-tarefa">Entrega 2</div>
+                            <div class="tarefa-meta">
+                                <span class="vermelho"><i class="bi bi-clock-fill"></i></span>
+                                Até dia 31 de Abril, 14:00h
                             </div>
-                            <div class="item-tarefa">
-                                <div class="nome-tarefa">Entrega 2</div>
-                                <div class="tarefa-meta">
-                                    <span class="vermelho"><i class="bi bi-clock-fill"></i></span>
-                                    Até dia 31 de Abril, 14:00h
-                                </div>
-                            </div>
-                        {% endif %}
+                        </div>
                     </div>
 
                 </aside>
