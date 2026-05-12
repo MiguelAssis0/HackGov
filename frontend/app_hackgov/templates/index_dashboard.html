@@ -23,7 +23,7 @@
 
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-brand">
-                <a href="{% url 'dashboard' %}" class="brand-txt text-white"><i class="bi bi-file-earmark-fill"></i> ERP <span>Municipal</span></a>
+                <a href="{% url 'dashboard' %}" class="brand-txt text-white"><i class="bi bi-file-earmark-fill"></i> Integra <span>Brasil</span></a>
             </div>
 
             <div class="sidebar-setor">
@@ -50,7 +50,7 @@
                     href="{% url 'dashboard' %}">
                     <i class="bi bi-house-fill"></i> Início
                 </a>
-                <a class="nav-item" href="#">
+                <a class="nav-item {% if request.resolver_match.url_name == 'ferramentas' %}active{% endif %}" href="{% url 'ferramentas' %}">
                     <i class="bi bi-wrench-adjustable"></i> Ferramentas
                 </a>
                 <a class="nav-item {% if request.resolver_match.url_name == 'processos' %}active{% endif %}"

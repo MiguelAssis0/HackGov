@@ -80,3 +80,14 @@ def criar_processo(token, data):
 
 def get_dashboard(token):
     return _get("/dashboard", token=token)
+
+def get_usuarios(token, page=1, search=""):
+    return _get("/usuarios", token=token, params={"page": page, "search": search})
+
+
+def criar_usuario(token, data):
+    return _post("/usuarios", data, token=token)
+
+
+def desativar_usuario(token, usuario_id):
+    return _post(f"/usuarios/{usuario_id}/desativar", {}, token=token)

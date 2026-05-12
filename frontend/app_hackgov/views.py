@@ -178,3 +178,45 @@ def contato(request):
         return redirect("contato")
  
     return render(request, "contato.html")
+
+@jwt_login_required
+def ferramentas(request):
+    token = request.session["jwt_token"]
+    user  = request.session.get("user", {})
+
+    lista_usuarios, erro = services.get_usuarios(token)
+
+    if request.method == "POST" and request.POST.get("acao") == "cadastrar_usuario":
+        senha  = request.POST.get("senha", "")
+        senha2 = request.POST.get("senha2", "")
+
+        if senha != senha2:
+            messages.error(request, "As senhas não coincidem.")
+            return redirect("ferramentas")
+
+        dados = {
+            "nome":          request.POST.get("nome", "").strip(),
+            "username":      request.POST.get("username", "").strip(),
+            "email":         request.POST.get("email", "").strip(),
+            "cargo":         request.POST.get("cargo", "").strip(),
+            "setor":         request.POST.get("setor", "").strip(),
+            "perfil":        request.POST.get("perfil", "").strip(),
+            "senha":         senha,
+            "enviar_email":  bool(request.POST.get("enviar_email")),
+        }
+
+        _, erro = services.criar_usuario(token, dados)
+
+        if erro:
+            messages.error(request, f"Erro ao cadastrar usuário: {erro}")
+        else:
+            messages.success(request, f"Usuário '{dados['nome']}' cadastrado com sucesso!")
+
+        return redirect("/ferramentas/?ferramenta=cadastro-usuario")
+
+    ctx = {
+        "user":          user,
+        "lista_usuarios": lista_usuarios or [],
+        "api_error":     erro,
+    }
+    return render(request, "ferramentas.html", ctx)

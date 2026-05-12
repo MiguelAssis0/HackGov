@@ -1,0 +1,513 @@
+{% extends 'index_dashboard.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/ferramentas.css' %}" />
+
+<div class="dashboard">
+    <div class="container">
+
+        <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+            <div>
+                <p class="section-label mb-0">Dashboard</p>
+                <h3 class="mb-0" style="font-size:1.4rem; color:var(--azul-escuro);">Ferramentas</h3>
+            </div>
+        </div>
+
+        <div class="ferramentas-layout">
+
+            <div class="ferramentas-nav">
+                <div class="ferramentas-nav-header">
+                    <div class="ferr-busca-wrap">
+                        <i class="bi bi-search"></i>
+                        <input type="text" class="ferr-busca" placeholder="Buscar ferramenta..." id="ferrBusca" />
+                    </div>
+                </div>
+
+                <button class="ferr-item active" data-ferramenta="inicio">
+                    <div class="ferr-item-icon"><i class="bi bi-grid-fill"></i></div>
+                    <span class="ferr-item-nome">Todas as ferramentas</span>
+                </button>
+
+                <div class="ferr-categoria-label">Usuários e Acesso</div>
+
+                <button class="ferr-item" data-ferramenta="cadastro-usuario">
+                    <div class="ferr-item-icon"><i class="bi bi-person-plus-fill"></i></div>
+                    <span class="ferr-item-nome">Cadastro de Usuários</span>
+                </button>
+
+                <button class="ferr-item" data-ferramenta="em-breve">
+                    <div class="ferr-item-icon"><i class="bi bi-shield-lock-fill"></i></div>
+                    <span class="ferr-item-nome">Controle de Acesso</span>
+                    <span class="ferr-badge em-breve">Em breve</span>
+                </button>
+
+                <div class="ferr-categoria-label">Gestão</div>
+
+                <button class="ferr-item" data-ferramenta="em-breve">
+                    <div class="ferr-item-icon"><i class="bi bi-diagram-3-fill"></i></div>
+                    <span class="ferr-item-nome">Gestão de Setores</span>
+                    <span class="ferr-badge em-breve">Em breve</span>
+                </button>
+
+                <button class="ferr-item" data-ferramenta="em-breve">
+                    <div class="ferr-item-icon"><i class="bi bi-bar-chart-fill"></i></div>
+                    <span class="ferr-item-nome">Relatórios</span>
+                    <span class="ferr-badge em-breve">Em breve</span>
+                </button>
+
+                <button class="ferr-item" data-ferramenta="em-breve">
+                    <div class="ferr-item-icon"><i class="bi bi-calendar2-check-fill"></i></div>
+                    <span class="ferr-item-nome">Agenda Municipal</span>
+                    <span class="ferr-badge em-breve">Em breve</span>
+                </button>
+
+                <div class="ferr-categoria-label">Dados</div>
+
+                <button class="ferr-item" data-ferramenta="em-breve">
+                    <div class="ferr-item-icon"><i class="bi bi-cloud-arrow-up-fill"></i></div>
+                    <span class="ferr-item-nome">Importação de Dados</span>
+                    <span class="ferr-badge em-breve">Em breve</span>
+                </button>
+
+                <button class="ferr-item" data-ferramenta="em-breve">
+                    <div class="ferr-item-icon"><i class="bi bi-file-earmark-arrow-down-fill"></i></div>
+                    <span class="ferr-item-nome">Exportação / Backup</span>
+                    <span class="ferr-badge em-breve">Em breve</span>
+                </button>
+
+                <div class="ferr-categoria-label">Sistema</div>
+
+                <button class="ferr-item" data-ferramenta="em-breve">
+                    <div class="ferr-item-icon"><i class="bi bi-gear-fill"></i></div>
+                    <span class="ferr-item-nome">Configurações</span>
+                    <span class="ferr-badge em-breve">Em breve</span>
+                </button>
+
+                <button class="ferr-item mb-2" data-ferramenta="em-breve">
+                    <div class="ferr-item-icon"><i class="bi bi-bell-fill"></i></div>
+                    <span class="ferr-item-nome">Notificações</span>
+                    <span class="ferr-badge em-breve">Em breve</span>
+                </button>
+
+            </div>
+
+            <div id="ferramentaConteudo">
+
+                <div class="ferramenta-painel active" id="painel-inicio">
+                    <div class="card-2" style="padding:1.25rem 1.5rem;">
+                        <p class="section-label mb-1">Disponíveis</p>
+                        <h3 style="margin-bottom:0.25rem;">Todas as Ferramentas</h3>
+                        <p style="font-size:0.85rem; color:var(--text-muted); margin:0;">
+                            Selecione uma ferramenta para começar. Novas funcionalidades são adicionadas continuamente.
+                        </p>
+                    </div>
+
+                    <div class="ferr-grade">
+
+                        <button class="ferr-card" data-ferramenta="cadastro-usuario">
+                            <div class="ferr-card-icon" style="background:#e8f2ff; color:var(--azul);">
+                                <i class="bi bi-person-plus-fill"></i>
+                            </div>
+                            <span class="ferr-card-nome">Cadastro de Usuários</span>
+                            <span class="ferr-card-tag" style="background:#dcfce7; color:#16a34a;">Ativo</span>
+                        </button>
+
+                        <div class="ferr-card disabled">
+                            <div class="ferr-card-icon" style="background:#f3e8ff; color:#7c3aed;">
+                                <i class="bi bi-shield-lock-fill"></i>
+                            </div>
+                            <span class="ferr-card-nome">Controle de Acesso</span>
+                            <span class="ferr-card-tag" style="background:var(--cinza-claro); color:var(--text-muted);">Em breve</span>
+                        </div>
+
+                        <div class="ferr-card disabled">
+                            <div class="ferr-card-icon" style="background:#fef3c7; color:#d97706;">
+                                <i class="bi bi-diagram-3-fill"></i>
+                            </div>
+                            <span class="ferr-card-nome">Gestão de Setores</span>
+                            <span class="ferr-card-tag" style="background:var(--cinza-claro); color:var(--text-muted);">Em breve</span>
+                        </div>
+
+                        <div class="ferr-card disabled">
+                            <div class="ferr-card-icon" style="background:#fce7f3; color:#be185d;">
+                                <i class="bi bi-bar-chart-fill"></i>
+                            </div>
+                            <span class="ferr-card-nome">Relatórios</span>
+                            <span class="ferr-card-tag" style="background:var(--cinza-claro); color:var(--text-muted);">Em breve</span>
+                        </div>
+
+                        <div class="ferr-card disabled">
+                            <div class="ferr-card-icon" style="background:#dcfce7; color:#16a34a;">
+                                <i class="bi bi-calendar2-check-fill"></i>
+                            </div>
+                            <span class="ferr-card-nome">Agenda Municipal</span>
+                            <span class="ferr-card-tag" style="background:var(--cinza-claro); color:var(--text-muted);">Em breve</span>
+                        </div>
+
+                        <div class="ferr-card disabled">
+                            <div class="ferr-card-icon" style="background:#e0f2fe; color:#0284c7;">
+                                <i class="bi bi-cloud-arrow-up-fill"></i>
+                            </div>
+                            <span class="ferr-card-nome">Importação de Dados</span>
+                            <span class="ferr-card-tag" style="background:var(--cinza-claro); color:var(--text-muted);">Em breve</span>
+                        </div>
+
+                        <div class="ferr-card disabled">
+                            <div class="ferr-card-icon" style="background:#fef3c7; color:#d97706;">
+                                <i class="bi bi-file-earmark-arrow-down-fill"></i>
+                            </div>
+                            <span class="ferr-card-nome">Exportação / Backup</span>
+                            <span class="ferr-card-tag" style="background:var(--cinza-claro); color:var(--text-muted);">Em breve</span>
+                        </div>
+
+                        <div class="ferr-card disabled">
+                            <div class="ferr-card-icon" style="background:var(--cinza-claro); color:var(--text-muted);">
+                                <i class="bi bi-gear-fill"></i>
+                            </div>
+                            <span class="ferr-card-nome">Configurações</span>
+                            <span class="ferr-card-tag" style="background:var(--cinza-claro); color:var(--text-muted);">Em breve</span>
+                        </div>
+
+                        <div class="ferr-card disabled">
+                            <div class="ferr-card-icon" style="background:#fee2e2; color:#dc2626;">
+                                <i class="bi bi-bell-fill"></i>
+                            </div>
+                            <span class="ferr-card-nome">Notificações</span>
+                            <span class="ferr-card-tag" style="background:var(--cinza-claro); color:var(--text-muted);">Em breve</span>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="ferramenta-painel" id="painel-cadastro-usuario">
+
+                    <div class="ferramenta-header">
+                        <div class="ferramenta-header-icon" style="background:#e8f2ff; color:var(--azul);">
+                            <i class="bi bi-person-plus-fill"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h4 class="ferramenta-titulo">Cadastro de Usuários</h4>
+                            <p class="ferramenta-desc">Adicione novos funcionários ao sistema e defina seus perfis de acesso.</p>
+                        </div>
+                        <a href="{% url 'ferramentas' %}" class="btn btn-primary" title="Voltar às ferramentas">
+                            <i class="bi bi-grid-fill"></i>
+                        </a>
+                    </div>
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="d-flex align-items-center gap-2 px-3 py-2 rounded-3"
+                                 style="background:{% if message.tags == 'success' %}#dcfce7;color:#16a34a;border:1px solid #bbf7d0{% else %}#fee2e2;color:#dc2626;border:1px solid #fecaca{% endif %};font-size:0.85rem;font-weight:500;">
+                                <i class="bi bi-{% if message.tags == 'success' %}check-circle-fill{% else %}exclamation-circle-fill{% endif %}"></i>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="usuario-form-card">
+                        <div class="d-flex align-items-center justify-content-between px-4 py-3"
+                             style="border-bottom:var(--border1); background:var(--cinza-claro);">
+                            <span style="font-size:0.85rem; font-weight:700; color:var(--azul-escuro);">
+                                <i class="bi bi-person-fill-add primary me-1"></i> Novo Usuário
+                            </span>
+                        </div>
+
+                        <div class="usuario-form-body">
+                            <form method="POST" action="{% url 'ferramentas' %}" id="formCadastroUsuario">
+                                {% csrf_token %}
+                                <input type="hidden" name="acao" value="cadastrar_usuario">
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-12 col-sm-6">
+                                        <label class="field-label" for="u_nome">Nome completo *</label>
+                                        <input type="text" id="u_nome" name="nome" class="field-input"
+                                            placeholder="Nome do servidor" required />
+                                    </div>
+                                    <div class="col-12 col-sm-6">
+                                        <label class="field-label" for="u_username">Nome de usuário *</label>
+                                        <input type="text" id="u_username" name="username" class="field-input"
+                                            placeholder="usuario.nome" required />
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-12 col-sm-6">
+                                        <label class="field-label" for="u_email">E-mail institucional *</label>
+                                        <input type="email" id="u_email" name="email" class="field-input"
+                                            placeholder="servidor@prefeitura.gov.br" required />
+                                    </div>
+                                    <div class="col-12 col-sm-6">
+                                        <label class="field-label" for="u_cargo">Cargo / Função *</label>
+                                        <input type="text" id="u_cargo" name="cargo" class="field-input"
+                                            placeholder="Ex: Analista Administrativo" required />
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-12 col-sm-6">
+                                        <label class="field-label" for="u_setor">Secretaria / Setor *</label>
+                                        <select id="u_setor" name="setor" class="field-input" required>
+                                            <option value="">Selecionar...</option>
+                                            <option>Administração Geral</option>
+                                            <option>Secretaria de Obras</option>
+                                            <option>Secretaria de Educação</option>
+                                            <option>Secretaria de Saúde</option>
+                                            <option>Secretaria da Fazenda</option>
+                                            <option>Assistência Social</option>
+                                            <option>Secretaria de Urbanismo</option>
+                                            <option>Secretaria de Meio Ambiente</option>
+                                            <option>Secretaria de Cultura</option>
+                                            <option>Secretaria de Transporte</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12 col-sm-6">
+                                        <label class="field-label" for="u_perfil">Perfil de Acesso *</label>
+                                        <select id="u_perfil" name="perfil" class="field-input" required>
+                                            <option value="">Selecionar...</option>
+                                            <option value="servidor">Servidor - acesso básico</option>
+                                            <option value="gestor">Gestor - acesso ao setor</option>
+                                            <option value="admin">Administrador - acesso total</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mb-4">
+                                    <div class="col-12 col-sm-6">
+                                        <label class="field-label" for="u_senha">Senha temporária *</label>
+                                        <div class="position-relative">
+                                            <input type="password" id="u_senha" name="senha" class="field-input"
+                                                placeholder="Mínimo 8 caracteres" required
+                                                style="padding-right:2.5rem;" />
+                                            <button type="button" class="position-absolute top-50 end-0 translate-middle-y border-0 bg-transparent pe-2"
+                                                style="color:var(--text-muted); cursor:pointer;"
+                                                onclick="toggleCampoSenha('u_senha', this)">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </div>
+                                        <small style="font-size:0.72rem; color:var(--text-muted);">
+                                            O usuário deverá alterar no primeiro acesso.
+                                        </small>
+                                    </div>
+                                    <div class="col-12 col-sm-6">
+                                        <label class="field-label" for="u_senha2">Confirmar senha *</label>
+                                        <div class="position-relative">
+                                            <input type="password" id="u_senha2" name="senha2" class="field-input"
+                                                placeholder="Repita a senha" required
+                                                style="padding-right:2.5rem;" />
+                                            <button type="button" class="position-absolute top-50 end-0 translate-middle-y border-0 bg-transparent pe-2"
+                                                style="color:var(--text-muted); cursor:pointer;"
+                                                onclick="toggleCampoSenha('u_senha2', this)">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </div>
+                                        <div id="senhaErroMsg" style="display:none; font-size:0.72rem; color:var(--vermelho); margin-top:0.25rem;">
+                                            <i class="bi bi-exclamation-circle-fill"></i> As senhas não coincidem.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                    <label class="d-flex align-items-center gap-2" style="font-size:0.82rem; color:var(--azul-escuro); cursor:pointer;">
+                                        <input type="checkbox" name="enviar_email" checked />
+                                        Enviar e-mail de boas-vindas ao usuário
+                                    </label>
+                                    <button type="submit" class="btn-primary d-flex align-items-center gap-2">
+                                        <i class="bi bi-person-check-fill"></i> Cadastrar Usuário
+                                    </button>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="usuarios-table-wrap">
+                        <div class="d-flex align-items-center justify-content-between px-4 py-3"
+                             style="border-bottom:var(--border1); background:var(--cinza-claro); flex-wrap:wrap; gap:0.5rem;">
+                            <span style="font-size:0.85rem; font-weight:700; color:var(--azul-escuro);">
+                                <i class="bi bi-people-fill primary me-1"></i> Usuários Cadastrados
+                            </span>
+                            <div class="position-relative">
+                                <i class="bi bi-search position-absolute"
+                                   style="left:0.6rem; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:0.75rem;"></i>
+                                <input type="text" id="buscaUsuarios" placeholder="Buscar usuário..."
+                                    style="background:var(--branco); border:var(--border1-5); border-radius:8px; padding:0.35rem 0.75rem 0.35rem 1.9rem; font-size:0.78rem; color:var(--azul-escuro); outline:none; width:200px;" />
+                            </div>
+                        </div>
+
+                        <div style="overflow-x:auto;">
+                            <table class="usuarios-table">
+                                <thead>
+                                    <tr>
+                                        <th>Usuário</th>
+                                        <th>Setor</th>
+                                        <th>Cargo</th>
+                                        <th>Perfil</th>
+                                        <th>Status</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabelaUsuarios">
+                                    {% if lista_usuarios %}
+                                        {% for u in lista_usuarios %}
+                                        <tr>
+                                            <td>
+                                                <div class="user-cell">
+                                                    <div class="user-table-avatar">{{ u.nome|slice:":2"|upper }}</div>
+                                                    <div>
+                                                        <div style="font-weight:600;">{{ u.nome }}</div>
+                                                        <div style="font-size:0.72rem; color:var(--text-muted);">{{ u.email }}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>{{ u.setor }}</td>
+                                            <td>{{ u.cargo }}</td>
+                                            <td>
+                                                <span class="role-badge role-{{ u.perfil }}">{{ u.perfil|capfirst }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="status-badge {% if u.ativo %}status-aberto{% else %}status-encerrado{% endif %}">
+                                                    {% if u.ativo %}Ativo{% else %}Inativo{% endif %}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <button class="table-action-btn" title="Editar"><i class="bi bi-pencil"></i></button>
+                                                    <button class="table-action-btn danger" title="Desativar"><i class="bi bi-slash-circle"></i></button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="6">
+                                                <div style="text-align:center; padding:1.5rem; color:var(--text-muted); font-size:0.85rem;">
+                                                    <i class="bi bi-people" style="font-size:1.5rem; display:block; margin-bottom:0.5rem; color:var(--border-color);"></i>
+                                                    Nenhum usuário cadastrado ainda. Use o formulário acima para adicionar.
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="table-paginacao">
+                            <span>{{ lista_usuarios|length|default:"0" }} usuário(s) cadastrado(s)</span>
+                            <div class="d-flex gap-1">
+                                <button class="pag-btn" disabled><i class="bi bi-chevron-left"></i></button>
+                                <button class="pag-btn" disabled><i class="bi bi-chevron-right"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- EM BREVE -->
+                <div class="ferramenta-painel" id="painel-em-breve">
+                    <div class="ferramenta-header">
+                        <div class="ferramenta-header-icon" style="background:var(--cinza-claro); color:var(--text-muted);">
+                            <i class="bi bi-tools"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h4 class="ferramenta-titulo">Ferramenta em desenvolvimento</h4>
+                            <p class="ferramenta-desc">Esta funcionalidade ainda não está disponível.</p>
+                        </div>
+                        <a href="{% url 'ferramentas' %}" class="btn btn-primary">
+                            <i class="bi bi-grid-fill"></i>
+                        </a>
+                    </div>
+
+                    <div class="em-breve-wrap">
+                        <i class="bi bi-hourglass-split"></i>
+                        <h4 style="margin-bottom:0.5rem;">Em desenvolvimento</h4>
+                        <p>Esta ferramenta está sendo desenvolvida e estará disponível em breve.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const itensNav  = document.querySelectorAll('.ferr-item[data-ferramenta]');
+    const cardsGrade = document.querySelectorAll('.ferr-card[data-ferramenta]');
+
+    function ativarFerramenta(id) {
+        document.querySelectorAll('.ferramenta-painel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.ferr-item').forEach(i => i.classList.remove('active'));
+
+        const alvoId = id === 'em-breve' ? 'painel-em-breve' : `painel-${id}`;
+        const painel = document.getElementById(alvoId);
+        if (painel) painel.classList.add('active');
+
+        const navItem = document.querySelector(`.ferr-item[data-ferramenta="${id}"]`);
+        if (navItem) navItem.classList.add('active');
+
+        document.getElementById('ferramentaConteudo').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    itensNav.forEach(btn => {
+        btn.addEventListener('click', () => ativarFerramenta(btn.dataset.ferramenta));
+    });
+
+    cardsGrade.forEach(card => {
+        card.addEventListener('click', () => ativarFerramenta(card.dataset.ferramenta));
+    });
+
+    document.getElementById('ferrBusca').addEventListener('input', function() {
+        const termo = this.value.toLowerCase();
+        document.querySelectorAll('.ferr-item[data-ferramenta]').forEach(item => {
+            const nome = item.querySelector('.ferr-item-nome').textContent.toLowerCase();
+            item.style.display = nome.includes(termo) ? '' : 'none';
+        });
+        document.querySelectorAll('.ferr-categoria-label').forEach(label => {
+            label.style.display = termo ? 'none' : '';
+        });
+    });
+
+    function toggleCampoSenha(id, btn) {
+        const input = document.getElementById(id);
+        const icon  = btn.querySelector('i');
+        const isPass = input.type === 'password';
+        input.type = isPass ? 'text' : 'password';
+        icon.className = isPass ? 'bi bi-eye-slash' : 'bi bi-eye';
+    }
+
+    document.getElementById('u_senha2').addEventListener('input', function() {
+        const p1  = document.getElementById('u_senha').value;
+        const msg = document.getElementById('senhaErroMsg');
+        if (this.value && this.value !== p1) {
+            msg.style.display = 'block';
+            this.classList.add('is-invalid');
+        } else {
+            msg.style.display = 'none';
+            this.classList.remove('is-invalid');
+        }
+    });
+
+    document.getElementById('formCadastroUsuario').addEventListener('submit', function(e) {
+        const p1 = document.getElementById('u_senha').value;
+        const p2 = document.getElementById('u_senha2').value;
+        if (p1 !== p2) {
+            e.preventDefault();
+            document.getElementById('senhaErroMsg').style.display = 'block';
+        }
+    });
+
+    document.getElementById('buscaUsuarios').addEventListener('input', function() {
+        const termo = this.value.toLowerCase();
+        document.querySelectorAll('#tabelaUsuarios tr').forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(termo) ? '' : 'none';
+        });
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('ferramenta')) {
+        ativarFerramenta(urlParams.get('ferramenta'));
+    }
+</script>
+
+{% endblock content %}
