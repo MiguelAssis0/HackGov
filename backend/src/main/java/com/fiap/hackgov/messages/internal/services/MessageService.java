@@ -13,7 +13,6 @@ import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
 import com.fiap.hackgov.shared.infra.pagination.PageResponseDTO;
 import com.fiap.hackgov.shared.infra.pagination.PaginationMapper;
-import com.fiap.hackgov.shared.infra.services.VerificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,7 +35,6 @@ public class MessageService {
     private final MessageMapper messageMapper;
 
     private final PaginationMapper paginationMapper;
-    private final VerificationService verificationService;
 
     @Transactional
     public MessageDTO sendMessage(Employee authenticatedEmployee, SendMessageDTO dto) {

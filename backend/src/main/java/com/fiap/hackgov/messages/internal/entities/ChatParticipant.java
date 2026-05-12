@@ -6,6 +6,9 @@ import com.fiap.hackgov.messages.internal.entities.enums.ChatRole;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -19,6 +22,7 @@ import java.util.UUID;
                 @UniqueConstraint(columnNames = {"chat_id", "employee_id"})
         }
 )
+@Filter(name = "cityHallFilter", condition = "city_hall_id = :cityHallId")
 public class ChatParticipant {
 
     @Id

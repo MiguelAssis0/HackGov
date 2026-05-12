@@ -4,10 +4,14 @@ import com.fiap.hackgov.cityhall_management.internal.DTOs.Sector.CreateSectorDTO
 import com.fiap.hackgov.cityhall_management.internal.DTOs.Sector.SectorResponseDTO;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.cityhall_management.internal.entities.Sector;
+import com.fiap.hackgov.cityhall_management.internal.entities.enums.Actions;
 import com.fiap.hackgov.cityhall_management.internal.mapper.SectorMapper;
 import com.fiap.hackgov.cityhall_management.internal.repositories.SectorRepository;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
-import com.fiap.hackgov.shared.infra.services.VerificationService;
+import com.fiap.hackgov.shared.infra.permissions.RequiresPermission;
+import com.fiap.hackgov.shared.infra.security.SecurityContext;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,8 +26,9 @@ public class SectorService {
     private final SectorRepository sectorRepository;
     private final SectorMapper sectorMapper;
     private final CityHallService cityHallService;
-    private final VerificationService verificationService;
+    private final SecurityContext securityContext;
 
+    @RequiresPermission(resource = "SECTOR", action = Actions.CREATE)
     public SectorResponseDTO createSector(CreateSectorDTO sectorDTO, Employee employee) {
 
         var cityHall = cityHallService.findById(sectorDTO.cityHall().getId());
@@ -31,9 +36,6 @@ public class SectorService {
         if (cityHall == null) {
             throw new BusinessException("City Hall not found");
         }
-
-        verificationService.checkCityHallAccess(employee, cityHall);
-        verificationService.checkPermission(employee, "CREATE_SECTOR");
 
         Sector sector = sectorMapper.toEntity(sectorDTO);
         sector.setCityHall(cityHall);
@@ -43,18 +45,19 @@ public class SectorService {
         return sectorMapper.toDTO(sector);
     }
 
+    @RequiresPermission(resource = "SECTOR", action = Actions.READ)
     public Page<SectorResponseDTO> getAllSectors(Pageable pageable, Employee employee) {
 
-        verificationService.checkPermission(employee, "VIEW_SECTORS");
+        System.out.println("PERMISSIONS: " + securityContext.getCurrentPermissions());
+        System.out.println("REQUIRED: SECTOR:READ");
 
         return sectorRepository
                 .findAllByCityHall_Id(employee.getCityHallId().getId(), pageable)
                 .map(sectorMapper::toDTO);
     }
 
+    @RequiresPermission(resource = "SECTOR", action = Actions.READ)
     public SectorResponseDTO getById(UUID id, Employee employee) {
-
-        verificationService.checkPermission(employee, "VIEW_SECTORS");
 
         Sector sector = sectorRepository
                 .findById(id)
@@ -63,9 +66,8 @@ public class SectorService {
         return sectorMapper.toDTO(sector);
     }
 
+    @RequiresPermission(resource = "SECTOR", action = Actions.READ)
     public SectorResponseDTO getByName(String name, Employee employee) {
-
-        verificationService.checkPermission(employee, "VIEW_SECTORS");
 
         Sector sector = sectorRepository
                 .findByNameAndCityHall_Id(name, employee.getCityHallId().getId())

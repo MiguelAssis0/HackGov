@@ -1,7 +1,7 @@
 package com.fiap.hackgov.cityhall_management.internal.entities.embeddables;
 
-import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.cityhall_management.internal.entities.Occupation;
+import com.fiap.hackgov.cityhall_management.internal.entities.Permissions;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -16,17 +16,18 @@ import java.io.Serializable;
 @Setter
 @EqualsAndHashCode
 @Embeddable
-public class EmployeeJobLevelPK implements Serializable {
+public class PermissionsOccupationPK implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     @ManyToOne
-    @JoinColumn(name = "employee_id")
-    private Employee employee;
+    @JoinColumn(name = "permission_id")
+    private Permissions permission;
 
     @ManyToOne
-    @JoinColumn(name = "joblevel_id")
+    @JoinColumn(name = "occupation_id")
     private Occupation occupation;
+
 
 }

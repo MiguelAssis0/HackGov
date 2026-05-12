@@ -2,7 +2,8 @@ package com.fiap.hackgov.shared.infra.config;
 
 import com.fiap.hackgov.auth.internal.entities.enums.Roles;
 import com.fiap.hackgov.cityhall_management.internal.entities.*;
-import com.fiap.hackgov.cityhall_management.internal.entities.enums.LevelJobLevel;
+import com.fiap.hackgov.cityhall_management.internal.entities.enums.Actions;
+import com.fiap.hackgov.cityhall_management.internal.entities.enums.LevelOccupation;
 import com.fiap.hackgov.cityhall_management.internal.entities.enums.TypeJobLevel;
 import com.fiap.hackgov.cityhall_management.internal.entities.enums.UF;
 import com.fiap.hackgov.cityhall_management.internal.repositories.*;
@@ -32,13 +33,11 @@ public class Mocks implements CommandLineRunner {
     @Autowired
     private SectorRepository sectorRepository;
     @Autowired
-    private JobLevelRepository jobLevelRepository;
-    @Autowired
-    private JobLevelSectorRepository jobLevelSectorRepository;
+    private OccupationRepository occupationRepository;
     @Autowired
     private PermissionsRepository permissionsRepository;
     @Autowired
-    private PermissionsJobLevelRepository permissionsJobLevelRepository;
+    private PermissionsOccupationRepository permissionsOccupationRepository;
     @Autowired
     private EmployeeRepository employeeRepository;
     @Autowired
@@ -102,69 +101,60 @@ public class Mocks implements CommandLineRunner {
         // -------------------------
         // JobLevels
         // -------------------------
-        JobLevel analista = new JobLevel();
+        Occupation analista = new Occupation();
         analista.setName("Analista de Sistemas");
         analista.setDescription("Responsável por análise e desenvolvimento de sistemas");
-        analista.getTypes().add(TypeJobLevel.CARGO_COMISSAO);
-        analista.setLevel(LevelJobLevel.JUNIOR);
-        jobLevelRepository.save(analista);
+        analista.setTypes(TypeJobLevel.CARGO_COMISSAO);
+        analista.setLevel(LevelOccupation.JUNIOR);
+        occupationRepository.save(analista);
 
-        JobLevel gerente = new JobLevel();
+        Occupation gerente = new Occupation();
         gerente.setName("Gerente de TI");
         gerente.setDescription("Responsável pela gestão da equipe de TI");
-        gerente.getTypes().add(TypeJobLevel.CONCURSADO);
-        gerente.setLevel(LevelJobLevel.SENIOR);
-        jobLevelRepository.save(gerente);
+        gerente.setTypes(TypeJobLevel.CONCURSADO);
+        gerente.setLevel(LevelOccupation.SENIOR);
+        occupationRepository.save(gerente);
 
-        JobLevel assistente = new JobLevel();
+        Occupation assistente = new Occupation();
         assistente.setName("Assistente Administrativo");
         assistente.setDescription("Suporte administrativo geral");
-        assistente.getTypes().add(TypeJobLevel.TERCEIRIZADO);
-        assistente.setLevel(LevelJobLevel.JUNIOR);
-        jobLevelRepository.save(assistente);
-
-        // -------------------------
-        // JobLevelSector
-        // -------------------------
-        jobLevelSectorRepository.save(new JobLevelSector(sectorTI, analista));
-        jobLevelSectorRepository.save(new JobLevelSector(sectorTI, gerente));
-        jobLevelSectorRepository.save(new JobLevelSector(sectorRH, assistente));
-        jobLevelSectorRepository.save(new JobLevelSector(sectorFinanceiro, assistente));
-        jobLevelSectorRepository.save(new JobLevelSector(sectorFinanceiro, analista));
+        assistente.setTypes(TypeJobLevel.TERCEIRIZADO);
+        assistente.setLevel(LevelOccupation.JUNIOR);
+        occupationRepository.save(assistente);
 
         // -------------------------
         // Permissions
         // -------------------------
         Permissions permRead = new Permissions();
-        permRead.setName("Leitura");
-        permRead.setCodename("READ");
+        permRead.setResource("SECTOR");
+        permRead.getAction().add(Actions.READ);
         permissionsRepository.save(permRead);
 
         Permissions permWrite = new Permissions();
-        permWrite.setName("Escrita");
-        permWrite.setCodename("WRITE");
+        permWrite.setResource("SECTOR");
+        permWrite.getAction().add(Actions.CREATE);
         permissionsRepository.save(permWrite);
 
         Permissions permDelete = new Permissions();
-        permDelete.setName("Exclusão");
-        permDelete.setCodename("DELETE");
+        permDelete.setResource("SECTOR");
+        permDelete.getAction().add(Actions.DELETE);
         permissionsRepository.save(permDelete);
 
         Permissions permAdmin = new Permissions();
-        permAdmin.setName("Administrador");
-        permAdmin.setCodename("ADMIN");
+        permAdmin.setResource("SECTOR");
+        permAdmin.getAction().add(Actions.UPDATE);
         permissionsRepository.save(permAdmin);
 
         // -------------------------
         // PermissionsJobLevel
         // -------------------------
-        permissionsJobLevelRepository.save(new PermissionsJobLevel(permRead, analista));
-        permissionsJobLevelRepository.save(new PermissionsJobLevel(permWrite, analista));
-        permissionsJobLevelRepository.save(new PermissionsJobLevel(permRead, gerente));
-        permissionsJobLevelRepository.save(new PermissionsJobLevel(permWrite, gerente));
-        permissionsJobLevelRepository.save(new PermissionsJobLevel(permDelete, gerente));
-        permissionsJobLevelRepository.save(new PermissionsJobLevel(permAdmin, gerente));
-        permissionsJobLevelRepository.save(new PermissionsJobLevel(permRead, assistente));
+        permissionsOccupationRepository.save(new PermissionsOccupation(permRead, analista));
+        permissionsOccupationRepository.save(new PermissionsOccupation(permWrite, analista));
+        permissionsOccupationRepository.save(new PermissionsOccupation(permRead, gerente));
+        permissionsOccupationRepository.save(new PermissionsOccupation(permWrite, gerente));
+        permissionsOccupationRepository.save(new PermissionsOccupation(permDelete, gerente));
+        permissionsOccupationRepository.save(new PermissionsOccupation(permAdmin, gerente));
+        permissionsOccupationRepository.save(new PermissionsOccupation(permRead, assistente));
 
         Employee admin = new Employee();
         admin.setFirstName("Admin");
@@ -182,7 +172,7 @@ public class Mocks implements CommandLineRunner {
         admin.setHoursWorked(1840.0);
         admin.setCityHallId(cityHallSP);
 
-        admin.getEmployeeJobLevels().add(new EmployeeJobLevel(admin, analista));
+        admin.setOccupationId(analista);
 
         employeeRepository.save(admin);
 
@@ -203,7 +193,7 @@ public class Mocks implements CommandLineRunner {
         maria.setHoursWorked(2200.0);
         maria.setCityHallId(cityHallSP);
 
-        maria.getEmployeeJobLevels().add(new EmployeeJobLevel(maria, gerente));
+        maria.setOccupationId(gerente);
 
         employeeRepository.save(maria);
 
@@ -224,7 +214,7 @@ public class Mocks implements CommandLineRunner {
         carlos.setHoursWorked(920.0);
         carlos.setCityHallId(cityHallRJ);
 
-        carlos.getEmployeeJobLevels().add(new EmployeeJobLevel(carlos, assistente));
+        carlos.setOccupationId(assistente);
 
         employeeRepository.save(carlos);
 
@@ -244,7 +234,7 @@ public class Mocks implements CommandLineRunner {
         ana.setHoursWorked(700.0);
         ana.setCityHallId(cityHallSP);
 
-        ana.getEmployeeJobLevels().add(new EmployeeJobLevel(ana, assistente));
+        ana.setOccupationId(assistente);
 
         employeeRepository.save(ana);
 
@@ -264,7 +254,7 @@ public class Mocks implements CommandLineRunner {
         joao.setHoursWorked(1600.0);
         joao.setCityHallId(cityHallSP);
 
-        joao.getEmployeeJobLevels().add(new EmployeeJobLevel(joao, analista));
+        joao.setOccupationId(analista);
 
         employeeRepository.save(joao);
 
@@ -284,7 +274,7 @@ public class Mocks implements CommandLineRunner {
         fernanda.setHoursWorked(2100.0);
         fernanda.setCityHallId(cityHallRJ);
 
-        fernanda.getEmployeeJobLevels().add(new EmployeeJobLevel(fernanda, analista));
+        fernanda.setOccupationId(analista);
 
         employeeRepository.save(fernanda);
 
@@ -304,7 +294,7 @@ public class Mocks implements CommandLineRunner {
         lucas.setHoursWorked(300.0);
         lucas.setCityHallId(cityHallRJ);
 
-        lucas.getEmployeeJobLevels().add(new EmployeeJobLevel(lucas, assistente));
+        lucas.setOccupationId(assistente);
 
         employeeRepository.save(lucas);
 

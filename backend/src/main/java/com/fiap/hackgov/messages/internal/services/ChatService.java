@@ -15,7 +15,6 @@ import com.fiap.hackgov.messages.internal.repositories.ChatParticipantRepository
 import com.fiap.hackgov.messages.internal.repositories.ChatRepository;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.services.TokenService;
-import com.fiap.hackgov.shared.infra.services.VerificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +40,6 @@ public class ChatService {
     private final ChatMapper chatMapper;
 
     private final TokenService tokenService;
-    private final VerificationService verificationService;
 
     @Transactional
     public ChatDTO createPrivateChat(Employee authenticatedEmployee, CreatePrivateChatDTO dto) {
@@ -51,11 +49,6 @@ public class ChatService {
 
         if (authenticatedEmployee.getId().equals(target.getId())) {
             throw new BusinessException("You cannot create a chat with yourself");
-        }
-
-        if (!verificationService.isSameCityHall(authenticatedEmployee, target.getCityHallId())) {
-
-            throw new BusinessException("Employees must belong to the same city hall");
         }
 
         Optional<Chat> existingChat = chatRepository.findPrivateChatBetweenEmployees(authenticatedEmployee.getId(), target.getId());

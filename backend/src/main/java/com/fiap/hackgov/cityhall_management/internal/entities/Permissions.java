@@ -1,5 +1,6 @@
 package com.fiap.hackgov.cityhall_management.internal.entities;
 
+import com.fiap.hackgov.cityhall_management.internal.entities.enums.Actions;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,11 +31,11 @@ public class Permissions implements Serializable {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    private String name;
-    private String codename;
+    private String resource;
+    private List<Actions> action = new ArrayList<>();
 
-    @OneToMany(mappedBy = "pk.permission", cascade = CascadeType.ALL)
-    private List<PermissionsJobLevel> jobLevels = new ArrayList<>();
+    @OneToMany(mappedBy = "pk.permission", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<PermissionsOccupation> occupations = new ArrayList<>();
 
     @CreationTimestamp
     private LocalDateTime createdAt;

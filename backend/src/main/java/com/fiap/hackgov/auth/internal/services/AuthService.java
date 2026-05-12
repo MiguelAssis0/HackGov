@@ -125,7 +125,7 @@ public class AuthService {
         if (user.getTwoFactor()) {
             auditLog.with(log).event("2fa_sent").email(user.getEmail()).level(AuditLog.Level.INFO).log();
             twoFactorAuthService.sendTwoFactorCode(user.getEmail(), user.getFullName());
-            return new LoginResponseDTO(null, null, user.getEmail(), user.getFullName(), user.getRole(), true);
+            return new LoginResponseDTO(null, null, true);
         }
 
         user.setLastLogin(LocalDateTime.now());
@@ -136,7 +136,7 @@ public class AuthService {
 
         auditLog.with(log).event("login_success").email(user.getEmail()).level(AuditLog.Level.INFO).log();
 
-        return new LoginResponseDTO(accessToken, refreshToken, user.getEmail(), user.getFullName(), user.getRole(), false);
+        return new LoginResponseDTO(accessToken, refreshToken, false);
     }
 
     public TwoFactorResponseDTO verifyTwoFactor(TwoFactorRequestDTO twoFactorRequest, String clientIp) {

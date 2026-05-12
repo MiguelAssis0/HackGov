@@ -1,6 +1,6 @@
 package com.fiap.hackgov.cityhall_management.internal.entities;
 
-import com.fiap.hackgov.cityhall_management.internal.entities.embeddables.PermissionsJobLevelPK;
+import com.fiap.hackgov.cityhall_management.internal.entities.embeddables.PermissionsOccupationPK;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -16,17 +16,17 @@ import java.io.Serializable;
 @Getter
 @Setter
 @NoArgsConstructor
-public class PermissionsJobLevel implements Serializable {
+public class PermissionsOccupation implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     @EmbeddedId
-    private PermissionsJobLevelPK pk = new PermissionsJobLevelPK();
+    private PermissionsOccupationPK pk = new PermissionsOccupationPK();
 
-    public PermissionsJobLevel(Permissions permission, JobLevel jobLevel) {
+    public PermissionsOccupation(Permissions permission, Occupation occupation) {
         this.pk.setPermission(permission);
-        this.pk.setJobLevel(jobLevel);
+        this.pk.setOccupation(occupation);
     }
 
 }

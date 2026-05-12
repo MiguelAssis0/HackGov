@@ -3,6 +3,8 @@ package com.fiap.hackgov.shared.infra.filters;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fiap.hackgov.auth.internal.services.UserDetailsServiceImpl;
+import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
+import com.fiap.hackgov.cityhall_management.internal.repositories.EmployeeRepository;
 import com.fiap.hackgov.shared.infra.exceptions.TokenInvalidException;
 import com.fiap.hackgov.shared.infra.exceptions.controllers.StandardError;
 import com.fiap.hackgov.shared.infra.services.TokenBlacklistService;
@@ -16,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -38,6 +40,9 @@ public class JwtAuthenticationFilter extends BaseSecurityFilter {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
@@ -55,8 +60,10 @@ public class JwtAuthenticationFilter extends BaseSecurityFilter {
 
                 var userLogin = tokenService.getSubject(token);
 
-                UserDetails user = userDetailsService.loadUserByUsername(userLogin);
-                var auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                Employee employee = (Employee) userDetailsService.loadUserByUsername(userLogin);
+
+                var auth = new UsernamePasswordAuthenticationToken(employee, null, employee.getAuthorities());
+
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
 

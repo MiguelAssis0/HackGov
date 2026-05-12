@@ -1,37 +1,37 @@
 package com.fiap.hackgov.cityhall_management.internal.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fiap.hackgov.cityhall_management.internal.entities.embeddables.JobLevelSectorPK;
+import com.fiap.hackgov.cityhall_management.internal.entities.embeddables.SectorToolsPK;
+import jakarta.persistence.Embeddable;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.*;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
-@NoArgsConstructor
+@Entity
+@Table(name = "sector_tools")
 @Getter
 @Setter
-@Entity
-@Table(name = "job_levels_sectors")
-public class JobLevelSector implements Serializable {
-
+@NoArgsConstructor
+@Filter(name = "cityHallFilter", condition = "city_hall_id = :cityHallId")
+@Filter(name = "sectorFilter", condition = "sector_id = :sectorId")
+public class SectorTools implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
     @EmbeddedId
-    @JsonIgnore
-    private JobLevelSectorPK pk = new JobLevelSectorPK();
+    private SectorToolsPK pk = new SectorToolsPK();
 
-    public JobLevelSector(Sector sector, JobLevel jobLevel) {
+    public SectorTools(Sector sector, Tools tools) {
         this.pk.setSector(sector);
-        this.pk.setJobLevel(jobLevel);
+        this.pk.setTools(tools);
     }
 
     @CreationTimestamp

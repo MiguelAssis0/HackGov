@@ -8,14 +8,17 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -23,11 +26,9 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "employees")
+@Filter(name = "cityHallFilter", condition = "city_hall_id = :cityHallId")
+@Filter(name = "sectorFilter", condition = "sector_id = :sectorId")
 public class Employee extends User implements Serializable {
-
-    @OneToMany(mappedBy = "pk.employee", cascade = CascadeType.ALL)
-    @JsonIgnore
-    private List<EmployeeJobLevel> employeeJobLevels = new ArrayList<>();
 
     private Double salary;
 
@@ -46,10 +47,24 @@ public class Employee extends User implements Serializable {
     @JsonIgnore
     private CityHall cityHallId;
 
+    @ManyToOne
+    @JoinColumn(name = "sector_id")
+    @JsonIgnore
+    private Sector sectorId;
+
+    @ManyToOne
+    private Occupation occupationId;
+
+
     @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_EMPLOYEE"));
+    }
+
+    @Override
+    public String toString() {
+        return "Employee [id=" + this.getId() + ", name=" + this.getFullName() + "]";
     }
 
 }

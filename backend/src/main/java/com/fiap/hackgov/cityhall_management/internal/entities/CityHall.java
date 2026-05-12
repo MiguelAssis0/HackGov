@@ -2,12 +2,13 @@ package com.fiap.hackgov.cityhall_management.internal.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.*;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -22,6 +23,7 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "cityhalls")
+@Filter(name = "cityHallFilter", condition = "city_hall_id = :cityHallId")
 public class CityHall implements Serializable {
 
     @Serial

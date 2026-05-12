@@ -1,6 +1,6 @@
 package com.fiap.hackgov.cityhall_management.internal.entities.embeddables;
 
-import com.fiap.hackgov.cityhall_management.internal.entities.JobLevel;
+import com.fiap.hackgov.cityhall_management.internal.entities.Occupation;
 import com.fiap.hackgov.cityhall_management.internal.entities.Sector;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.JoinColumn;
@@ -27,6 +27,6 @@ public class JobLevelSectorPK implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "joblevel_id")
-    private JobLevel jobLevel;
+    private Occupation occupation;
 
 }

@@ -3,12 +3,12 @@ package com.fiap.hackgov.tasks.internal.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -19,6 +19,8 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "tasks")
+@Filter(name = "cityHallFilter", condition = "city_hall_id = :cityHallId")
+@Filter(name = "sectorFilter", condition = "sector_id = :sectorId")
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -30,6 +32,9 @@ public class Task {
 
     @ManyToOne
     private Employee responsible;
+
+    @ManyToOne
+    private Employee createdBy;
 
     @ManyToOne
     @JsonIgnore

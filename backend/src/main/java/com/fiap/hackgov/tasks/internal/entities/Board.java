@@ -4,6 +4,9 @@ import com.fiap.hackgov.cityhall_management.internal.entities.CityHall;
 import com.fiap.hackgov.cityhall_management.internal.entities.Sector;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 
 import java.util.List;
 import java.util.UUID;
@@ -14,6 +17,8 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "boards")
+@Filter(name = "cityHallFilter", condition = "city_hall_id = :cityHallId")
+@Filter(name = "sectorFilter", condition = "sector_id = :sectorId")
 public class Board {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

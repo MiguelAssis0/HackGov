@@ -1,6 +1,6 @@
 package com.fiap.hackgov.cityhall_management.internal.entities;
 
-import com.fiap.hackgov.cityhall_management.internal.entities.enums.LevelJobLevel;
+import com.fiap.hackgov.cityhall_management.internal.entities.enums.LevelOccupation;
 import com.fiap.hackgov.cityhall_management.internal.entities.enums.TypeJobLevel;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -23,7 +23,7 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "job_levels")
-public class JobLevel implements Serializable {
+public class Occupation implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -36,22 +36,16 @@ public class JobLevel implements Serializable {
 
     private String description;
 
-    @ElementCollection
-    @CollectionTable(name = "job_level_types", joinColumns = @JoinColumn(name = "job_level_id"))
-    @Column(name = "type")
     @Enumerated(EnumType.STRING)
-    private final List<TypeJobLevel> types = new ArrayList<>();
+    private TypeJobLevel types;
 
-    private LevelJobLevel level;
+    private LevelOccupation level;
 
-    @OneToMany(mappedBy = "pk.jobLevel", cascade = CascadeType.ALL)
-    private List<EmployeeJobLevel> employees = new ArrayList<>();
+    @OneToMany(mappedBy = "pk.occupation", cascade = CascadeType.ALL)
+    private List<PermissionsOccupation> permissions = new ArrayList<>();
 
-    @OneToMany(mappedBy = "pk.jobLevel", cascade = CascadeType.ALL)
-    private List<PermissionsJobLevel> permissions = new ArrayList<>();
-
-    @OneToMany(mappedBy = "pk.jobLevel", cascade = CascadeType.ALL)
-    private List<JobLevelSector> sectors = new ArrayList<>();
+    @ManyToOne
+    private Sector sectorId;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

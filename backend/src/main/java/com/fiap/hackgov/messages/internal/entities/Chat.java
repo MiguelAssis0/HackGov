@@ -8,6 +8,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,6 +23,7 @@ import java.util.UUID;
 @Table(name = "chats")
 @Getter
 @Setter
+@Filter(name = "cityHallFilter", condition = "city_hall_id = :cityHallId")
 public class Chat {
 
     @Id

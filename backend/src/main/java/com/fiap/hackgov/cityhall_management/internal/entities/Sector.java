@@ -1,12 +1,12 @@
 package com.fiap.hackgov.cityhall_management.internal.entities;
 
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.*;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -21,6 +21,7 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "sectors")
+@Filter(name = "cityHallFilter", condition = "city_hall_id = :cityHallId")
 public class Sector implements Serializable {
 
     @Serial
@@ -37,12 +38,18 @@ public class Sector implements Serializable {
     @JoinColumn(name = "cityHall_id")
     private CityHall cityHall;
 
-    @OneToMany(mappedBy = "pk.sector", cascade = CascadeType.ALL)
-    private List<JobLevelSector> jobLevels = new ArrayList<>();
+    @ManyToOne
+    private Occupation occupationId;
+
+    @OneToMany
+    private List<SectorTools> sectorTools = new ArrayList<>();
+
 
     @CreationTimestamp
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+
 }
