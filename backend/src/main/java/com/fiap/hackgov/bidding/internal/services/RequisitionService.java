@@ -4,14 +4,15 @@ import com.fiap.hackgov.bidding.internal.DTOs.processHistory.ProcessHistoryDTO;
 import com.fiap.hackgov.bidding.internal.DTOs.processStatus.AdvanceRequisitionStageDTO;
 import com.fiap.hackgov.bidding.internal.DTOs.requisiton.CreateRequisitionDTO;
 import com.fiap.hackgov.bidding.internal.DTOs.requisiton.RequisitionResponseDTO;
-import com.fiap.hackgov.bidding.internal.entities.ETP;
-import com.fiap.hackgov.bidding.internal.entities.ProcessHistory;
-import com.fiap.hackgov.bidding.internal.entities.ProcessStatus;
-import com.fiap.hackgov.bidding.internal.entities.Requisition;
+import com.fiap.hackgov.bidding.internal.entities.*;
+import com.fiap.hackgov.bidding.internal.entities.enums.ApprovalSector;
+import com.fiap.hackgov.bidding.internal.entities.enums.ApprovalStatus;
+import com.fiap.hackgov.bidding.internal.entities.enums.HistoryEventType;
 import com.fiap.hackgov.bidding.internal.entities.enums.ProcessStage;
 import com.fiap.hackgov.bidding.internal.mappers.ETPMapper;
 import com.fiap.hackgov.bidding.internal.mappers.ProcessHistoryMapper;
 import com.fiap.hackgov.bidding.internal.mappers.RequisitionMapper;
+import com.fiap.hackgov.bidding.internal.repositories.ApprovalRepository;
 import com.fiap.hackgov.bidding.internal.repositories.ProcessHistoryRepository;
 import com.fiap.hackgov.bidding.internal.repositories.ProcessStatusRepository;
 import com.fiap.hackgov.bidding.internal.repositories.RequisitionRepository;
@@ -29,7 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,13 +42,14 @@ public class RequisitionService {
     private final RequisitionRepository requisitionRepository;
     private final ProcessStatusRepository processStatusRepository;
     private final ProcessHistoryRepository processHistoryRepository;
+    private final SectorRepository sectorRepository;
+    private final ApprovalRepository approvalRepository;
+    private final ProcessHistoryService processHistoryService;
+
     private final ProcessHistoryMapper processHistoryMapper;
     private final PaginationMapper paginationMapper;
-
     private final RequisitionMapper requisitionMapper;
     private final ETPMapper etpMapper;
-
-    private final SectorRepository sectorRepository;
 
     public PageResponseDTO<RequisitionResponseDTO> findAll(Pageable pageable) {
 
@@ -65,6 +67,7 @@ public class RequisitionService {
         return requisitionMapper.toDTO(requisition);
     }
 
+    @Transactional
     public RequisitionResponseDTO create(Employee responsible, CreateRequisitionDTO dto) {
 
         Requisition requisition = requisitionMapper.toEntity(dto);
@@ -89,9 +92,11 @@ public class RequisitionService {
 
         processStatusRepository.save(processStatus);
 
-        ProcessHistory history = requisitionMapper.toInitialHistory(requisition, responsible);
+        processHistoryService.createProcessHistory(requisition, responsible, "Requisição criada", ProcessStage.REQUISICAO_CADASTRADA, HistoryEventType.REQUISITION_CREATED);
 
-        processHistoryRepository.save(history);
+        processHistoryService.createProcessHistory(requisition, responsible, "Requisição enviada para homologação do secretário", ProcessStage.HOMOLOGACAO_SECRETARIO, HistoryEventType.STAGE_SENT);
+
+        createApprovalIfNecessary(requisition, ProcessStage.REQUISICAO_CADASTRADA);
 
         return requisitionMapper.toDTO(requisition);
     }
@@ -101,34 +106,22 @@ public class RequisitionService {
 
         Requisition requisition = requisitionRepository.findById(requisitionId).orElseThrow(() -> new ResourceNotFoundException("Requisition not found: " + requisitionId));
 
+        sendToNextStage(requisition, dto.nextStage(), employee, dto.observation());
+
+        return requisitionMapper.toDTO(requisition);
+    }
+
+    void sendToNextStage(Requisition requisition, ProcessStage nextStage, Employee employee, String observation) {
+
         ProcessStatus processStatus = requisition.getProcessStatus();
 
         ProcessStage currentStage = processStatus.getStage();
-        ProcessStage nextStage = dto.nextStage();
 
-        validateStageTransition(currentStage, nextStage);
+        validateStageTransition(requisition, currentStage, nextStage);
 
-        LocalDateTime now = LocalDateTime.now();
+        processHistoryService.createProcessHistory(requisition, employee, observation, nextStage, HistoryEventType.STAGE_SENT);
 
-        processStatus.setStage(nextStage);
-        processStatus.setResponsibleId(employee.getId());
-        processStatus.setObservation(dto.observation());
-
-        processStatus.setFinishedAt(now);
-
-        processStatusRepository.save(processStatus);
-
-        ProcessHistory history = new ProcessHistory();
-
-        history.setRequisition(requisition);
-        history.setStage(nextStage);
-        history.setChangedBy(employee);
-        history.setObservation(dto.observation());
-        history.setChangedAt(now);
-
-        processHistoryRepository.save(history);
-
-        return requisitionMapper.toDTO(requisition);
+        createApprovalIfNecessary(requisition, nextStage);
     }
 
     @Transactional(readOnly = true)
@@ -151,7 +144,7 @@ public class RequisitionService {
 
         if (!requisitions.isEmpty()) {
 
-            String lastNumber = requisitions.get(0).getRegisterNumber();
+            String lastNumber = requisitions.getFirst().getRegisterNumber();
 
             String numericPart = lastNumber.substring(lastNumber.lastIndexOf("-") + 1);
 
@@ -161,17 +154,62 @@ public class RequisitionService {
         return String.format("REQ-%s-%06d", year, nextNumber);
     }
 
-    private void validateStageTransition(ProcessStage currentStage, ProcessStage nextStage) {
+    private void validateStageTransition(Requisition requisition, ProcessStage currentStage, ProcessStage nextStage) {
 
-        if (currentStage == nextStage) {
-
-            throw new BusinessException("Requisition is already in this stage");
+        if (nextStage.getStep() < currentStage.getStep()) {
+            throw new BusinessException("Cannot rollback workflow stage");
         }
 
-        if (nextStage.getStep() != currentStage.getStep() + 1) {
-
+        if (nextStage.getStep() > currentStage.getStep() + 1) {
             throw new BusinessException("Invalid workflow transition");
+        }
+
+        ApprovalSector requiredApproval = mapApprovalSector(currentStage);
+
+        if (requiredApproval == null) {
+            return;
+        }
+
+        Approval latestApproval = requisition.getApprovals().stream().filter(a -> a.getApprovalSector() == requiredApproval).max(Comparator.comparing(Approval::getCreatedAt)).orElseThrow(() -> new BusinessException("Approval not found for current stage"));
+
+        if (latestApproval.getApprovalStatus() != ApprovalStatus.APROVADO) {
+
+            throw new BusinessException("Current stage approval is still pending");
         }
     }
 
+    private void createApprovalIfNecessary(Requisition requisition, ProcessStage stage) {
+
+        ApprovalSector sector = mapApprovalSector(stage);
+
+        if (sector == null) {
+            return;
+        }
+
+        Approval approval = new Approval();
+
+        approval.setRequisition(requisition);
+
+        approval.setApprovalSector(sector);
+
+        approval.setApprovalStatus(ApprovalStatus.PENDENTE);
+
+        approvalRepository.save(approval);
+    }
+
+    private ApprovalSector mapApprovalSector(ProcessStage stage) {
+
+        return switch (stage) {
+
+            case REQUISICAO_CADASTRADA -> ApprovalSector.REQUISICAO_SECRETARIO;
+
+            case ANALISE_PRESTACAO_CONTAS -> ApprovalSector.ANALISE_COMPRAS;
+
+            case DECLARACAO_PAGAMENTO -> ApprovalSector.DECLARACAO_PAGAMENTO;
+
+            case PRESTACAO_CONTAS -> ApprovalSector.PRESTACAO_CONTAS;
+
+            default -> null;
+        };
+    }
 }

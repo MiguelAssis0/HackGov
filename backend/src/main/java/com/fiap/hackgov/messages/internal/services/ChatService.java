@@ -51,7 +51,8 @@ public class ChatService {
             throw new BusinessException("You cannot create a chat with yourself");
         }
 
-        Optional<Chat> existingChat = chatRepository.findPrivateChatBetweenEmployees(authenticatedEmployee.getId(), target.getId());
+        Optional<Chat> existingChat = chatRepository.
+        findPrivateChatBetweenEmployees(authenticatedEmployee.getId(), target.getId());
 
         if (existingChat.isPresent()) {
             return chatMapper.toDTO(existingChat.get());

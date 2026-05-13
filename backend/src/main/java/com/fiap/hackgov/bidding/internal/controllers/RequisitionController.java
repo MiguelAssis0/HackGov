@@ -10,6 +10,8 @@ import com.fiap.hackgov.shared.infra.pagination.PageResponseDTO;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,9 +28,8 @@ public class RequisitionController {
     private RequisitionService requisitionService;
 
     @GetMapping
-    public ResponseEntity<PageResponseDTO<RequisitionResponseDTO>> getAllRequisitions(Pageable pageable) {
-
-        return ResponseEntity.ok(requisitionService.findAll(pageable));
+    public PageResponseDTO<RequisitionResponseDTO> findAll(@PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return requisitionService.findAll(pageable);
     }
 
 
