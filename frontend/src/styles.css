@@ -1,0 +1,135 @@
+:root {
+  --border: var(--border-color);
+  --gold: var(--amarelo);
+}
+
+body {
+  font-family:
+    Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--branco);
+  color: var(--azul-escuro);
+}
+
+h1 {
+  letter-spacing: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.auth-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.auth-message.error {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.auth-message.success {
+  background: #dcfce7;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+.react-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(4, 21, 44, 0.55);
+}
+
+.react-modal-card {
+  width: min(920px, 100%);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  background: var(--branco);
+  border: var(--border1-5);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+
+.modal-open {
+  overflow: hidden;
+}
+
+.btn-link-reset {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+.msg-tab {
+  border-top: 0;
+  border-right: 0;
+  border-left: 0;
+  background: transparent;
+}
+
+.processo-item {
+  width: 100%;
+  border-top: 0;
+  border-right: 0;
+  border-left: 0;
+  background: var(--branco);
+  text-align: left;
+}
+
+.equipe-swiper .swiper-wrapper {
+  display: flex;
+  align-items: stretch;
+  gap: 1.25rem;
+  justify-content: center;
+}
+
+.equipe .swiper-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 0.45rem;
+  margin-top: 1rem;
+}
+
+.equipe .swiper-pagination-bullet {
+  width: 10px;
+  height: 10px;
+  border: 0;
+  border-radius: 999px;
+}
+
+@media (max-width: 768px) {
+  .equipe-swiper .swiper-wrapper {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    justify-content: flex-start;
+    padding-inline: 1rem;
+  }
+
+  .equipe-swiper .swiper-slide {
+    min-width: 300px;
+    scroll-snap-align: center;
+  }
+
+  .auth-form-side {
+    padding: 2rem 1.25rem;
+  }
+}
