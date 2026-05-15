@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { PublicLayout } from "../components/PublicLayout.jsx";
 import { Link } from "../components/RouterContext.jsx";
 
@@ -71,55 +71,177 @@ function scrollToSection(event, selector) {
 
 function TeamCard({ member }) {
   return (
-    <div className="swiper-slide">
-      <div className="equipe-card">
-        <div className="equipe-card-img overflow-hidden">
+    <div className="equipe-card">
+      <div className="equipe-card-img overflow-hidden">
+        <img src={member.image} alt={member.fullName} className="img-fluid" />
+      </div>
+      <h3 className="equipe-card-name">{member.name}</h3>
+      <span className="equipe-card-profession">{member.role}</span>
+      <div className="equipe-info">
+        <div className="equipe-info-icon">
+          <i className="ri-information-line"></i>
+        </div>
+        <div className="equipe-info-img overflow-hidden">
           <img src={member.image} alt={member.fullName} className="img-fluid" />
         </div>
-        <h3 className="equipe-card-name">{member.name}</h3>
-        <span className="equipe-card-profession">{member.role}</span>
-        <div className="equipe-info">
-          <div className="equipe-info-icon">
-            <i className="ri-information-line"></i>
-          </div>
-          <div className="equipe-info-img overflow-hidden">
-            <img src={member.image} alt={member.fullName} className="img-fluid" />
-          </div>
-          <div className="equipe-info-data">
-            <h3 className="equipe-info-name">{member.fullName}</h3>
-            <span className="equipe-info-profession">Aluno de SI na FIAP</span>
-            <span className="equipe-info-location">{member.location}</span>
-          </div>
-          <div className="equipe-info-social">
-            {[
-              ["https://www.linkedin.com/", "ri-linkedin-box-line"],
-              ["https://instagram.com/", "ri-instagram-fill"],
-              ["https://github.com/", "ri-github-fill"],
-            ].map(([href, icon]) => (
-              <a
-                href={href}
-                target="_blank"
-                rel="noreferrer"
-                className="equipe-info-social-link"
-                key={icon}
-              >
-                <span className="equipe-info-social-icon">
-                  <i className={icon}></i>
-                </span>
-              </a>
-            ))}
-          </div>
+        <div className="equipe-info-data">
+          <h3 className="equipe-info-name">{member.fullName}</h3>
+          <span className="equipe-info-profession">Aluno de SI na FIAP</span>
+          <span className="equipe-info-location">{member.location}</span>
+        </div>
+        <div className="equipe-info-social">
+          {[
+            ["https://www.linkedin.com/", "ri-linkedin-box-line"],
+            ["https://instagram.com/", "ri-instagram-fill"],
+            ["https://github.com/", "ri-github-fill"],
+          ].map(([href, icon]) => (
+            <a
+              href={href}
+              target="_blank"
+              rel="noreferrer"
+              className="equipe-info-social-link"
+              key={icon}
+            >
+              <span className="equipe-info-social-icon">
+                <i className={icon}></i>
+              </span>
+            </a>
+          ))}
         </div>
       </div>
     </div>
   );
 }
 
-export default function HomePage() {
-  const [activeTeam, setActiveTeam] = useState(0);
+function wrap(index, length) {
+  return ((index % length) + length) % length;
+}
+
+function TeamCarousel() {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const touchStartX = useRef(null);
+  const touchStartY = useRef(null);
+
+  function goTo(index) {
+    setActiveIndex(wrap(index, team.length));
+  }
+
+  function next() {
+    goTo(activeIndex + 1);
+  }
+
+  function prev() {
+    goTo(activeIndex - 1);
+  }
+
+  function handleTouchStart(e) {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  }
+
+  function handleTouchEnd(e) {
+    if (touchStartX.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+      if (dx < 0) next();
+      else prev();
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+  }
+
+  const slots = [
+    { member: team[wrap(activeIndex - 1, team.length)], position: "left" },
+    { member: team[activeIndex], position: "center" },
+    { member: team[wrap(activeIndex + 1, team.length)], position: "right" },
+  ];
 
   return (
-    <PublicLayout styles={["/css/swiper-bundle.min.css", "/css/home.css"]}>
+    <>
+      <style>{`
+        .team-carousel-wrapper {
+          perspective: 1200px;
+          overflow: hidden;
+        }
+
+        .team-carousel {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 20px;
+          position: relative;
+          padding: 16px 0 48px;
+          transform-style: preserve-3d;
+        }
+
+        .team-carousel-slot {
+          flex-shrink: 0;
+          transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+                      filter 0.45s ease;
+          cursor: pointer;
+        }
+
+        .team-carousel-slot.center {
+          transform: translate3d(0, 0, 0) rotateY(0deg);
+          filter: none;
+          z-index: 2;
+        }
+
+        .team-carousel-slot.left {
+          transform: translate3d(0, 0, -120px) rotateY(-35deg);
+          filter: brightness(0.7);
+          z-index: 1;
+        }
+
+        .team-carousel-slot.right {
+          transform: translate3d(0, 0, -120px) rotateY(+35deg);
+          filter: brightness(0.7);
+          z-index: 1;
+        }
+      `}</style>
+
+      <div
+        className="team-carousel-wrapper"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        <div className="team-carousel">
+          {slots.map(({ member, position }) => (
+            <div
+              key={member.name}
+              className={`team-carousel-slot ${position}`}
+              onClick={() => {
+                if (position === "left") prev();
+                if (position === "right") next();
+              }}
+            >
+              <TeamCard member={member} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="swiper-pagination" style={{ display: "flex", justifyContent: "center", gap: "8px", marginTop: "8px" }}>
+        {team.map((member, index) => (
+          <button
+            type="button"
+            aria-label={`Ver ${member.name}`}
+            className={`swiper-pagination-bullet ${
+              activeIndex === index ? "swiper-pagination-bullet-active" : ""
+            }`}
+            onClick={() => goTo(index)}
+            key={member.name}
+          />
+        ))}
+      </div>
+    </>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <PublicLayout styles={["/css/home.css"]}>
       <section className="hero">
         <div className="hero-grid-lines"></div>
         <div className="container py-5">
@@ -296,28 +418,7 @@ export default function HomePage() {
         <div className="container">
           <div className="section-label text-center fade-up">Nossa equipe de</div>
           <h2 className="section-title text-center fade-up delay-1 mb-5">Desenvolvedores</h2>
-
-          <div className="equipe-swiper swiper">
-            <div className="swiper-wrapper">
-              {team.map((member) => (
-                <TeamCard member={member} key={member.name} />
-              ))}
-            </div>
-
-            <div className="swiper-pagination">
-              {team.map((member, index) => (
-                <button
-                  type="button"
-                  aria-label={`Ver ${member.name}`}
-                  className={`swiper-pagination-bullet ${
-                    activeTeam === index ? "swiper-pagination-bullet-active" : ""
-                  }`}
-                  onClick={() => setActiveTeam(index)}
-                  key={member.name}
-                ></button>
-              ))}
-            </div>
-          </div>
+          <TeamCarousel />
         </div>
       </section>
 
