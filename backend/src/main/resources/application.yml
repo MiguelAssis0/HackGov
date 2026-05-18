@@ -35,6 +35,8 @@ api:
       secret: ${JWT_SECRET:my-secret}
       refresh-secret: ${JWT_REFRESH_SECRET:my-refresh-secret}
       expiration: ${JWT_TIME:2}
+    gemini:
+      api-key: ${GOOGLE_API_KEY}
 
 logging:
   level:

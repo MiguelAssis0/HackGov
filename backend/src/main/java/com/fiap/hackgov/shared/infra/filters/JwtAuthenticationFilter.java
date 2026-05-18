@@ -13,6 +13,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
@@ -25,23 +26,15 @@ import java.io.IOException;
 import java.time.Instant;
 
 @Component
+@RequiredArgsConstructor
 @Order(2)
 public class JwtAuthenticationFilter extends BaseSecurityFilter {
 
-    @Autowired
-    private TokenService tokenService;
-
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
-
-    @Autowired
-    private TokenBlacklistService tokenBlacklistService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private EmployeeRepository employeeRepository;
+    private final TokenService tokenService;
+    private final UserDetailsServiceImpl userDetailsService;
+    private final TokenBlacklistService tokenBlacklistService;
+    private final ObjectMapper objectMapper;
+    private final EmployeeRepository employeeRepository;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,

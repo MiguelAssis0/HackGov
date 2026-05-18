@@ -1,9 +1,16 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
+/**
+ * Recupera token do storage
+ */
 function getToken() {
   return localStorage.getItem("hackgov.accessToken");
 }
 
+/**
+ * Cliente HTTP único da aplicação
+ */
 async function request(path, options = {}) {
   const headers = {
     "Content-Type": "application/json",
@@ -11,81 +18,119 @@ async function request(path, options = {}) {
   };
 
   const token = getToken();
-  if (token) headers.Authorization = `Bearer ${token}`;
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
 
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers,
   });
 
+  // 204 No Content
+  if (response.status === 204) return null;
+
+  const text = await response.text();
+
+  let data;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    data = text;
+  }
+
   if (!response.ok) {
-    let message = `Erro ${response.status}`;
-    const responseCopy = response.clone();
-    try {
-      const data = await response.json();
-      message = data.message || data.error || message;
-    } catch {
-      const text = await responseCopy.text();
-      if (text) message = text;
-    }
+    const message =
+      data?.message ||
+      data?.error ||
+      `Erro ${response.status}`;
     throw new Error(message);
   }
 
-  if (response.status === 204) return null;
-  return response.json();
+  return data;
 }
 
+/**
+ * API centralizada
+ */
 export const api = {
-  async login(email, password) {
-    return request("/auth/login", {
+  // AUTH
+  login: (email, password) =>
+    request("/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
-    });
-  },
+    }),
 
-  async logout() {
-    return request("/auth/logout", { method: "POST" });
-  },
+  logout: () =>
+    request("/auth/logout", {
+      method: "POST",
+    }),
 
-  async getEmployees() {
-    return request("/employee");
-  },
+  // EMPLOYEES
+  getEmployees: () => request("/employee"),
 
-  async getRequisitions() {
-    return request("/requisitions");
-  },
+  // REQUISITIONS
+  getRequisitions: () => request("/requisitions"),
 
-  async createRequisition(payload) {
-    return request("/requisitions", {
+  createRequisition: (payload) =>
+    request("/requisitions", {
       method: "POST",
       body: JSON.stringify(payload),
-    });
-  },
+    }),
+
+  // AI (integrado no mesmo client)
+  requestAI: (message) =>
+    request("/ai", {
+      method: "POST",
+      body: JSON.stringify({ message }),
+    }),
 };
 
+/**
+ * Salva sessão do usuário
+ */
 export function saveSession(loginResponse, email) {
-  const accessToken = loginResponse.accessToken || loginResponse.token;
+  const accessToken =
+    loginResponse.accessToken || loginResponse.token;
+
   const refreshToken = loginResponse.refreshToken;
 
-  if (accessToken) localStorage.setItem("hackgov.accessToken", accessToken);
-  if (refreshToken) localStorage.setItem("hackgov.refreshToken", refreshToken);
+  if (accessToken) {
+    localStorage.setItem("hackgov.accessToken", accessToken);
+  }
+
+  if (refreshToken) {
+    localStorage.setItem("hackgov.refreshToken", refreshToken);
+  }
 
   localStorage.setItem(
     "hackgov.user",
     JSON.stringify({
-      nome: loginResponse.nome || loginResponse.name || email,
-      cargo: loginResponse.cargo || loginResponse.role || "Servidor",
+      nome:
+        loginResponse.nome ||
+        loginResponse.name ||
+        email,
+      cargo:
+        loginResponse.cargo ||
+        loginResponse.role ||
+        "Servidor",
       setor: loginResponse.setor || "",
     }),
   );
 }
 
+/**
+ * Remove sessão
+ */
 export function clearSession() {
   localStorage.removeItem("hackgov.accessToken");
   localStorage.removeItem("hackgov.refreshToken");
   localStorage.removeItem("hackgov.user");
 }
 
+/**
+ * Recupera usuário logado
+ */
 export function getStoredUser() {
   try {
     return JSON.parse(localStorage.getItem("hackgov.user")) || null;

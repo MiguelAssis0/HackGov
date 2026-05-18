@@ -1,3 +1,4 @@
+import Chatbot from "../components/Chatbot.jsx";
 import { DashboardLayout } from "../components/DashboardLayout.jsx";
 import { Link } from "../components/RouterContext.jsx";
 import { getStoredUser } from "../services/api.js";
