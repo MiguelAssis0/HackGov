@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -119,9 +120,22 @@ public class RequisitionService {
 
         validateStageTransition(requisition, currentStage, nextStage);
 
+        updateCurrentStage(processStatus, nextStage, employee, observation);
+
         processHistoryService.createProcessHistory(requisition, employee, observation, nextStage, HistoryEventType.STAGE_SENT);
 
         createApprovalIfNecessary(requisition, nextStage);
+    }
+
+    void returnToInitialStage(Requisition requisition, Employee employee, String observation) {
+
+        ProcessStatus processStatus = requisition.getProcessStatus();
+
+        updateCurrentStage(processStatus, ProcessStage.REQUISICAO_CADASTRADA, employee, observation);
+
+        processHistoryService.createProcessHistory(requisition, employee, observation, ProcessStage.REQUISICAO_CADASTRADA, HistoryEventType.STAGE_SENT);
+
+        createApprovalIfNecessary(requisition, ProcessStage.REQUISICAO_CADASTRADA);
     }
 
     @Transactional(readOnly = true)
@@ -195,6 +209,17 @@ public class RequisitionService {
         approval.setApprovalStatus(ApprovalStatus.PENDENTE);
 
         approvalRepository.save(approval);
+    }
+
+    void updateCurrentStage(ProcessStatus processStatus, ProcessStage stage, Employee employee, String observation) {
+
+        processStatus.setStage(stage);
+        processStatus.setResponsibleId(employee.getId());
+        processStatus.setObservation(observation);
+        processStatus.setStartedAt(LocalDateTime.now());
+        processStatus.setFinishedAt(null);
+
+        processStatusRepository.save(processStatus);
     }
 
     private ApprovalSector mapApprovalSector(ProcessStage stage) {
