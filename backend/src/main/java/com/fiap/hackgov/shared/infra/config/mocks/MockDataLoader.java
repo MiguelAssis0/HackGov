@@ -35,8 +35,8 @@ public class MockDataLoader implements CommandLineRunner {
     public void run(String... args) {
         MockContext ctx = new MockContext();
         stateMock.load(ctx);
-        sectorMock.load(ctx);
         cityHallMock.load(ctx);
+        sectorMock.load(ctx);
         occupationMock.load(ctx);
         permissionMock.load(ctx);
         employeeMock.load(ctx);

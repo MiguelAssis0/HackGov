@@ -7,11 +7,16 @@ import com.fiap.hackgov.cityhall_management.internal.entities.*;
 
 public class MockContext {
 
-    public Sector tiSector;
-    public Sector comprasSector;
-    public Sector financeiroSector;
-    public Sector contratosSector;
-    public Sector juridicoSector;
+    public Sector tiSectorsSP;
+    public Sector comprasSectorSP;
+    public Sector financeiroSectorSP;
+    public Sector contratosSectorSP;
+    public Sector juridicoSectorSP;
+    public Sector tiSectorRJ;
+    public Sector comprasSectorRJ;
+    public Sector financeiroSectorRJ;
+    public Sector contratosSectorRJ;
+    public Sector juridicoSectorRJ;
 
     public State sp;
     public State rj;

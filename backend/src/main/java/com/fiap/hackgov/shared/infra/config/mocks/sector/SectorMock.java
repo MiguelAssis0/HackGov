@@ -15,36 +15,36 @@ public class SectorMock {
     private final SectorRepository repository;
 
     public void load(MockContext ctx) {
+        Sector ti = createSector("Tecnologia da Informação", ctx.cityHallSP);
+        Sector compras = createSector("Compras", ctx.cityHallSP);
+        Sector financeiro = createSector("Financeiro", ctx.cityHallSP);
+        Sector contratos = createSector("Contratos", ctx.cityHallSP);
+        Sector juridico = createSector("Jurídico", ctx.cityHallSP);
 
-        Sector ti = new Sector();
-        ti.setName("Tecnologia da Informação");
+        Sector tiRJ = createSector("Tecnologia da Informação", ctx.cityHallRJ);
+        Sector comprasRJ = createSector("Compras", ctx.cityHallRJ);
+        Sector financeiroRJ = createSector("Financeiro", ctx.cityHallRJ);
+        Sector contratosRJ = createSector("Contratos", ctx.cityHallRJ);
+        Sector juridicoRJ = createSector("Jurídico", ctx.cityHallRJ);
 
-        Sector compras = new Sector();
-        compras.setName("Compras");
+        repository.saveAll(List.of(ti, compras, financeiro, contratos, juridico, tiRJ, comprasRJ, financeiroRJ, contratosRJ, juridicoRJ));
 
-        Sector financeiro = new Sector();
-        financeiro.setName("Financeiro");
+        ctx.tiSectorsSP = ti;
+        ctx.comprasSectorSP = compras;
+        ctx.financeiroSectorSP = financeiro;
+        ctx.contratosSectorSP = contratos;
+        ctx.juridicoSectorSP = juridico;
+        ctx.tiSectorRJ = tiRJ;
+        ctx.comprasSectorRJ = comprasRJ;
+        ctx.financeiroSectorRJ = financeiroRJ;
+        ctx.contratosSectorRJ = contratosRJ;
+        ctx.juridicoSectorRJ = juridicoRJ;
+    }
 
-        Sector contratos = new Sector();
-        contratos.setName("Contratos");
-
-        Sector juridico = new Sector();
-        juridico.setName("Jurídico");
-
-        repository.saveAll(
-                List.of(
-                        ti,
-                        compras,
-                        financeiro,
-                        contratos,
-                        juridico
-                )
-        );
-
-        ctx.tiSector = ti;
-        ctx.comprasSector = compras;
-        ctx.financeiroSector = financeiro;
-        ctx.contratosSector = contratos;
-        ctx.juridicoSector = juridico;
+    private Sector createSector(String name, com.fiap.hackgov.cityhall_management.internal.entities.CityHall cityHall) {
+        Sector sector = new Sector();
+        sector.setName(name);
+        sector.setCityHall(cityHall);
+        return sector;
     }
 }

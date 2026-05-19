@@ -39,7 +39,7 @@ public class RequisitionMock {
 
         pendingApproval.setRegisterNumber("REQ-2026-000001");
 
-        pendingApproval.setSector(ctx.tiSector);
+        pendingApproval.setSector(ctx.tiSectorsSP);
 
         pendingApproval.setResponsible(ctx.admin);
 
@@ -88,7 +88,7 @@ public class RequisitionMock {
 
         licitationRequisition.setRegisterNumber("REQ-2026-000002");
 
-        licitationRequisition.setSector(ctx.comprasSector);
+        licitationRequisition.setSector(ctx.comprasSectorSP);
 
         licitationRequisition.setResponsible(ctx.maria);
 
@@ -145,7 +145,7 @@ public class RequisitionMock {
 
         completedLicitationRequisition.setRegisterNumber("REQ-2026-000003");
 
-        completedLicitationRequisition.setSector(ctx.financeiroSector);
+        completedLicitationRequisition.setSector(ctx.financeiroSectorSP);
 
         completedLicitationRequisition.setResponsible(ctx.joao);
 
