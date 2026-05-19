@@ -6,6 +6,7 @@ import com.fiap.hackgov.bidding.internal.DTOs.approval.UpdateApprovalDTO;
 import com.fiap.hackgov.bidding.internal.entities.Approval;
 import com.fiap.hackgov.bidding.internal.entities.ProcessStatus;
 import com.fiap.hackgov.bidding.internal.entities.Requisition;
+import com.fiap.hackgov.bidding.internal.entities.enums.ApprovalSector;
 import com.fiap.hackgov.bidding.internal.entities.enums.ApprovalStatus;
 import com.fiap.hackgov.bidding.internal.entities.enums.HistoryEventType;
 import com.fiap.hackgov.bidding.internal.entities.enums.ProcessStage;
@@ -17,6 +18,7 @@ import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,6 +70,8 @@ public class ApprovalService {
 
         Approval approval = approvalRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Approval not found"));
 
+        validateApprovalPermission(employee, approval.getApprovalSector());
+
         approval.setApprovalStatus(dto.status());
         approval.setApprovedBy(employee);
         approval.setObservation(dto.observation());
@@ -104,6 +108,33 @@ public class ApprovalService {
 
         return approvalMapper.toDTO(approval);
     }
+
+    public Page<ApprovalResponseDTO> findPending(Pageable pageable) {
+
+        return approvalRepository.findByApprovalStatus(ApprovalStatus.PENDENTE, pageable).map(approvalMapper::toDTO);
+    }
+
+    private void validateApprovalPermission(Employee employee, ApprovalSector sector) {
+
+        String requiredPermission = switch (sector) {
+
+            case REQUISICAO_SECRETARIO -> "approval.secretary";
+
+            case ANALISE_COMPRAS -> "approval.procurement";
+
+            case DECLARACAO_PAGAMENTO -> "approval.payment";
+
+            case PRESTACAO_CONTAS -> "approval.accountability";
+        };
+
+        boolean hasPermission = employee.getAuthorities().stream().map(GrantedAuthority::getAuthority).anyMatch(permission -> permission.equals(requiredPermission));
+
+        if (!hasPermission) {
+
+            throw new BusinessException("User does not have permission to approve this stage");
+        }
+    }
+
 
     // apenas ADM
     public void delete(UUID id) {

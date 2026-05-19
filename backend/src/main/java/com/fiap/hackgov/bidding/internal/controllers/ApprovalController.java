@@ -23,33 +23,38 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ApprovalController {
 
-    private final ApprovalService service;
+    private final ApprovalService approvalService;
 
     @PostMapping
     public ResponseEntity<ApprovalResponseDTO> create(@RequestBody @Valid CreateApprovalDTO dto) {
-        var response = service.create(dto);
+        var response = approvalService.create(dto);
 
         return ResponseEntity.created(URI.create("/api/approval/" + response.id())).body(response);
     }
 
     @GetMapping
     public ResponseEntity<Page<ApprovalResponseDTO>> findAll(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        return ResponseEntity.ok(service.findAll(pageable));
+        return ResponseEntity.ok(approvalService.findAll(pageable));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApprovalResponseDTO> findById(@PathVariable UUID id) {
-        return ResponseEntity.ok(service.findById(id));
+        return ResponseEntity.ok(approvalService.findById(id));
+    }
+
+    @GetMapping("/pending")
+    public Page<ApprovalResponseDTO> findPending(Pageable pageable) {
+        return approvalService.findPending(pageable);
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<ApprovalResponseDTO> processApproval(@AuthenticationPrincipal Employee employee, @PathVariable UUID id, @RequestBody @Valid UpdateApprovalDTO dto) {
-        return ResponseEntity.ok(service.processApproval(id, dto, employee));
+        return ResponseEntity.ok(approvalService.processApproval(id, dto, employee));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
-        service.delete(id);
+        approvalService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

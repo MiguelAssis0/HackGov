@@ -33,7 +33,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowCredentials(true);
     }
 
-    @Override  // adicione este método
+    @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(hibernateFilterInterceptor)
                 .addPathPatterns("/api/**")
