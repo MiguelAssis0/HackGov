@@ -106,15 +106,18 @@ export function saveSession(loginResponse, email) {
   localStorage.setItem(
     "hackgov.user",
     JSON.stringify({
+      id: loginResponse.id || loginResponse.userId || 1,
       nome:
         loginResponse.nome ||
         loginResponse.name ||
         email,
+      email: loginResponse.email || email,
       cargo:
         loginResponse.cargo ||
         loginResponse.role ||
         "Servidor",
       setor: loginResponse.setor || "",
+      prefeitura: loginResponse.prefeitura || loginResponse.cityHall || "",
     }),
   );
 }
@@ -131,6 +134,41 @@ export function clearSession() {
 /**
  * Recupera usuário logado
  */
+function isEmail(value) {
+  return typeof value === "string" && value.includes("@");
+}
+
+function formatName(value) {
+  if (!value) return "";
+  return value
+    .replace(/[_.-]+/g, " ")
+    .trim()
+    .split(/\s+/)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+export function getUserDisplayName(user, fallback = "Usuário") {
+  let profile = null;
+
+  try {
+    profile = JSON.parse(localStorage.getItem("hackgov.profile")) || null;
+  } catch {
+    profile = null;
+  }
+
+  const name = [profile?.nome, user?.nome, user?.name, user?.username].find(
+    (value) => value && !isEmail(value),
+  );
+
+  if (name) return formatName(name);
+
+  const email = profile?.email || user?.email || user?.nome || user?.name;
+  if (isEmail(email)) return formatName(email.split("@")[0]);
+
+  return fallback;
+}
+
 export function getStoredUser() {
   try {
     return JSON.parse(localStorage.getItem("hackgov.user")) || null;

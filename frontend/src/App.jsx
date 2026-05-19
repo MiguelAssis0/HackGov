@@ -7,6 +7,7 @@ import ContactPage from "./pages/ContactPage.jsx";
 import DashboardPage from "./pages/DashboardPage.jsx";
 import ToolsPage from "./pages/ToolsPage.jsx";
 import ProcessesPage from "./pages/ProcessesPage.jsx";
+import ProfilePage from "./pages/ProfilePage.jsx";
 
 function normalizePath(pathname) {
   const cleanPath = (pathname || "/").split(/[?#]/)[0];
@@ -44,6 +45,7 @@ export default function App() {
     "/dashboard": <DashboardPage />,
     "/ferramentas": <ToolsPage />,
     "/processos": <ProcessesPage />,
+    "/perfil": <ProfilePage />,
   }[path] || <HomePage />;
 
   return <RouterContext.Provider value={router}>{page}</RouterContext.Provider>;

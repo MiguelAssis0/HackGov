@@ -8,7 +8,7 @@ export default function Messages({
   activeTab,
   setActiveTab,
 }) {
-  usePageStyles(styles);
+  usePageStyles(styles, "widget");
 
   return (
     <section className="chat-float d-none d-lg-flex" id="chatFloat">

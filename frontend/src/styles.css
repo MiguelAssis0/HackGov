@@ -95,6 +95,20 @@ button {
   text-align: left;
 }
 
+.user-profile-link {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+  flex: 1;
+  color: inherit;
+  text-decoration: none;
+}
+
+.user-profile-link:hover .user-name {
+  color: var(--azul);
+}
+
 .equipe-swiper .swiper-wrapper {
   display: flex;
   align-items: stretch;
@@ -132,4 +146,5 @@ button {
   .auth-form-side {
     padding: 2rem 1.25rem;
   }
+
 }

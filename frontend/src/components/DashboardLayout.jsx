@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { clearSession, getStoredUser } from "../services/api.js";
+import { useEffect, useState } from "react";
+import { clearSession, getStoredUser, getUserDisplayName } from "../services/api.js";
 import { usePageStyles } from "../hooks/usePageStyles.js";
 import { Link, useRouter } from "./RouterContext.jsx";
 import Messages from "./Messages.jsx";
@@ -26,7 +26,8 @@ export function DashboardLayout({ children, styles = [] }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("chats");
-  const user = useMemo(() => getStoredUser() || demoUser, []);
+  const user = getStoredUser() || demoUser;
+  const displayName = getUserDisplayName(user);
   usePageStyles(["/css/index_dashboard.css", ...styles]);
 
   useEffect(() => {
@@ -113,8 +114,9 @@ export function DashboardLayout({ children, styles = [] }) {
 
         <div className="sidebar-footer">
           <div className="user-row">
+            <Link to="/perfil" className="user-profile-link">
             <div className="user-avatar">
-              {initials(user.nome) || (
+                {initials(displayName) || (
                 <i
                   className="bi bi-person-fill"
                   style={{ fontSize: "1rem" }}
@@ -122,9 +124,10 @@ export function DashboardLayout({ children, styles = [] }) {
               )}
             </div>
             <div className="user-info">
-              <div className="user-name">{user.nome}</div>
+                <div className="user-name">{displayName}</div>
               <div className="user-role">{user.cargo || "—"}</div>
             </div>
+            </Link>
             <a
               href="/logout"
               className="user-settings-btn"
@@ -175,9 +178,12 @@ export function DashboardLayout({ children, styles = [] }) {
             <button className="bnav-btn">
               <i className="bi bi-chat-dots-fill"></i>Chats
             </button>
-            <a href="/logout" className="bnav-btn" onClick={logout}>
+            <Link
+              to="/perfil"
+              className={`bnav-btn ${isActive("/perfil") ? "active" : ""}`}
+            >
               <i className="bi bi-person-fill"></i>Perfil
-            </a>
+            </Link>
           </div>
         </div>
       </nav>

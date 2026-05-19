@@ -1,7 +1,7 @@
 import Chatbot from "../components/Chatbot.jsx";
 import { DashboardLayout } from "../components/DashboardLayout.jsx";
 import { Link } from "../components/RouterContext.jsx";
-import { getStoredUser } from "../services/api.js";
+import { getStoredUser, getUserDisplayName } from "../services/api.js";
 
 const calendarDays = [
   ["30", "outro-mes"],
@@ -94,7 +94,7 @@ export default function DashboardPage() {
                 <div className="row">
                   <div className="col-12 col-md-8">
                     <h2 className="hero-h2">
-                      Olá, {user.nome}
+                      Olá, {getUserDisplayName(user)}
                       {user.setor && (
                         <small style={{ fontSize: "0.9rem", opacity: 0.7, fontWeight: 400 }}>
                           {" "}— {user.setor}
