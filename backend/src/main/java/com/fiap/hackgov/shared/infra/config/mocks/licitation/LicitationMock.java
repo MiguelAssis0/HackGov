@@ -45,11 +45,11 @@ public class LicitationMock {
 
         licitationProcess = licitationProcessRepository.save(licitationProcess);
 
-        createHistory(licitationProcess, ctx.carlos, LicitationEventType.PROCESS_CREATED, LicitationStatus.DRAFT, "Processo licitatório criado");
+        createHistory(licitationProcess, ctx.maria, LicitationEventType.PROCESS_CREATED, LicitationStatus.DRAFT, "Processo licitatório criado");
 
-        createHistory(licitationProcess, ctx.carlos, LicitationEventType.STATUS_CHANGED, LicitationStatus.OPEN, "Edital publicado");
+        createHistory(licitationProcess, ctx.maria, LicitationEventType.STATUS_CHANGED, LicitationStatus.OPEN, "Edital publicado");
 
-        createHistory(licitationProcess, ctx.carlos, LicitationEventType.STATUS_CHANGED, LicitationStatus.IN_PROGRESS, "Recebimento de propostas iniciado");
+        createHistory(licitationProcess, ctx.ana, LicitationEventType.STATUS_CHANGED, LicitationStatus.IN_PROGRESS, "Recebimento de propostas iniciado");
 
         ctx.licitationProcess = licitationProcess;
     }

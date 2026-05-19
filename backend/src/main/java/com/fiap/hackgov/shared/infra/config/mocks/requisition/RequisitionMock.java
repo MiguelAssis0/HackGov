@@ -106,7 +106,7 @@ public class RequisitionMock {
 
         licitationStatus.setStage(ProcessStage.PROCESSO_LICITATORIO);
 
-        licitationStatus.setResponsibleId(ctx.carlos.getId());
+        licitationStatus.setResponsibleId(ctx.maria.getId());
 
         licitationStatus.setObservation("Processo em fase licitatória");
 
@@ -118,9 +118,9 @@ public class RequisitionMock {
 
         createHistory(licitationRequisition, ctx.maria, ProcessStage.HOMOLOGACAO_SECRETARIO, HistoryEventType.APPROVED, "Homologação do secretário aprovada");
 
-        createHistory(licitationRequisition, ctx.carlos, ProcessStage.RECEBIMENTO_COMPRAS, HistoryEventType.STAGE_SENT, "Processo enviado para área de compras");
+        createHistory(licitationRequisition, ctx.ana, ProcessStage.RECEBIMENTO_COMPRAS, HistoryEventType.STAGE_SENT, "Processo enviado para área de compras");
 
-        createHistory(licitationRequisition, ctx.carlos, ProcessStage.PROCESSO_LICITATORIO, HistoryEventType.STAGE_SENT, "Processo encaminhado para licitação");
+        createHistory(licitationRequisition, ctx.maria, ProcessStage.PROCESSO_LICITATORIO, HistoryEventType.STAGE_SENT, "Processo encaminhado para licitação");
 
         Approval approvalCompleted = new Approval();
 

@@ -25,16 +25,26 @@ public class SectorMock {
         Sector financeiro = new Sector();
         financeiro.setName("Financeiro");
 
+        Sector contratos = new Sector();
+        contratos.setName("Contratos");
+
+        Sector juridico = new Sector();
+        juridico.setName("Jurídico");
+
         repository.saveAll(
                 List.of(
                         ti,
                         compras,
-                        financeiro
+                        financeiro,
+                        contratos,
+                        juridico
                 )
         );
 
         ctx.tiSector = ti;
         ctx.comprasSector = compras;
         ctx.financeiroSector = financeiro;
+        ctx.contratosSector = contratos;
+        ctx.juridicoSector = juridico;
     }
 }

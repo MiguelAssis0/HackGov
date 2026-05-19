@@ -63,10 +63,10 @@ public class NoticeContractMock {
         notice.setProposalOpeningDate(LocalDate.now().minusDays(4));
         notice.setProposalClosingDate(LocalDate.now().plusDays(10));
         notice.setEstimatedValue(new BigDecimal("150000.00"));
-        notice.setCreatedBy(ctx.carlos);
+        notice.setCreatedBy(ctx.maria);
         noticeRepository.save(notice);
 
-        createHistory(ctx.licitationProcess, ctx.carlos, LicitationEventType.NOTICE_PUBLISHED, ctx.licitationProcess.getStatus(), "Edital publicado: " + notice.getNoticeNumber());
+        createHistory(ctx.licitationProcess, ctx.maria, LicitationEventType.NOTICE_PUBLISHED, ctx.licitationProcess.getStatus(), "Edital publicado: " + notice.getNoticeNumber());
 
         LicitationProcess finishedProcess = new LicitationProcess();
         finishedProcess.setProcessNumber("LIC-2026-000002");
