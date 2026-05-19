@@ -137,12 +137,57 @@ public class RequisitionMock {
         approvalRepository.save(approvalCompleted);
 
         /*
+         * REQUISIÇÃO 3
+         * Processo licitatório concluído, pronta para contrato
+         */
+
+        Requisition completedLicitationRequisition = new Requisition();
+
+        completedLicitationRequisition.setRegisterNumber("REQ-2026-000003");
+
+        completedLicitationRequisition.setSector(ctx.financeiroSector);
+
+        completedLicitationRequisition.setResponsible(ctx.joao);
+
+        completedLicitationRequisition.setTechnicalDescription("Contratação de licença e suporte para plataforma de gestão tributária");
+
+        completedLicitationRequisition.setJustification("Modernização do atendimento e melhoria do controle fiscal");
+
+        completedLicitationRequisition.setBudgetAllocation("3.3.90.40.00");
+
+        completedLicitationRequisition = requisitionRepository.save(completedLicitationRequisition);
+
+        ProcessStatus completedLicitationStatus = new ProcessStatus();
+
+        completedLicitationStatus.setRequisition(completedLicitationRequisition);
+
+        completedLicitationStatus.setStage(ProcessStage.INICIO_SERVICOS);
+
+        completedLicitationStatus.setResponsibleId(ctx.maria.getId());
+
+        completedLicitationStatus.setObservation("Processo licitatório finalizado e aguardando execução contratual");
+
+        processStatusRepository.save(completedLicitationStatus);
+
+        completedLicitationRequisition.setProcessStatus(completedLicitationStatus);
+
+        createHistory(completedLicitationRequisition, ctx.joao, ProcessStage.REQUISICAO_CADASTRADA, HistoryEventType.REQUISITION_CREATED, "Requisição criada");
+
+        createHistory(completedLicitationRequisition, ctx.admin, ProcessStage.HOMOLOGACAO_SECRETARIO, HistoryEventType.APPROVED, "Homologação do secretário aprovada");
+
+        createHistory(completedLicitationRequisition, ctx.maria, ProcessStage.PROCESSO_LICITATORIO, HistoryEventType.STAGE_SENT, "Processo encaminhado para licitação");
+
+        createHistory(completedLicitationRequisition, ctx.maria, ProcessStage.INICIO_SERVICOS, HistoryEventType.STAGE_SENT, "Processo contratual iniciado após licitação concluída");
+
+        /*
          * CONTEXTO
          */
 
         ctx.requisitionPendingApproval = pendingApproval;
 
         ctx.requisitionInLicitation = licitationRequisition;
+
+        ctx.requisitionFinishedLicitation = completedLicitationRequisition;
     }
 
     private void createHistory(Requisition requisition, Employee employee, ProcessStage stage, HistoryEventType eventType, String observation) {

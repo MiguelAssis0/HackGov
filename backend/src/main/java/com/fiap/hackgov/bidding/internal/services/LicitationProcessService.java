@@ -123,7 +123,7 @@ public class LicitationProcessService {
         return String.format("LIC-%s-%06d", year, nextNumber);
     }
 
-    private void createHistory(LicitationProcess licitationProcess, Employee employee, LicitationEventType eventType, LicitationStatus status, String observation) {
+    void createHistory(LicitationProcess licitationProcess, Employee employee, LicitationEventType eventType, LicitationStatus status, String observation) {
 
         LicitationHistory history = new LicitationHistory();
 
