@@ -12,4 +12,5 @@ public record AdvanceRequisitionStageDTO(
         @Size(min = 1, max = 255, message = "Observação deve ter entre 1 e 255 caracteres")
         String observation
 
-) {}
+) {
+}

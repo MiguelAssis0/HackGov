@@ -12,7 +12,7 @@ public class ProdHeaderSecurityConfig implements HeaderSecurityConfig {
 
     @Override
     public void apply(HttpSecurity http) throws Exception {
-        http .headers(headers -> headers
+        http.headers(headers -> headers
                 .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
                 .xssProtection(Customizer.withDefaults())
                 .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'"))

@@ -42,7 +42,7 @@ public class Security {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-       headerSecurityConfig.apply(http);
+        headerSecurityConfig.apply(http);
 
         return http
                 .csrf(AbstractHttpConfigurer::disable)

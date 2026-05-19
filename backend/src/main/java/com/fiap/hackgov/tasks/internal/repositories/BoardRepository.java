@@ -12,6 +12,7 @@ import java.util.UUID;
 public interface BoardRepository extends JpaRepository<Board, UUID> {
 
     Page<Board> findAll(Pageable pageable);
+
     Optional<Board> findById(UUID id);
 
 }

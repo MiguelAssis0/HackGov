@@ -33,14 +33,14 @@ public class LoggingFilter extends BaseSecurityFilter {
 
             MDC.put("ip", getClientIp(request));
             MDC.put("requestId", UUID.randomUUID().toString());
-            MDC.put("path",      request.getRequestURI());
-            MDC.put("method",    request.getMethod());
+            MDC.put("path", request.getRequestURI());
+            MDC.put("method", request.getMethod());
 
             filterChain.doFilter(request, response);
 
         } finally {
-            MDC.put("status",        String.valueOf(response.getStatus()));
-            MDC.put("durationMs",    String.valueOf(System.currentTimeMillis() - startTime));
+            MDC.put("status", String.valueOf(response.getStatus()));
+            MDC.put("durationMs", String.valueOf(System.currentTimeMillis() - startTime));
             log.info("event=request_completed");
             MDC.clear();
         }

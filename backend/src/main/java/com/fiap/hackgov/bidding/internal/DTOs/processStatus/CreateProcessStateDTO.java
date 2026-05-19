@@ -20,4 +20,5 @@ public record CreateProcessStateDTO(
 
         String observation
 
-) {}
+) {
+}

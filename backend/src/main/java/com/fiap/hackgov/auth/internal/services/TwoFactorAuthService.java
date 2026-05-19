@@ -1,8 +1,8 @@
 package com.fiap.hackgov.auth.internal.services;
 
 import com.fiap.hackgov.auth.internal.entities.TwoFactorCode;
-import com.fiap.hackgov.shared.infra.utils.AuditLog;
 import com.fiap.hackgov.auth.internal.repositories.TwoFactorCodeRepository;
+import com.fiap.hackgov.shared.infra.utils.AuditLog;
 import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,7 +104,7 @@ public class TwoFactorAuthService {
         if (isValid) {
             auditLog.with(log).reason("2fa_verify_success").email(email).level(AuditLog.Level.INFO).log();
             twoFactorCodeRepository.deleteByEmail(email);
-        }else{
+        } else {
             auditLog.with(log).reason("2fa_verify_failed").reason("invalid_code").email(email).level(AuditLog.Level.WARN).log();
         }
 

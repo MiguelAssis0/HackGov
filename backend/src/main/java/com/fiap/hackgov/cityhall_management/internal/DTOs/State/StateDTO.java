@@ -11,4 +11,5 @@ public record StateDTO(
         UF uf,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
-) {}
+) {
+}

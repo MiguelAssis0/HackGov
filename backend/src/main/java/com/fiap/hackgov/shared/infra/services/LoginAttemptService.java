@@ -13,13 +13,13 @@ import java.time.LocalDateTime;
 @Service
 public class LoginAttemptService {
 
-    private static final int FIRST_BLOCK_ATTEMPTS     = 5;
-    private static final int SECOND_BLOCK_ATTEMPTS    = 10;
+    private static final int FIRST_BLOCK_ATTEMPTS = 5;
+    private static final int SECOND_BLOCK_ATTEMPTS = 10;
     private static final int PERMANENT_BLOCK_ATTEMPTS = 15;
 
-    private static final int FIRST_BLOCK_MINUTES  = 5;
+    private static final int FIRST_BLOCK_MINUTES = 5;
     private static final int SECOND_BLOCK_MINUTES = 15;
-    private static final int THIRD_BLOCK_MINUTES  = 60;
+    private static final int THIRD_BLOCK_MINUTES = 60;
 
     @Autowired
     private BlockedAttemptRepository blockedAttemptRepository;

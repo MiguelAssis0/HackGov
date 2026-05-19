@@ -51,4 +51,5 @@ public record CreateEmployeeDTO(
 
         @NotNull(message = "Role is required")
         int role
-) {}
+) {
+}

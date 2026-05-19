@@ -22,10 +22,10 @@ import java.time.Duration;
 @Order(1)
 public class RateLimitFilter extends BaseSecurityFilter {
 
-    private static final int DEFAULT_MAX_REQUESTS  = 20;
+    private static final int DEFAULT_MAX_REQUESTS = 20;
     private static final int DEFAULT_WINDOW_MINUTES = 1;
 
-    private static final int AUTH_MAX_REQUESTS  = 5;
+    private static final int AUTH_MAX_REQUESTS = 5;
     private static final int AUTH_WINDOW_MINUTES = 1;
 
     private final Cache<String, Bucket> buckets = Caffeine.newBuilder()
@@ -43,9 +43,9 @@ public class RateLimitFilter extends BaseSecurityFilter {
                                  @NonNull HttpServletResponse response,
                                  @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        String clientIp  = getClientIp(request);
-        String routeKey  = clientIp + ":" + getRouteKey(request);
-        Bucket bucket    = buckets.get(routeKey, key -> newBucket(request));
+        String clientIp = getClientIp(request);
+        String routeKey = clientIp + ":" + getRouteKey(request);
+        Bucket bucket = buckets.get(routeKey, key -> newBucket(request));
 
         if (bucket.tryConsume(1)) {
             filterChain.doFilter(request, response);
@@ -60,7 +60,7 @@ public class RateLimitFilter extends BaseSecurityFilter {
     private Bucket newBucket(HttpServletRequest request) {
         boolean isAuthRoute = isAuthRoute(request);
 
-        int maxRequests   = isAuthRoute ? AUTH_MAX_REQUESTS   : DEFAULT_MAX_REQUESTS;
+        int maxRequests = isAuthRoute ? AUTH_MAX_REQUESTS : DEFAULT_MAX_REQUESTS;
         int windowMinutes = isAuthRoute ? AUTH_WINDOW_MINUTES : DEFAULT_WINDOW_MINUTES;
         return Bucket.builder()
                 .addLimit(limit -> limit
@@ -78,7 +78,7 @@ public class RateLimitFilter extends BaseSecurityFilter {
     private String getRouteKey(HttpServletRequest request) {
         String uri = request.getRequestURI();
         if (uri.contains("/api/auth/login")) return "auth:login";
-        if (uri.contains("/api/auth/2fa"))   return "auth:2fa";
+        if (uri.contains("/api/auth/2fa")) return "auth:2fa";
         return "default";
     }
 }

@@ -9,10 +9,10 @@ import com.fiap.hackgov.auth.internal.DTOs.TwoFactorResponseDTO;
 import com.fiap.hackgov.auth.internal.entities.User;
 import com.fiap.hackgov.auth.internal.repositories.UserRepository;
 import com.fiap.hackgov.shared.infra.exceptions.InvalidCredentialsException;
-import com.fiap.hackgov.shared.infra.services.TokenService;
-import com.fiap.hackgov.shared.infra.utils.AuditLog;
 import com.fiap.hackgov.shared.infra.services.LoginAttemptService;
 import com.fiap.hackgov.shared.infra.services.TokenBlacklistService;
+import com.fiap.hackgov.shared.infra.services.TokenService;
+import com.fiap.hackgov.shared.infra.utils.AuditLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,8 +48,8 @@ public class AuthService {
 
     private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
-    public void logout(String token){
-        if(token == null){
+    public void logout(String token) {
+        if (token == null) {
             auditLog.with(log).event("logout_failed").level(AuditLog.Level.ERROR).log();
             throw new InvalidCredentialsException("Invalid token");
         }
@@ -80,7 +80,7 @@ public class AuthService {
 
         auditLog.with(log).event("refresh_token_success").email(email).level(AuditLog.Level.INFO).log();
 
-        String newAccessToken  = tokenService.generateToken(user);
+        String newAccessToken = tokenService.generateToken(user);
         String newRefreshToken = tokenService.generateRefreshToken(user);
 
         return new RefreshTokenResponseDTO(newAccessToken, newRefreshToken);
@@ -131,7 +131,7 @@ public class AuthService {
         user.setLastLogin(LocalDateTime.now());
         userRepository.save(user);
 
-        String accessToken  = tokenService.generateToken(user);
+        String accessToken = tokenService.generateToken(user);
         String refreshToken = tokenService.generateRefreshToken(user);
 
         auditLog.with(log).event("login_success").email(user.getEmail()).level(AuditLog.Level.INFO).log();

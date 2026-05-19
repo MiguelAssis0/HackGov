@@ -9,4 +9,5 @@ public record UpdateTaskDTO(
         UUID responsibleId,
         LocalDateTime startDate,
         LocalDateTime endDate
-) {}
+) {
+}

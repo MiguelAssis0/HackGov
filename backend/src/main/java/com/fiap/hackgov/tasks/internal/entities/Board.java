@@ -3,10 +3,11 @@ package com.fiap.hackgov.tasks.internal.entities;
 import com.fiap.hackgov.cityhall_management.internal.entities.CityHall;
 import com.fiap.hackgov.cityhall_management.internal.entities.Sector;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.FilterDef;
-import org.hibernate.annotations.ParamDef;
 
 import java.util.List;
 import java.util.UUID;

@@ -3,14 +3,15 @@ package com.fiap.hackgov.cityhall_management.internal.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fiap.hackgov.auth.internal.entities.User;
 import com.fiap.hackgov.cityhall_management.internal.entities.enums.RequisitionStatus;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.FilterDef;
-import org.hibernate.annotations.ParamDef;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -18,7 +19,6 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 @Getter
 @Setter

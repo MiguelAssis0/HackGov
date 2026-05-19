@@ -42,11 +42,7 @@ public class EmployeeService {
 
         CreationToken creationToken = creationTokenService.validateAndConsume(employeeDTO.tokenId());
 
-        auditLog.with(log)
-                .event("save_employee")
-                .email(employeeDTO.email())
-                .level(AuditLog.Level.INFO)
-                .log();
+        auditLog.with(log).event("save_employee").email(employeeDTO.email()).level(AuditLog.Level.INFO).log();
 
 
         Employee employee = employeeMapper.toEntity(employeeDTO);
@@ -55,10 +51,7 @@ public class EmployeeService {
 
         Employee saved = employeeRepository.save(employee);
 
-        auditLog.with(log)
-                .event("save_employee_success")
-                .level(AuditLog.Level.INFO)
-                .log();
+        auditLog.with(log).event("save_employee_success").level(AuditLog.Level.INFO).log();
 
         return saved;
 
@@ -71,21 +64,19 @@ public class EmployeeService {
 
     public Employee findById(UUID uuid) {
         auditLog.with(log).event("find_employee_by_id").level(AuditLog.Level.INFO).log();
-        Employee employee = employeeRepository.findById(uuid)
-                .orElseThrow(() -> {
-                    auditLog.with(log).event("find_employee_by_id_failed").reason("employee_not_found").level(AuditLog.Level.WARN).log();
-                    return new ResourceNotFoundException("Employee not found: " + uuid);
-                });
+        Employee employee = employeeRepository.findById(uuid).orElseThrow(() -> {
+            auditLog.with(log).event("find_employee_by_id_failed").reason("employee_not_found").level(AuditLog.Level.WARN).log();
+            return new ResourceNotFoundException("Employee not found: " + uuid);
+        });
 
         auditLog.with(log).event("find_employee_by_id_success").level(AuditLog.Level.INFO).log();
         return employee;
     }
 
     public Employee findByEmail(String email) {
-        return employeeRepository.findByEmail(email)
-                .orElseThrow(() -> {
-                    auditLog.with(log).event("find_employee_by_email_failed").reason("employee_not_found").level(AuditLog.Level.WARN).log();
-                    return new ResourceNotFoundException("Employee not found: " + email);
-                });
+        return employeeRepository.findByEmail(email).orElseThrow(() -> {
+            auditLog.with(log).event("find_employee_by_email_failed").reason("employee_not_found").level(AuditLog.Level.WARN).log();
+            return new ResourceNotFoundException("Employee not found: " + email);
+        });
     }
 }

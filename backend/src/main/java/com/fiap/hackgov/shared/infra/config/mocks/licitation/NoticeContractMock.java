@@ -1,16 +1,8 @@
 package com.fiap.hackgov.shared.infra.config.mocks.licitation;
 
 import com.fiap.hackgov.bidding.internal.entities.*;
-import com.fiap.hackgov.bidding.internal.entities.enums.ContractStatus;
-import com.fiap.hackgov.bidding.internal.entities.enums.LicitationEventType;
-import com.fiap.hackgov.bidding.internal.entities.enums.LicitationStatus;
-import com.fiap.hackgov.bidding.internal.entities.enums.LicitationType;
-import com.fiap.hackgov.bidding.internal.entities.enums.NoticeStatus;
-import com.fiap.hackgov.bidding.internal.repositories.ContractRepository;
-import com.fiap.hackgov.bidding.internal.repositories.LicitationHistoryRepository;
-import com.fiap.hackgov.bidding.internal.repositories.LicitationProcessRepository;
-import com.fiap.hackgov.bidding.internal.repositories.NoticeRepository;
-import com.fiap.hackgov.bidding.internal.repositories.SupplierRepository;
+import com.fiap.hackgov.bidding.internal.entities.enums.*;
+import com.fiap.hackgov.bidding.internal.repositories.*;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.shared.infra.config.mocks.util.MockContext;
 import lombok.RequiredArgsConstructor;

@@ -7,7 +7,8 @@ public record LoginRequestDTO(
         @NotBlank(message = "Email is required")
         @Email(message = "Invalid email")
         String email,
-        
+
         @NotBlank(message = "Password is required")
         String password
-) {}
+) {
+}

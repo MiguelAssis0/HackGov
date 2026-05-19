@@ -10,4 +10,5 @@ public record CityHallDTO(
         String stateName,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
-) {}
+) {
+}

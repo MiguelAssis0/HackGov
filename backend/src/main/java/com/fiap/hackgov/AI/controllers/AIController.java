@@ -24,7 +24,7 @@ public class AIController {
     @Operation(summary = "Generate a response from AI", security = @SecurityRequirement(name = "bearer-key"))
     @PostMapping
     public ResponseEntity<ResponseAI> generateResponse(@RequestBody RequestAI request, @AuthenticationPrincipal User user) {
-        ResponseAI response =  aiService.generateResponse(request);
+        ResponseAI response = aiService.generateResponse(request);
         return ResponseEntity.ok(response);
     }
 }
