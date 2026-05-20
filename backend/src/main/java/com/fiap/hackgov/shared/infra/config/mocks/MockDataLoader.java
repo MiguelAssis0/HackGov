@@ -4,6 +4,7 @@ import com.fiap.hackgov.shared.infra.config.mocks.chat.ChatMock;
 import com.fiap.hackgov.shared.infra.config.mocks.cityhall.CityHallMock;
 import com.fiap.hackgov.shared.infra.config.mocks.employee.EmployeeMock;
 import com.fiap.hackgov.shared.infra.config.mocks.licitation.LicitationMock;
+import com.fiap.hackgov.shared.infra.config.mocks.licitation.ContractPaymentMock;
 import com.fiap.hackgov.shared.infra.config.mocks.licitation.NoticeContractMock;
 import com.fiap.hackgov.shared.infra.config.mocks.occupation.OccupationMock;
 import com.fiap.hackgov.shared.infra.config.mocks.permission.PermissionMock;
@@ -30,6 +31,7 @@ public class MockDataLoader implements CommandLineRunner {
     private final RequisitionMock requisitionMock;
     private final LicitationMock licitationMock;
     private final NoticeContractMock noticeContractMock;
+    private final ContractPaymentMock contractPaymentMock;
 
     @Override
     public void run(String... args) {
@@ -44,6 +46,7 @@ public class MockDataLoader implements CommandLineRunner {
         requisitionMock.load(ctx);
         licitationMock.load(ctx);
         noticeContractMock.load(ctx);
+        contractPaymentMock.load(ctx);
         System.out.println("Mocks carregados!");
     }
 }

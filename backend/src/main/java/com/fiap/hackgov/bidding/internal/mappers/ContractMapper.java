@@ -15,6 +15,9 @@ public interface ContractMapper {
     @Mapping(target = "licitationProcess", ignore = true)
     @Mapping(target = "supplier", ignore = true)
     @Mapping(target = "responsible", ignore = true)
+    @Mapping(target = "executionOrders", ignore = true)
+    @Mapping(target = "commitments", ignore = true)
+    @Mapping(target = "accountabilityReports", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     Contract toEntity(CreateContractDTO dto);

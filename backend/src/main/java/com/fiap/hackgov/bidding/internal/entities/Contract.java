@@ -13,6 +13,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -60,6 +62,15 @@ public class Contract {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ContractStatus status;
+
+    @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ExecutionOrder> executionOrders = new ArrayList<>();
+
+    @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Commitment> commitments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AccountabilityReport> accountabilityReports = new ArrayList<>();
 
     @CreationTimestamp
     private LocalDateTime createdAt;

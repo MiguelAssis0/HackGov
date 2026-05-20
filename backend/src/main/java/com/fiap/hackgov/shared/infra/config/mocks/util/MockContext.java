@@ -1,8 +1,6 @@
 package com.fiap.hackgov.shared.infra.config.mocks.util;
 
-import com.fiap.hackgov.bidding.internal.entities.LicitationProcess;
-import com.fiap.hackgov.bidding.internal.entities.Requisition;
-import com.fiap.hackgov.bidding.internal.entities.Supplier;
+import com.fiap.hackgov.bidding.internal.entities.*;
 import com.fiap.hackgov.cityhall_management.internal.entities.*;
 
 public class MockContext {
@@ -24,11 +22,20 @@ public class MockContext {
     public Requisition requisitionPendingApproval;
     public Requisition requisitionInLicitation;
     public Requisition requisitionFinishedLicitation;
+    public Requisition requisitionInPaymentStage;
 
     public LicitationProcess licitationProcess;
     public LicitationProcess finishedLicitationProcess;
+    public LicitationProcess paymentStageLicitationProcess;
 
     public Supplier supplierWinner;
+    public Supplier paymentStageSupplier;
+
+    public Contract paymentStageContract;
+    public ExecutionOrder paymentStageExecutionOrder;
+    public Commitment paymentStageCommitment;
+    public PaymentDeclaration paymentStageDeclaration;
+    public Payment paymentStagePayment;
 
     public CityHall cityHallSP;
     public CityHall cityHallRJ;
