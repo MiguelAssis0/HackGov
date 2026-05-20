@@ -1,5 +1,6 @@
 package com.fiap.hackgov.cityhall_management.internal.services;
 
+import com.fiap.hackgov.cityhall_management.internal.DTOs.Employee.EmployeeDetailsResponseDTO;
 import com.fiap.hackgov.auth.internal.entities.enums.Roles;
 import com.fiap.hackgov.cityhall_management.internal.DTOs.Employee.CreateEmployeeDTO;
 import com.fiap.hackgov.cityhall_management.internal.entities.CityHall;
@@ -93,6 +94,26 @@ public class EmployeeService {
 
         auditLog.with(log).event("find_employee_by_id_success").level(AuditLog.Level.INFO).log();
         return employee;
+    }
+
+    @Transactional(readOnly = true)
+    public EmployeeDetailsResponseDTO getEmployeeDetails(Employee authenticatedEmployee) {
+        Employee employee = employeeRepository.findByIdWithDetails(authenticatedEmployee.getId())
+                .orElseThrow(() -> {
+                    auditLog.with(log).event("get_employee_details_failed").reason("employee_not_found").level(AuditLog.Level.WARN).log();
+                    return new ResourceNotFoundException("Employee not found: " + authenticatedEmployee.getId());
+                });
+
+        CityHall cityHall = employee.getCityHallId();
+        Occupation occupation = employee.getOccupationId();
+        Sector sector = employee.getSectorId();
+
+        return new EmployeeDetailsResponseDTO(
+                employee.getFullName(),
+                cityHall != null ? cityHall.getName() : null,
+                occupation != null ? occupation.getName() : null,
+                sector != null ? sector.getName() : null
+        );
     }
 
     public Employee findByEmail(String email) {

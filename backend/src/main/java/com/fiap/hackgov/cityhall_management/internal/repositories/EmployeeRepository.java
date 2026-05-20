@@ -22,6 +22,14 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
     @Query("SELECT e FROM Employee e WHERE e.email = :email")
     Optional<Employee> findByEmailWithPermissions(@Param("email") String email);
 
+    @EntityGraph(attributePaths = {
+            "cityHallId",
+            "sectorId",
+            "occupationId"
+    })
+    @Query("SELECT e FROM Employee e WHERE e.id = :id")
+    Optional<Employee> findByIdWithDetails(@Param("id") UUID id);
+
     Optional<Employee> findByEmail(String email);
 
 }
