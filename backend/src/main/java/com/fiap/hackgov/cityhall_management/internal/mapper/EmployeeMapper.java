@@ -19,6 +19,18 @@ public interface EmployeeMapper {
     @Mapping(target = "sectorId", ignore = true)
     @Mapping(target = "occupationId", ignore = true)
     @Mapping(target = "role", ignore = true)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "accessibility", ignore = true)
+    @Mapping(target = "avatarPath", ignore = true)
+    @Mapping(target = "twoFactor", ignore = true)
+    @Mapping(target = "acceptTerms", ignore = true)
+    @Mapping(target = "lastLogin", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "requisitionStatus", ignore = true)
+    @Mapping(target = "dismissalDate", ignore = true)
+    @Mapping(target = "authorities", ignore = true)
     Employee toEntity(CreateEmployeeDTO createEmployeeDTO);
 
     @Mapping(target = "cityHallId", source = "cityHallId.id")

@@ -11,6 +11,9 @@ public interface ApprovalMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "requisition", ignore = true)
+    @Mapping(target = "approvalSector", source = "stage")
+    @Mapping(target = "approvalStatus", ignore = true)
+    @Mapping(target = "approvedBy", ignore = true)
     @Mapping(target = "approvedAt", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -30,5 +33,7 @@ public interface ApprovalMapper {
     )
     ApprovalResponseDTO toDTO(Approval approval);
 
+    @Mapping(target = "stage", source = "approvalSector")
+    @Mapping(target = "approvedById", source = "approvedBy.id")
     CreateApprovalDTO toCreateApprovalDTO(Approval approval);
 }

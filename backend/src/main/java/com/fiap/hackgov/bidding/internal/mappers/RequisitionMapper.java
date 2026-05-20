@@ -24,6 +24,8 @@ public interface RequisitionMapper {
     @Mapping(target = "histories", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "requiresEtp", ignore = true)
+    @Mapping(target = "requestStatus", ignore = true)
     @Mapping(target = "etp", ignore = true)
     @Mapping(target = "sector", ignore = true)
     @Mapping(target = "responsible", ignore = true)

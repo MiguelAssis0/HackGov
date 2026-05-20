@@ -10,6 +10,7 @@ import org.mapstruct.Mapping;
 public interface TaskMapper {
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     Task toEntity(CreateTaskDTO dto);

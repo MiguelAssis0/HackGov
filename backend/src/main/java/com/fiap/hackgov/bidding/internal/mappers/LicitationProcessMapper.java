@@ -15,6 +15,7 @@ public interface LicitationProcessMapper {
     @Mapping(target = "processNumber", ignore = true)
     @Mapping(target = "requisition", ignore = true)
     @Mapping(target = "status", ignore = true)
+    @Mapping(target = "winnerSupplier", ignore = true)
     @Mapping(target = "notice", ignore = true)
     @Mapping(target = "contract", ignore = true)
     @Mapping(target = "proposals", ignore = true)
