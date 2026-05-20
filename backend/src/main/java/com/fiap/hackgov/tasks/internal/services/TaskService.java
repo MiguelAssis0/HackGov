@@ -36,10 +36,10 @@ public class TaskService {
         UUID cityHallId = requireCityHallId(currentEmployee);
 
         Employee responsible = employeeRepository.findById(dto.responsible().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Responsavel pela tarefa nao encontrado"));
 
         Board board = boardRepository.findById(dto.board().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Board not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Quadro/setor de destino da tarefa nao encontrado"));
 
         validateSameCity(board, cityHallId);
         validateSameCity(responsible, cityHallId);
@@ -86,14 +86,14 @@ public class TaskService {
 
         if (dto.responsibleId() != null) {
             Employee responsible = employeeRepository.findById(dto.responsibleId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Responsavel pela tarefa nao encontrado"));
             validateSameCity(responsible, cityHallId);
             task.setResponsible(responsible);
         }
 
         if (dto.boardId() != null) {
             Board board = boardRepository.findById(dto.boardId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Board not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Quadro/setor de destino da tarefa nao encontrado"));
             validateSameCity(board, cityHallId);
             task.setBoard(board);
         }
@@ -119,16 +119,16 @@ public class TaskService {
 
         if (canViewCityTasks(employee)) {
             return taskRepository.findByIdAndBoard_CityHall_Id(id, cityHallId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Tarefa nao encontrada para esta prefeitura"));
         }
 
         return taskRepository.findByIdAndBoard_CityHall_IdAndBoard_Sector_Id(id, cityHallId, requireSectorId(employee))
-                .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Tarefa nao encontrada para o seu setor"));
     }
 
     private Employee requireAuthenticated(Employee employee) {
         if (employee == null) {
-            throw new UnauthorizedException("Authenticated employee is required");
+            throw new UnauthorizedException("E necessario estar autenticado para acessar tarefas");
         }
 
         return employee;
@@ -140,7 +140,7 @@ public class TaskService {
 
     private UUID requireCityHallId(Employee employee) {
         if (employee.getCityHallId() == null) {
-            throw new BusinessException("Employee must be linked to a city hall");
+            throw new BusinessException("O usuario autenticado precisa estar vinculado a uma prefeitura");
         }
 
         return employee.getCityHallId().getId();
@@ -148,7 +148,7 @@ public class TaskService {
 
     private UUID requireSectorId(Employee employee) {
         if (employee.getSectorId() == null) {
-            throw new BusinessException("Employee must be linked to a sector");
+            throw new BusinessException("O usuario autenticado precisa estar vinculado a um setor");
         }
 
         return employee.getSectorId().getId();
@@ -156,13 +156,13 @@ public class TaskService {
 
     private void validateSameCity(Board board, UUID cityHallId) {
         if (board.getCityHall() == null || !cityHallId.equals(board.getCityHall().getId())) {
-            throw new BusinessException("Board does not belong to the authenticated employee city hall");
+            throw new BusinessException("O quadro/setor de destino nao pertence a prefeitura do usuario autenticado");
         }
     }
 
     private void validateSameCity(Employee employee, UUID cityHallId) {
         if (employee.getCityHallId() == null || !cityHallId.equals(employee.getCityHallId().getId())) {
-            throw new BusinessException("Responsible employee does not belong to the authenticated employee city hall");
+            throw new BusinessException("O responsavel informado nao pertence a prefeitura do usuario autenticado");
         }
     }
 }

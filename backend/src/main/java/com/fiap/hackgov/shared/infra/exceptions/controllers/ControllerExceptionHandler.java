@@ -3,11 +3,11 @@ package com.fiap.hackgov.shared.infra.exceptions.controllers;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.fiap.hackgov.shared.infra.exceptions.*;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -72,10 +72,15 @@ public class ControllerExceptionHandler {
     public ResponseEntity<StandardError> handleMethodNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
         List<String> errors = e.getBindingResult().getAllErrors()
                 .stream()
-                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .map(error -> {
+                    if (error instanceof FieldError fieldError) {
+                        return fieldError.getField() + ": " + fieldError.getDefaultMessage();
+                    }
+                    return error.getDefaultMessage();
+                })
                 .collect(Collectors.toList());
         String errorMessage = String.join(", ", errors);
-        return handleException("Argument Not Valid", HttpStatus.BAD_REQUEST, new IllegalArgumentException(errorMessage), request);
+        return handleException("Dados invalidos", HttpStatus.BAD_REQUEST, new IllegalArgumentException(errorMessage), request);
     }
 
     @ExceptionHandler(InvalidDataAccessApiUsageException.class)

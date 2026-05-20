@@ -31,7 +31,7 @@ public class BoardService {
         Board board = boardMapper.toEntity(createBoardDTO);
 
         if (board.getCityHall() != null && !cityHallId.equals(board.getCityHall().getId())) {
-            throw new BusinessException("Board does not belong to the authenticated employee city hall");
+            throw new BusinessException("O quadro/setor nao pertence a prefeitura do usuario autenticado");
         }
 
         return boardRepository.save(board);
@@ -45,12 +45,12 @@ public class BoardService {
     public Board getBoardById(UUID id, Employee authenticatedEmployee) {
         Employee currentEmployee = requireAuthenticated(authenticatedEmployee);
         return boardRepository.findByIdAndCityHall_Id(id, requireCityHallId(currentEmployee))
-                .orElseThrow(() -> new ResourceNotFoundException("Board not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Quadro/setor nao encontrado para esta prefeitura"));
     }
 
     private Employee requireAuthenticated(Employee employee) {
         if (employee == null) {
-            throw new UnauthorizedException("Authenticated employee is required");
+            throw new UnauthorizedException("E necessario estar autenticado para acessar quadros/setores");
         }
 
         return employee;
@@ -58,7 +58,7 @@ public class BoardService {
 
     private UUID requireCityHallId(Employee employee) {
         if (employee.getCityHallId() == null) {
-            throw new BusinessException("Employee must be linked to a city hall");
+            throw new BusinessException("O usuario autenticado precisa estar vinculado a uma prefeitura");
         }
 
         return employee.getCityHallId().getId();
