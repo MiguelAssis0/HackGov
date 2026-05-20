@@ -58,6 +58,11 @@ public class ControllerExceptionHandler {
         ));
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<StandardError> handleUnauthorizedException(UnauthorizedException e, HttpServletRequest request) {
+        return handleException("Unauthorized", HttpStatus.UNAUTHORIZED, e, request);
+    }
+
     @ExceptionHandler(BlockedException.class)
     public ResponseEntity<String> handleBlockedException(BlockedException ex) {
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(ex.getMessage());

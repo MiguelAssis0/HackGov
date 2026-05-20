@@ -1,6 +1,7 @@
 package com.fiap.hackgov.shared.infra.filters;
 
 
+import com.fiap.hackgov.auth.internal.entities.enums.Roles;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.shared.infra.security.SecurityContext;
 import jakarta.persistence.EntityManager;
@@ -30,7 +31,7 @@ public class HibernateFilterActivator {
         session.enableFilter("cityHallFilter")
                 .setParameter("cityHallId", employee.getCityHallId().getId());
 
-        if (employee.getSectorId() != null) {
+        if (employee.getSectorId() != null && !Roles.ADMIN.equals(employee.getRole())) {
             session.enableFilter("sectorFilter")
                     .setParameter("sectorId", employee.getSectorId().getId());
         }

@@ -25,20 +25,20 @@ public class BoardController {
 
     @PostMapping
     public ResponseEntity<Board> createBoard(@RequestBody @Valid CreateBoardDTO createBoardDTO, @AuthenticationPrincipal Employee employee) {
-        Board board = boardService.createBoard(createBoardDTO);
+        Board board = boardService.createBoard(createBoardDTO, employee);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(board.getId()).toUri();
         return ResponseEntity.created(location).body(board);
     }
 
     @GetMapping
     public ResponseEntity<Page<Board>> getAllBoards(@AuthenticationPrincipal Employee employee, Pageable pageable) {
-        Page<Board> response = boardService.getAllBoards(pageable);
+        Page<Board> response = boardService.getAllBoards(pageable, employee);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Board> getBoardById(@PathVariable UUID id, @AuthenticationPrincipal Employee employee) {
-        Board board = boardService.getBoardById(id);
+        Board board = boardService.getBoardById(id, employee);
         return ResponseEntity.ok(board);
     }
 }

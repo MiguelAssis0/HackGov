@@ -107,9 +107,9 @@ export default function DashboardPage() {
                       <Link to="/processos" className="btn btn-primary">
                         Ver Processos <i className="bi bi-diagram-3"></i>
                       </Link>
-                      <a href="#" className="btn btn-outline-primary">
+                      <Link to="/tarefas?nova=1" className="btn btn-outline-primary">
                         Nova Tarefa <i className="bi bi-plus"></i>
-                      </a>
+                      </Link>
                     </div>
                   </div>
 
@@ -188,9 +188,9 @@ export default function DashboardPage() {
                     <h4>
                       <i className="bi bi-check-square-fill primary me-1"></i> Suas tarefas
                     </h4>
-                    <a href="#">
+                    <Link to="/tarefas">
                       <h4 className="primary">Ver todas</h4>
-                    </a>
+                    </Link>
                   </div>
 
                   {[

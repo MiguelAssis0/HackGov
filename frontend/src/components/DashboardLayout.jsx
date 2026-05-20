@@ -94,9 +94,12 @@ export function DashboardLayout({ children, styles = [] }) {
           >
             <i className="bi bi-diagram-3"></i> Processos
           </Link>
-          <a className="nav-item" href="#">
+          <Link
+            className={`nav-item ${isActive("/tarefas") ? "active" : ""}`}
+            to="/tarefas"
+          >
             <i className="bi bi-check2-square"></i> Tarefas
-          </a>
+          </Link>
 
           <div className="nav-section-label" style={{ marginTop: "0.5rem" }}>
             Administração
@@ -172,9 +175,12 @@ export function DashboardLayout({ children, styles = [] }) {
             >
               <i className="bi bi-wrench-adjustable"></i>Ferramentas
             </Link>
-            <button className="bnav-btn">
-              <i className="bi bi-search"></i>Buscar
-            </button>
+            <Link
+              to="/tarefas"
+              className={`bnav-btn ${isActive("/tarefas") ? "active" : ""}`}
+            >
+              <i className="bi bi-check2-square"></i>Tarefas
+            </Link>
             <button className="bnav-btn">
               <i className="bi bi-chat-dots-fill"></i>Chats
             </button>

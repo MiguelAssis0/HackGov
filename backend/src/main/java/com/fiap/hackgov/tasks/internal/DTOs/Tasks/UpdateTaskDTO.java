@@ -7,6 +7,7 @@ public record UpdateTaskDTO(
         String title,
         String description,
         UUID responsibleId,
+        UUID boardId,
         LocalDateTime startDate,
         LocalDateTime endDate
 ) {

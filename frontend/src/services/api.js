@@ -1,5 +1,6 @@
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+const API_ROOT_URL = API_BASE_URL.replace(/\/api\/?$/, "");
 
 /**
  * Recupera token do storage
@@ -11,7 +12,7 @@ function getToken() {
 /**
  * Cliente HTTP único da aplicação
  */
-async function request(path, options = {}) {
+async function requestFrom(baseUrl, path, options = {}) {
   const headers = {
     "Content-Type": "application/json",
     ...(options.headers || {}),
@@ -22,7 +23,7 @@ async function request(path, options = {}) {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await fetch(`${baseUrl}${path}`, {
     ...options,
     headers,
   });
@@ -44,10 +45,29 @@ async function request(path, options = {}) {
       data?.message ||
       data?.error ||
       `Erro ${response.status}`;
-    throw new Error(message);
+    const error = new Error(message);
+    error.status = response.status;
+    error.data = data;
+    throw error;
   }
 
   return data;
+}
+
+async function request(path, options = {}) {
+  return requestFrom(API_BASE_URL, path, options);
+}
+
+async function requestTaskPath(path, options = {}) {
+  try {
+    return await requestFrom(API_ROOT_URL, path, options);
+  } catch (error) {
+    if (error.status === 404) {
+      return request(path, options);
+    }
+
+    throw error;
+  }
 }
 
 /**
@@ -67,7 +87,39 @@ export const api = {
     }),
 
   // EMPLOYEES
-  getEmployees: () => request("/employee"),
+  getEmployees: () => request("/employee?size=100&sort=firstName,asc"),
+
+  // SECTORS
+  getSectors: () => request("/sectors?size=100"),
+
+  // TASK BOARDS
+  getBoards: () => requestTaskPath("/boards?size=100&sort=name,asc"),
+
+  createBoard: (payload) =>
+    requestTaskPath("/boards", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  // TASKS
+  getTasks: () => requestTaskPath("/tasks?size=100&sort=title,asc"),
+
+  createTask: (payload) =>
+    requestTaskPath("/tasks", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  updateTask: (id, payload) =>
+    requestTaskPath(`/tasks/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+
+  deleteTask: (id) =>
+    requestTaskPath(`/tasks/${id}`, {
+      method: "DELETE",
+    }),
 
   // REQUISITIONS
   getRequisitions: () => request("/requisitions"),

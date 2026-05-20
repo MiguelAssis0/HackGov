@@ -8,6 +8,7 @@ import DashboardPage from "./pages/DashboardPage.jsx";
 import ToolsPage from "./pages/ToolsPage.jsx";
 import ProcessesPage from "./pages/ProcessesPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
+import TasksPage from "./pages/TasksPage.jsx";
 
 function normalizePath(pathname) {
   const cleanPath = (pathname || "/").split(/[?#]/)[0];
@@ -45,6 +46,7 @@ export default function App() {
     "/dashboard": <DashboardPage />,
     "/ferramentas": <ToolsPage />,
     "/processos": <ProcessesPage />,
+    "/tarefas": <TasksPage />,
     "/perfil": <ProfilePage />,
   }[path] || <HomePage />;
 

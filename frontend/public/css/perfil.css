@@ -167,7 +167,7 @@
     padding: 0.22rem 0.55rem;
     border-radius: 7px;
     font-size: 0.72rem;
-    font-weight: 800;
+    font-weight: 500;
 }
 
 .perfil-status.ok {
@@ -210,7 +210,7 @@
     color: var(--branco);
     font-size: 0.72rem;
     font-style: normal;
-    font-weight: 800;
+    font-weight: 500;
 }
 
 .font-segmented {

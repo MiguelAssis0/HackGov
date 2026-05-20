@@ -13,6 +13,10 @@ public interface BoardRepository extends JpaRepository<Board, UUID> {
 
     Page<Board> findAll(Pageable pageable);
 
+    Page<Board> findAllByCityHall_Id(UUID cityHallId, Pageable pageable);
+
     Optional<Board> findById(UUID id);
+
+    Optional<Board> findByIdAndCityHall_Id(UUID id, UUID cityHallId);
 
 }
