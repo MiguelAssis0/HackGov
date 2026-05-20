@@ -19,4 +19,5 @@ public record CreateCityHallDTO(
 
         @NotNull(message = "State ID is required")
         UUID stateId
-) {}
+) {
+}

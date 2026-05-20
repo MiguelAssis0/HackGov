@@ -5,7 +5,6 @@ import com.fiap.hackgov.tasks.internal.entities.Board;
 import jakarta.validation.constraints.NotBlank;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 public record CreateTaskDTO(
         @NotBlank

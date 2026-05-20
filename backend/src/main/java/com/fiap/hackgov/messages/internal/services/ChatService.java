@@ -52,7 +52,7 @@ public class ChatService {
         }
 
         Optional<Chat> existingChat = chatRepository.
-        findPrivateChatBetweenEmployees(authenticatedEmployee.getId(), target.getId());
+                findPrivateChatBetweenEmployees(authenticatedEmployee.getId(), target.getId());
 
         if (existingChat.isPresent()) {
             return chatMapper.toDTO(existingChat.get());

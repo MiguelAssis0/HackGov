@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class AuditLog {
 
-    public enum Level { INFO, WARN, ERROR }
+    public enum Level {INFO, WARN, ERROR}
 
     public Builder with(Logger log) {
         return new Builder(log);
@@ -46,18 +46,18 @@ public class AuditLog {
         }
 
         public void log() {
-            if (email  != null) MDC.put("email",  email);
+            if (email != null) MDC.put("email", email);
             if (reason != null) MDC.put("reason", reason);
 
             String message = "event=" + event;
 
             switch (level) {
-                case WARN  -> log.warn(message);
+                case WARN -> log.warn(message);
                 case ERROR -> log.error(message);
-                default    -> log.info(message);
+                default -> log.info(message);
             }
 
-            if (email  != null) MDC.remove("email");
+            if (email != null) MDC.remove("email");
             if (reason != null) MDC.remove("reason");
         }
     }

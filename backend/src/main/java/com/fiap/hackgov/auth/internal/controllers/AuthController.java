@@ -6,8 +6,8 @@ import com.fiap.hackgov.auth.internal.DTOs.RefreshToken.RefreshTokenRequestDTO;
 import com.fiap.hackgov.auth.internal.DTOs.RefreshToken.RefreshTokenResponseDTO;
 import com.fiap.hackgov.auth.internal.DTOs.TwoFactorRequestDTO;
 import com.fiap.hackgov.auth.internal.DTOs.TwoFactorResponseDTO;
-import com.fiap.hackgov.shared.infra.services.TokenService;
 import com.fiap.hackgov.auth.internal.services.AuthService;
+import com.fiap.hackgov.shared.infra.services.TokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -15,7 +15,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -73,7 +76,7 @@ public class AuthController {
             @ApiResponse(responseCode = "401", description = "Invalid token")
     })
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletRequest request){
+    public ResponseEntity<Void> logout(HttpServletRequest request) {
         String token = tokenService.extractToken(request);
         authService.logout(token);
         return ResponseEntity.noContent().build();
@@ -85,7 +88,7 @@ public class AuthController {
             @ApiResponse(responseCode = "401", description = "Invalid or expired refresh token")
     })
     @PostMapping("/refresh")
-    public ResponseEntity<RefreshTokenResponseDTO> refresh(@RequestBody @Valid RefreshTokenRequestDTO request){
+    public ResponseEntity<RefreshTokenResponseDTO> refresh(@RequestBody @Valid RefreshTokenRequestDTO request) {
         return ResponseEntity.ok(authService.refreshToken(request));
     }
 }

@@ -13,4 +13,5 @@ public record UpdateProcessStateDTO(
         UUID responsibleId,
         String observation
 
-) {}
+) {
+}

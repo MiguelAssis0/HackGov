@@ -6,13 +6,13 @@ public enum Roles {
     EMPLOYEE(1),
     CITIZEN(2),
     ADMIN(3);
-    
+
     private final int id;
-    
+
     Roles(int id) {
         this.id = id;
     }
-    
+
     public int getId() {
         return id;
     }

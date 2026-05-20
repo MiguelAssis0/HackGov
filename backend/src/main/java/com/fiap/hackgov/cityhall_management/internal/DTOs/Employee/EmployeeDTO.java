@@ -33,4 +33,5 @@ public record EmployeeDTO(
         Double hoursWorked,
         UUID cityHallId
 
-) {}
+) {
+}

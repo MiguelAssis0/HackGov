@@ -1,12 +1,9 @@
 package com.fiap.hackgov.auth.internal.services;
 
-import com.fiap.hackgov.auth.internal.entities.User;
-import com.fiap.hackgov.auth.internal.repositories.UserRepository;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.cityhall_management.internal.repositories.EmployeeRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

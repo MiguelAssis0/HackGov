@@ -17,4 +17,5 @@ public record ApprovalResponseDTO(
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 
-) {}
+) {
+}

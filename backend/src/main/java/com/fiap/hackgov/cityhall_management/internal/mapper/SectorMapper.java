@@ -9,5 +9,6 @@ import org.mapstruct.Mapper;
 public interface SectorMapper {
 
     Sector toEntity(CreateSectorDTO createSectorDTO);
+
     SectorResponseDTO toDTO(Sector sector);
 }

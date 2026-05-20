@@ -1,10 +1,16 @@
 package com.fiap.hackgov.cityhall_management.internal.services;
 
+import com.fiap.hackgov.auth.internal.entities.enums.Roles;
 import com.fiap.hackgov.cityhall_management.internal.DTOs.Employee.CreateEmployeeDTO;
-import com.fiap.hackgov.cityhall_management.internal.entities.CreationToken;
+import com.fiap.hackgov.cityhall_management.internal.entities.CityHall;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
+import com.fiap.hackgov.cityhall_management.internal.entities.Occupation;
+import com.fiap.hackgov.cityhall_management.internal.entities.Sector;
 import com.fiap.hackgov.cityhall_management.internal.mapper.EmployeeMapper;
 import com.fiap.hackgov.cityhall_management.internal.repositories.EmployeeRepository;
+import com.fiap.hackgov.cityhall_management.internal.repositories.OccupationRepository;
+import com.fiap.hackgov.cityhall_management.internal.repositories.SectorRepository;
+import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
 import com.fiap.hackgov.shared.infra.utils.AuditLog;
 import org.slf4j.Logger;
@@ -12,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,10 +34,16 @@ public class EmployeeService {
     private EmployeeMapper employeeMapper;
 
     @Autowired
-    private CreationTokenService creationTokenService;
+    private CityHallService cityHallService;
 
     @Autowired
-    private CityHallService cityHallService;
+    private SectorRepository sectorRepository;
+
+    @Autowired
+    private OccupationRepository occupationRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private AuditLog auditLog;
@@ -39,26 +52,28 @@ public class EmployeeService {
 
     @Transactional
     public Employee save(CreateEmployeeDTO employeeDTO) {
+        CityHall cityHall = cityHallService.findById(employeeDTO.cityHallId());
+        Sector sector = sectorRepository.findByIdAndCityHall_Id(employeeDTO.sectorId(), cityHall.getId()).orElseThrow(() -> new ResourceNotFoundException("Sector not found for city hall: " + employeeDTO.sectorId()));
+        Occupation occupation = occupationRepository.findById(employeeDTO.occupationId()).orElseThrow(() -> new ResourceNotFoundException("Occupation not found: " + employeeDTO.occupationId()));
 
-        CreationToken creationToken = creationTokenService.validateAndConsume(employeeDTO.tokenId());
+        if (occupation.getSectorId() == null || !occupation.getSectorId().getId().equals(sector.getId())) {
+            throw new BusinessException("Occupation does not belong to the informed sector");
+        }
 
-        auditLog.with(log)
-                .event("save_employee")
-                .email(employeeDTO.email())
-                .level(AuditLog.Level.INFO)
-                .log();
-
+        auditLog.with(log).event("save_employee").email(employeeDTO.email()).level(AuditLog.Level.INFO).log();
 
         Employee employee = employeeMapper.toEntity(employeeDTO);
-
-        employee.setCityHallId(creationToken.getCityHall());
+        employee.setPassword(passwordEncoder.encode(employeeDTO.password()));
+        employee.setRole(Roles.EMPLOYEE);
+        employee.setStatus(true);
+        employee.setTwoFactor(false);
+        employee.setCityHallId(cityHall);
+        employee.setSectorId(sector);
+        employee.setOccupationId(occupation);
 
         Employee saved = employeeRepository.save(employee);
 
-        auditLog.with(log)
-                .event("save_employee_success")
-                .level(AuditLog.Level.INFO)
-                .log();
+        auditLog.with(log).event("save_employee_success").level(AuditLog.Level.INFO).log();
 
         return saved;
 
@@ -71,21 +86,19 @@ public class EmployeeService {
 
     public Employee findById(UUID uuid) {
         auditLog.with(log).event("find_employee_by_id").level(AuditLog.Level.INFO).log();
-        Employee employee = employeeRepository.findById(uuid)
-                .orElseThrow(() -> {
-                    auditLog.with(log).event("find_employee_by_id_failed").reason("employee_not_found").level(AuditLog.Level.WARN).log();
-                    return new ResourceNotFoundException("Employee not found: " + uuid);
-                });
+        Employee employee = employeeRepository.findById(uuid).orElseThrow(() -> {
+            auditLog.with(log).event("find_employee_by_id_failed").reason("employee_not_found").level(AuditLog.Level.WARN).log();
+            return new ResourceNotFoundException("Employee not found: " + uuid);
+        });
 
         auditLog.with(log).event("find_employee_by_id_success").level(AuditLog.Level.INFO).log();
         return employee;
     }
 
     public Employee findByEmail(String email) {
-        return employeeRepository.findByEmail(email)
-                .orElseThrow(() -> {
-                    auditLog.with(log).event("find_employee_by_email_failed").reason("employee_not_found").level(AuditLog.Level.WARN).log();
-                    return new ResourceNotFoundException("Employee not found: " + email);
-                });
+        return employeeRepository.findByEmail(email).orElseThrow(() -> {
+            auditLog.with(log).event("find_employee_by_email_failed").reason("employee_not_found").level(AuditLog.Level.WARN).log();
+            return new ResourceNotFoundException("Employee not found: " + email);
+        });
     }
 }

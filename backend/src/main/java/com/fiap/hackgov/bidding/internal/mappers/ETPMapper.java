@@ -1,8 +1,10 @@
 package com.fiap.hackgov.bidding.internal.mappers;
 
-import com.fiap.hackgov.bidding.internal.DTOs.etp.*;
+import com.fiap.hackgov.bidding.internal.DTOs.etp.CreateETPDTO;
+import com.fiap.hackgov.bidding.internal.DTOs.etp.ETPDTO;
 import com.fiap.hackgov.bidding.internal.entities.ETP;
-import org.mapstruct.*;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface ETPMapper {

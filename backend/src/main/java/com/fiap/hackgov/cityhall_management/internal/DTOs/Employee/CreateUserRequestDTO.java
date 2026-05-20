@@ -7,4 +7,5 @@ public record CreateUserRequestDTO(
         String email,
         String password,
         String phone
-) {}
+) {
+}

@@ -53,6 +53,9 @@ public class LicitationProcess {
     @OneToOne(mappedBy = "licitationProcess", cascade = CascadeType.ALL, orphanRemoval = true)
     private Notice notice;
 
+    @OneToOne(mappedBy = "licitationProcess", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Contract contract;
+
     @OneToMany(mappedBy = "licitationProcess", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Proposal> proposals = new ArrayList<>();
 

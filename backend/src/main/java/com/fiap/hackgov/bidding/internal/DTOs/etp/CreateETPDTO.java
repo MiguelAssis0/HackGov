@@ -9,4 +9,5 @@ public record CreateETPDTO(
         @Size(min = 10, max = 5000, message = "Content must be between 10 and 5000 characters")
         String content
 
-) {}
+) {
+}

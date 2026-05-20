@@ -18,4 +18,5 @@ public record ProcessStateResponseDTO(
         LocalDateTime updatedAt,
         UUID biddingProcessId
 
-) {}
+) {
+}

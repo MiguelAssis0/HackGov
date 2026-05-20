@@ -89,16 +89,24 @@ public class ApprovalService {
 
             ProcessStage approvedStage = getNextStage(currentStage);
 
-            processStatus.setStage(approvedStage);
-            processStatus.setResponsibleId(employee.getId());
-            processStatus.setObservation(dto.observation());
-            processStatus.setFinishedAt(LocalDateTime.now());
+            requisitionService.updateCurrentStage(processStatus, approvedStage, employee, dto.observation());
 
             processHistoryService.createProcessHistory(requisition, employee, "Etapa aprovada: " + approvedStage.getDescription(), approvedStage, HistoryEventType.APPROVED);
 
             ProcessStage nextStage = getNextStage(approvedStage);
 
             requisitionService.sendToNextStage(requisition, nextStage, employee, "Processo enviado para " + nextStage.getDescription());
+        }
+
+        if (dto.status() == ApprovalStatus.CORRECAO_NECESSARIA) {
+
+            processHistoryService.createProcessHistory(requisition, employee, "Correção solicitada na etapa: " + currentStage.getDescription(), currentStage, HistoryEventType.REJECTED);
+
+            requisitionService.returnToInitialStage(
+                    requisition,
+                    employee,
+                    "Requisição retornada para " + ProcessStage.REQUISICAO_CADASTRADA.getDescription() + " para correção"
+            );
         }
 
         if (dto.status() == ApprovalStatus.REPROVADO) {

@@ -41,6 +41,12 @@ public class PermissionMock {
 
         List<PermissionsOccupation> relations = List.of(
 
+                // Administrador municipal
+                createRelation(permRead, ctx.administradorMunicipal),
+                createRelation(permCreate, ctx.administradorMunicipal),
+                createRelation(permDelete, ctx.administradorMunicipal),
+                createRelation(permUpdate, ctx.administradorMunicipal),
+
                 // Analista
                 createRelation(permRead, ctx.analista),
 
@@ -54,6 +60,29 @@ public class PermissionMock {
                 createRelation(permDelete, ctx.gerente),
 
                 createRelation(permUpdate, ctx.gerente),
+
+                // Agente de compras
+                createRelation(permRead, ctx.agenteCompras),
+                createRelation(permCreate, ctx.agenteCompras),
+                createRelation(permUpdate, ctx.agenteCompras),
+
+                // Pregoeiro
+                createRelation(permRead, ctx.pregoeiro),
+                createRelation(permCreate, ctx.pregoeiro),
+                createRelation(permUpdate, ctx.pregoeiro),
+
+                // Analista financeiro
+                createRelation(permRead, ctx.analistaFinanceiro),
+                createRelation(permUpdate, ctx.analistaFinanceiro),
+
+                // Gestor de contratos
+                createRelation(permRead, ctx.gestorContratos),
+                createRelation(permCreate, ctx.gestorContratos),
+                createRelation(permUpdate, ctx.gestorContratos),
+
+                // Assessor jurídico
+                createRelation(permRead, ctx.assessorJuridico),
+                createRelation(permUpdate, ctx.assessorJuridico),
 
                 // Assistente
                 createRelation(permRead, ctx.assistente));
