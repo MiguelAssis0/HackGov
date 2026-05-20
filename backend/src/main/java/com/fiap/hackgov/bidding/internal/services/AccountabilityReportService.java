@@ -3,9 +3,7 @@ package com.fiap.hackgov.bidding.internal.services;
 import com.fiap.hackgov.bidding.internal.DTOs.accountabilityReport.CreateAccountabilityReportDTO;
 import com.fiap.hackgov.bidding.internal.entities.AccountabilityReport;
 import com.fiap.hackgov.bidding.internal.entities.Contract;
-import com.fiap.hackgov.bidding.internal.entities.Requisition;
 import com.fiap.hackgov.bidding.internal.entities.enums.AccountabilityStatus;
-import com.fiap.hackgov.bidding.internal.entities.enums.HistoryEventType;
 import com.fiap.hackgov.bidding.internal.entities.enums.ProcessStage;
 import com.fiap.hackgov.bidding.internal.mappers.AccountabilityReportMapper;
 import com.fiap.hackgov.bidding.internal.repositories.AccountabilityReportRepository;
@@ -35,7 +33,6 @@ public class AccountabilityReportService {
     private final EmployeeRepository employeeRepository;
     private final AccountabilityReportMapper accountabilityReportMapper;
     private final RequisitionService requisitionService;
-    private final ProcessHistoryService processHistoryService;
 
     public AccountabilityReport create(CreateAccountabilityReportDTO dto) {
         Contract contract = findContract(dto.contractId());
@@ -101,8 +98,6 @@ public class AccountabilityReportService {
     }
 
     private void registerStage(Contract contract, Employee employee, ProcessStage stage, String observation) {
-        Requisition requisition = contract.getLicitationProcess().getRequisition();
-        requisitionService.updateCurrentStage(requisition.getProcessStatus(), stage, employee, observation);
-        processHistoryService.createProcessHistory(requisition, employee, observation, stage, HistoryEventType.STAGE_SENT);
+        requisitionService.sendToNextStage(contract.getLicitationProcess().getRequisition(), stage, employee, observation);
     }
 }

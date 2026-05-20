@@ -87,13 +87,9 @@ public class ApprovalService {
 
         if (dto.status() == ApprovalStatus.APROVADO) {
 
-            ProcessStage approvedStage = getNextStage(currentStage);
+            processHistoryService.createProcessHistory(requisition, employee, "Etapa aprovada: " + currentStage.getDescription(), currentStage, HistoryEventType.APPROVED);
 
-            requisitionService.updateCurrentStage(processStatus, approvedStage, employee, dto.observation());
-
-            processHistoryService.createProcessHistory(requisition, employee, "Etapa aprovada: " + approvedStage.getDescription(), approvedStage, HistoryEventType.APPROVED);
-
-            ProcessStage nextStage = getNextStage(approvedStage);
+            ProcessStage nextStage = getNextStage(currentStage);
 
             requisitionService.sendToNextStage(requisition, nextStage, employee, "Processo enviado para " + nextStage.getDescription());
         }

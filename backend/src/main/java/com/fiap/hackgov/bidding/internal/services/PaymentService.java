@@ -4,8 +4,6 @@ import com.fiap.hackgov.bidding.internal.DTOs.payment.CreatePaymentDTO;
 import com.fiap.hackgov.bidding.internal.entities.Contract;
 import com.fiap.hackgov.bidding.internal.entities.Payment;
 import com.fiap.hackgov.bidding.internal.entities.PaymentDeclaration;
-import com.fiap.hackgov.bidding.internal.entities.Requisition;
-import com.fiap.hackgov.bidding.internal.entities.enums.HistoryEventType;
 import com.fiap.hackgov.bidding.internal.entities.enums.ProcessStage;
 import com.fiap.hackgov.bidding.internal.mappers.PaymentMapper;
 import com.fiap.hackgov.bidding.internal.repositories.PaymentDeclarationRepository;
@@ -35,7 +33,6 @@ public class PaymentService {
     private final SectorRepository sectorRepository;
     private final PaymentMapper paymentMapper;
     private final RequisitionService requisitionService;
-    private final ProcessHistoryService processHistoryService;
 
     public Payment create(CreatePaymentDTO dto) {
         PaymentDeclaration declaration = findDeclaration(dto.declarationId());
@@ -101,8 +98,6 @@ public class PaymentService {
     }
 
     private void registerStage(Contract contract, Employee employee, ProcessStage stage, String observation) {
-        Requisition requisition = contract.getLicitationProcess().getRequisition();
-        requisitionService.updateCurrentStage(requisition.getProcessStatus(), stage, employee, observation);
-        processHistoryService.createProcessHistory(requisition, employee, observation, stage, HistoryEventType.STAGE_SENT);
+        requisitionService.sendToNextStage(contract.getLicitationProcess().getRequisition(), stage, employee, observation);
     }
 }

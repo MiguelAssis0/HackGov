@@ -3,9 +3,7 @@ package com.fiap.hackgov.bidding.internal.services;
 import com.fiap.hackgov.bidding.internal.DTOs.executionOrder.CreateExecutionOrderDTO;
 import com.fiap.hackgov.bidding.internal.entities.Contract;
 import com.fiap.hackgov.bidding.internal.entities.ExecutionOrder;
-import com.fiap.hackgov.bidding.internal.entities.Requisition;
 import com.fiap.hackgov.bidding.internal.entities.enums.ContractStatus;
-import com.fiap.hackgov.bidding.internal.entities.enums.HistoryEventType;
 import com.fiap.hackgov.bidding.internal.entities.enums.ProcessStage;
 import com.fiap.hackgov.bidding.internal.mappers.ExecutionOrderMapper;
 import com.fiap.hackgov.bidding.internal.repositories.ContractRepository;
@@ -32,7 +30,6 @@ public class ExecutionOrderService {
     private final EmployeeRepository employeeRepository;
     private final ExecutionOrderMapper executionOrderMapper;
     private final RequisitionService requisitionService;
-    private final ProcessHistoryService processHistoryService;
 
     public ExecutionOrder create(CreateExecutionOrderDTO dto) {
         Contract contract = findContract(dto.contractId());
@@ -89,8 +86,6 @@ public class ExecutionOrderService {
     }
 
     private void registerStage(Contract contract, Employee employee, ProcessStage stage, String observation) {
-        Requisition requisition = contract.getLicitationProcess().getRequisition();
-        requisitionService.updateCurrentStage(requisition.getProcessStatus(), stage, employee, observation);
-        processHistoryService.createProcessHistory(requisition, employee, observation, stage, HistoryEventType.STAGE_SENT);
+        requisitionService.sendToNextStage(contract.getLicitationProcess().getRequisition(), stage, employee, observation);
     }
 }

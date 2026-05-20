@@ -4,10 +4,12 @@ import com.fiap.hackgov.bidding.internal.DTOs.paymentDeclaration.CreatePaymentDe
 import com.fiap.hackgov.bidding.internal.entities.Commitment;
 import com.fiap.hackgov.bidding.internal.entities.Contract;
 import com.fiap.hackgov.bidding.internal.entities.PaymentDeclaration;
-import com.fiap.hackgov.bidding.internal.entities.Requisition;
-import com.fiap.hackgov.bidding.internal.entities.enums.HistoryEventType;
+import com.fiap.hackgov.bidding.internal.entities.Approval;
+import com.fiap.hackgov.bidding.internal.entities.enums.ApprovalSector;
+import com.fiap.hackgov.bidding.internal.entities.enums.ApprovalStatus;
 import com.fiap.hackgov.bidding.internal.entities.enums.ProcessStage;
 import com.fiap.hackgov.bidding.internal.mappers.PaymentDeclarationMapper;
+import com.fiap.hackgov.bidding.internal.repositories.ApprovalRepository;
 import com.fiap.hackgov.bidding.internal.repositories.CommitmentRepository;
 import com.fiap.hackgov.bidding.internal.repositories.PaymentDeclarationRepository;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
@@ -19,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -29,9 +32,9 @@ public class PaymentDeclarationService {
     private final PaymentDeclarationRepository paymentDeclarationRepository;
     private final CommitmentRepository commitmentRepository;
     private final EmployeeRepository employeeRepository;
+    private final ApprovalRepository approvalRepository;
     private final PaymentDeclarationMapper paymentDeclarationMapper;
     private final RequisitionService requisitionService;
-    private final ProcessHistoryService processHistoryService;
 
     public PaymentDeclaration create(CreatePaymentDeclarationDTO dto) {
         Commitment commitment = findCommitment(dto.commitmentId());
@@ -44,6 +47,7 @@ public class PaymentDeclarationService {
         declaration = paymentDeclarationRepository.save(declaration);
 
         registerStage(commitment.getContract(), approvedBy, ProcessStage.DECLARACAO_PAGAMENTO, "Declaração para pagamento registrada");
+        approvePaymentDeclarationIfNecessary(commitment, approvedBy, dto);
 
         return declaration;
     }
@@ -76,8 +80,22 @@ public class PaymentDeclarationService {
     }
 
     private void registerStage(Contract contract, Employee employee, ProcessStage stage, String observation) {
-        Requisition requisition = contract.getLicitationProcess().getRequisition();
-        requisitionService.updateCurrentStage(requisition.getProcessStatus(), stage, employee, observation);
-        processHistoryService.createProcessHistory(requisition, employee, observation, stage, HistoryEventType.STAGE_SENT);
+        requisitionService.sendToNextStage(contract.getLicitationProcess().getRequisition(), stage, employee, observation);
+    }
+
+    private void approvePaymentDeclarationIfNecessary(Commitment commitment, Employee approvedBy, CreatePaymentDeclarationDTO dto) {
+        if (!Boolean.TRUE.equals(dto.secretaryApproved())) {
+            return;
+        }
+
+        UUID requisitionId = commitment.getContract().getLicitationProcess().getRequisition().getId();
+        Approval approval = approvalRepository.findFirstByRequisitionIdAndApprovalSectorOrderByCreatedAtDesc(requisitionId, ApprovalSector.DECLARACAO_PAGAMENTO)
+                .orElseThrow(() -> new ResourceNotFoundException("Aprovação da declaração de pagamento não encontrada"));
+
+        approval.setApprovalStatus(ApprovalStatus.APROVADO);
+        approval.setApprovedBy(approvedBy);
+        approval.setApprovedAt(LocalDateTime.now());
+        approval.setObservation("Declaração de pagamento aprovada pelo secretário");
+        approvalRepository.save(approval);
     }
 }

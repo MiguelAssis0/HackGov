@@ -211,7 +211,7 @@ public class RequisitionService {
         approvalRepository.save(approval);
     }
 
-    void updateCurrentStage(ProcessStatus processStatus, ProcessStage stage, Employee employee, String observation) {
+    private void updateCurrentStage(ProcessStatus processStatus, ProcessStage stage, Employee employee, String observation) {
 
         processStatus.setStage(stage);
         processStatus.setResponsibleId(employee.getId());

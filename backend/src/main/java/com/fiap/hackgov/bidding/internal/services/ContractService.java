@@ -6,6 +6,7 @@ import com.fiap.hackgov.bidding.internal.entities.LicitationProcess;
 import com.fiap.hackgov.bidding.internal.entities.Supplier;
 import com.fiap.hackgov.bidding.internal.entities.enums.LicitationEventType;
 import com.fiap.hackgov.bidding.internal.entities.enums.LicitationStatus;
+import com.fiap.hackgov.bidding.internal.entities.enums.ProcessStage;
 import com.fiap.hackgov.bidding.internal.mappers.ContractMapper;
 import com.fiap.hackgov.bidding.internal.repositories.ContractRepository;
 import com.fiap.hackgov.bidding.internal.repositories.LicitationProcessRepository;
@@ -32,6 +33,7 @@ public class ContractService {
     private final SupplierRepository supplierRepository;
     private final EmployeeRepository employeeRepository;
     private final LicitationProcessService licitationProcessService;
+    private final RequisitionService requisitionService;
     private final ContractMapper contractMapper;
 
     public Contract create(CreateContractDTO dto) {
@@ -68,6 +70,13 @@ public class ContractService {
                 responsible,
                 LicitationEventType.CONTRACT_CREATED,
                 licitationProcess.getStatus(),
+                "Contrato criado: " + dto.contractNumber()
+        );
+
+        requisitionService.sendToNextStage(
+                licitationProcess.getRequisition(),
+                ProcessStage.SETOR_CONTRATOS,
+                responsible,
                 "Contrato criado: " + dto.contractNumber()
         );
 

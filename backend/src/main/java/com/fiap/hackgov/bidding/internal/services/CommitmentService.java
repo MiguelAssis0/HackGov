@@ -4,8 +4,6 @@ import com.fiap.hackgov.bidding.internal.DTOs.commitment.CreateCommitmentDTO;
 import com.fiap.hackgov.bidding.internal.entities.Commitment;
 import com.fiap.hackgov.bidding.internal.entities.Contract;
 import com.fiap.hackgov.bidding.internal.entities.ExecutionOrder;
-import com.fiap.hackgov.bidding.internal.entities.Requisition;
-import com.fiap.hackgov.bidding.internal.entities.enums.HistoryEventType;
 import com.fiap.hackgov.bidding.internal.entities.enums.ProcessStage;
 import com.fiap.hackgov.bidding.internal.mappers.CommitmentMapper;
 import com.fiap.hackgov.bidding.internal.repositories.CommitmentRepository;
@@ -34,7 +32,6 @@ public class CommitmentService {
     private final EmployeeRepository employeeRepository;
     private final CommitmentMapper commitmentMapper;
     private final RequisitionService requisitionService;
-    private final ProcessHistoryService processHistoryService;
 
     public Commitment create(CreateCommitmentDTO dto) {
         Contract contract = findContract(dto.contractId());
@@ -108,8 +105,6 @@ public class CommitmentService {
     }
 
     private void registerStage(Contract contract, Employee employee, ProcessStage stage, String observation) {
-        Requisition requisition = contract.getLicitationProcess().getRequisition();
-        requisitionService.updateCurrentStage(requisition.getProcessStatus(), stage, employee, observation);
-        processHistoryService.createProcessHistory(requisition, employee, observation, stage, HistoryEventType.STAGE_SENT);
+        requisitionService.sendToNextStage(contract.getLicitationProcess().getRequisition(), stage, employee, observation);
     }
 }
