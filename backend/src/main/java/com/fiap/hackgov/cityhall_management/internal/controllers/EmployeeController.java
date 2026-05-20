@@ -5,7 +5,6 @@ import com.fiap.hackgov.cityhall_management.internal.DTOs.Employee.EmployeeDTO;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.cityhall_management.internal.mapper.EmployeeMapper;
 import com.fiap.hackgov.cityhall_management.internal.services.EmployeeService;
-import com.fiap.hackgov.shared.infra.services.TokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -30,9 +29,6 @@ public class EmployeeController {
 
     @Autowired
     private EmployeeMapper employeeMapper;
-
-    @Autowired
-    private TokenService tokenService;
 
     @PostMapping
     public ResponseEntity<Void> createEmployee(@RequestBody @Valid CreateEmployeeDTO employeeDTO) {

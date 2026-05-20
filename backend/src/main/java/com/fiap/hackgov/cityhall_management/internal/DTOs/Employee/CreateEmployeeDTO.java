@@ -7,9 +7,14 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record CreateEmployeeDTO(
+        @NotNull(message = "City hall ID is required")
+        UUID cityHallId,
 
-        @NotNull(message = "Token ID is required")
-        UUID tokenId,
+        @NotNull(message = "Sector ID is required")
+        UUID sectorId,
+
+        @NotNull(message = "Occupation ID is required")
+        UUID occupationId,
 
         @NotNull(message = "Salary is required")
         @Min(value = 0, message = "Salary must be greater than or equal to 0")
@@ -47,9 +52,6 @@ public record CreateEmployeeDTO(
         String password,
 
         @NotBlank(message = "Phone is required")
-        String phone,
-
-        @NotNull(message = "Role is required")
-        int role
+        String phone
 ) {
 }
