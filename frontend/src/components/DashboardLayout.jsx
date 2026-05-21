@@ -219,7 +219,7 @@ export function DashboardLayout({ children, styles = [] }) {
           <a className="nav-item" href="#">
             <i className="bi bi-bell"></i> Notificações
           </a>
-          <a className="nav-item" href="#">
+          <a className="nav-item" href="/perfil">
             <i className="bi bi-gear"></i> Configurações
           </a>
         </nav>
