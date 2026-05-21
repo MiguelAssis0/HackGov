@@ -60,6 +60,11 @@ public class Requisition {
     @OneToMany(mappedBy = "requisition")
     private List<Approval> approvals;
 
+    @OneToMany(mappedBy = "requisition",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<Analysis> analyses = new ArrayList<>();
+
     @OneToOne(mappedBy = "requisition",
             cascade = CascadeType.ALL,
             orphanRemoval = true)

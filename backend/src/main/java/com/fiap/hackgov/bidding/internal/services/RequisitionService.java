@@ -5,6 +5,7 @@ import com.fiap.hackgov.bidding.internal.DTOs.processStatus.AdvanceRequisitionSt
 import com.fiap.hackgov.bidding.internal.DTOs.requisiton.CreateRequisitionDTO;
 import com.fiap.hackgov.bidding.internal.DTOs.requisiton.RequisitionResponseDTO;
 import com.fiap.hackgov.bidding.internal.entities.*;
+import com.fiap.hackgov.bidding.internal.entities.enums.AnalysisResult;
 import com.fiap.hackgov.bidding.internal.entities.enums.ApprovalSector;
 import com.fiap.hackgov.bidding.internal.entities.enums.ApprovalStatus;
 import com.fiap.hackgov.bidding.internal.entities.enums.HistoryEventType;
@@ -12,6 +13,7 @@ import com.fiap.hackgov.bidding.internal.entities.enums.ProcessStage;
 import com.fiap.hackgov.bidding.internal.mappers.ETPMapper;
 import com.fiap.hackgov.bidding.internal.mappers.ProcessHistoryMapper;
 import com.fiap.hackgov.bidding.internal.mappers.RequisitionMapper;
+import com.fiap.hackgov.bidding.internal.repositories.AnalysisRepository;
 import com.fiap.hackgov.bidding.internal.repositories.ApprovalRepository;
 import com.fiap.hackgov.bidding.internal.repositories.ProcessHistoryRepository;
 import com.fiap.hackgov.bidding.internal.repositories.ProcessStatusRepository;
@@ -31,7 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,6 +46,7 @@ public class RequisitionService {
     private final ProcessHistoryRepository processHistoryRepository;
     private final SectorRepository sectorRepository;
     private final ApprovalRepository approvalRepository;
+    private final AnalysisRepository analysisRepository;
     private final ProcessHistoryService processHistoryService;
 
     private final ProcessHistoryMapper processHistoryMapper;
@@ -95,9 +97,7 @@ public class RequisitionService {
 
         processHistoryService.createProcessHistory(requisition, responsible, "Requisição criada", ProcessStage.REQUISICAO_CADASTRADA, HistoryEventType.REQUISITION_CREATED);
 
-        processHistoryService.createProcessHistory(requisition, responsible, "Requisição enviada para homologação do secretário", ProcessStage.HOMOLOGACAO_SECRETARIO, HistoryEventType.STAGE_SENT);
-
-        createApprovalIfNecessary(requisition, ProcessStage.REQUISICAO_CADASTRADA);
+        sendToNextStage(requisition, ProcessStage.HOMOLOGACAO_SECRETARIO, responsible, "Requisição enviada para homologação do secretário");
 
         return requisitionMapper.toDTO(requisition);
     }
@@ -125,6 +125,8 @@ public class RequisitionService {
         processHistoryService.createProcessHistory(requisition, employee, observation, nextStage, HistoryEventType.STAGE_SENT);
 
         createApprovalIfNecessary(requisition, nextStage);
+
+        createAnalysisIfNecessary(requisition, nextStage);
     }
 
     void returnToInitialStage(Requisition requisition, Employee employee, String observation) {
@@ -135,7 +137,7 @@ public class RequisitionService {
 
         processHistoryService.createProcessHistory(requisition, employee, observation, ProcessStage.REQUISICAO_CADASTRADA, HistoryEventType.STAGE_SENT);
 
-        createApprovalIfNecessary(requisition, ProcessStage.REQUISICAO_CADASTRADA);
+        createAnalysisIfNecessary(requisition, ProcessStage.REQUISICAO_CADASTRADA);
     }
 
     @Transactional(readOnly = true)
@@ -180,15 +182,25 @@ public class RequisitionService {
 
         ApprovalSector requiredApproval = mapApprovalSector(currentStage);
 
-        if (requiredApproval == null) {
+        if (requiredApproval != null) {
+            Approval latestApproval = approvalRepository.findFirstByRequisitionIdAndApprovalSectorOrderByCreatedAtDesc(requisition.getId(), requiredApproval)
+                    .orElseThrow(() -> new BusinessException("Approval not found for current stage"));
+
+            if (latestApproval.getApprovalStatus() != ApprovalStatus.APROVADO) {
+
+                throw new BusinessException("Current stage approval is still pending");
+            }
+        }
+
+        if (isNotAnalysisStage(currentStage)) {
             return;
         }
 
-        Approval latestApproval = requisition.getApprovals().stream().filter(a -> a.getApprovalSector() == requiredApproval).max(Comparator.comparing(Approval::getCreatedAt)).orElseThrow(() -> new BusinessException("Approval not found for current stage"));
+        Analysis latestAnalysis = analysisRepository.findFirstByRequisitionIdAndStageOrderByCreatedAtDesc(requisition.getId(), currentStage)
+                .orElseThrow(() -> new BusinessException("Analysis not found for current stage"));
 
-        if (latestApproval.getApprovalStatus() != ApprovalStatus.APROVADO) {
-
-            throw new BusinessException("Current stage approval is still pending");
+        if (latestAnalysis.getResult() != AnalysisResult.APROVADO) {
+            throw new BusinessException("Current stage analysis is still pending");
         }
     }
 
@@ -211,6 +223,21 @@ public class RequisitionService {
         approvalRepository.save(approval);
     }
 
+    private void createAnalysisIfNecessary(Requisition requisition, ProcessStage stage) {
+
+        if (isNotAnalysisStage(stage)) {
+            return;
+        }
+
+        Analysis analysis = new Analysis();
+
+        analysis.setRequisition(requisition);
+        analysis.setStage(stage);
+        analysis.setResult(AnalysisResult.PENDENTE);
+
+        analysisRepository.save(analysis);
+    }
+
     private void updateCurrentStage(ProcessStatus processStatus, ProcessStage stage, Employee employee, String observation) {
 
         processStatus.setStage(stage);
@@ -226,15 +253,20 @@ public class RequisitionService {
 
         return switch (stage) {
 
-            case REQUISICAO_CADASTRADA -> ApprovalSector.REQUISICAO_SECRETARIO;
+            case HOMOLOGACAO_SECRETARIO -> ApprovalSector.REQUISICAO_SECRETARIO;
 
-            case ANALISE_PRESTACAO_CONTAS -> ApprovalSector.ANALISE_COMPRAS;
+            case HOMOLOGACAO_COMPRAS -> ApprovalSector.ANALISE_COMPRAS;
 
             case DECLARACAO_PAGAMENTO -> ApprovalSector.DECLARACAO_PAGAMENTO;
 
-            case PRESTACAO_CONTAS -> ApprovalSector.PRESTACAO_CONTAS;
+            case HOMOLOGACAO_PRESTACAO_CONTAS -> ApprovalSector.PRESTACAO_CONTAS;
 
             default -> null;
         };
+    }
+
+    private boolean isNotAnalysisStage(ProcessStage stage) {
+
+        return stage != ProcessStage.ANALISE_REQUISICAO && stage != ProcessStage.ANALISE_PRESTACAO_CONTAS;
     }
 }

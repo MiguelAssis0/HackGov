@@ -39,7 +39,7 @@ public class ApprovalService {
     public ApprovalResponseDTO create(CreateApprovalDTO dto) {
         Approval approval = approvalMapper.toEntity(dto);
 
-        approval.setApprovedAt(LocalDateTime.now());
+        approval.setApprovalStatus(ApprovalStatus.PENDENTE);
 
         return approvalMapper.toDTO(approvalRepository.save(approval));
     }
@@ -85,6 +85,8 @@ public class ApprovalService {
 
         ProcessStage currentStage = processStatus.getStage();
 
+        validateApprovalMatchesCurrentStage(approval, currentStage);
+
         if (dto.status() == ApprovalStatus.APROVADO) {
 
             processHistoryService.createProcessHistory(requisition, employee, "Etapa aprovada: " + currentStage.getDescription(), currentStage, HistoryEventType.APPROVED);
@@ -92,17 +94,6 @@ public class ApprovalService {
             ProcessStage nextStage = getNextStage(currentStage);
 
             requisitionService.sendToNextStage(requisition, nextStage, employee, "Processo enviado para " + nextStage.getDescription());
-        }
-
-        if (dto.status() == ApprovalStatus.CORRECAO_NECESSARIA) {
-
-            processHistoryService.createProcessHistory(requisition, employee, "Correção solicitada na etapa: " + currentStage.getDescription(), currentStage, HistoryEventType.REJECTED);
-
-            requisitionService.returnToInitialStage(
-                    requisition,
-                    employee,
-                    "Requisição retornada para " + ProcessStage.REQUISICAO_CADASTRADA.getDescription() + " para correção"
-            );
         }
 
         if (dto.status() == ApprovalStatus.REPROVADO) {
@@ -139,7 +130,6 @@ public class ApprovalService {
         }
     }
 
-
     // apenas ADM
     public void delete(UUID id) {
         Approval approval = approvalRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Approval not found"));
@@ -149,5 +139,25 @@ public class ApprovalService {
     private ProcessStage getNextStage(ProcessStage currentStage) {
 
         return Arrays.stream(ProcessStage.values()).filter(stage -> stage.getStep() == currentStage.getStep() + 1).findFirst().orElseThrow(() -> new BusinessException("Next stage not found"));
+    }
+
+    private void validateApprovalMatchesCurrentStage(Approval approval, ProcessStage currentStage) {
+
+        ApprovalSector expectedSector = switch (currentStage) {
+
+            case HOMOLOGACAO_SECRETARIO -> ApprovalSector.REQUISICAO_SECRETARIO;
+
+            case HOMOLOGACAO_COMPRAS -> ApprovalSector.ANALISE_COMPRAS;
+
+            case DECLARACAO_PAGAMENTO -> ApprovalSector.DECLARACAO_PAGAMENTO;
+
+            case HOMOLOGACAO_PRESTACAO_CONTAS -> ApprovalSector.PRESTACAO_CONTAS;
+
+            default -> null;
+        };
+
+        if (expectedSector == null || approval.getApprovalSector() != expectedSector) {
+            throw new BusinessException("Approval does not belong to the current requisition stage");
+        }
     }
 }

@@ -21,6 +21,7 @@ public interface RequisitionMapper {
     @Mapping(target = "registerNumber", ignore = true)
     @Mapping(target = "processStatus", ignore = true)
     @Mapping(target = "approvals", ignore = true)
+    @Mapping(target = "analyses", ignore = true)
     @Mapping(target = "histories", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)

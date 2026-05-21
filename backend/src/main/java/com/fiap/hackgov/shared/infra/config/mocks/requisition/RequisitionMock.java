@@ -1,13 +1,16 @@
 package com.fiap.hackgov.shared.infra.config.mocks.requisition;
 
 import com.fiap.hackgov.bidding.internal.entities.Approval;
+import com.fiap.hackgov.bidding.internal.entities.Analysis;
 import com.fiap.hackgov.bidding.internal.entities.ProcessHistory;
 import com.fiap.hackgov.bidding.internal.entities.ProcessStatus;
 import com.fiap.hackgov.bidding.internal.entities.Requisition;
+import com.fiap.hackgov.bidding.internal.entities.enums.AnalysisResult;
 import com.fiap.hackgov.bidding.internal.entities.enums.ApprovalSector;
 import com.fiap.hackgov.bidding.internal.entities.enums.ApprovalStatus;
 import com.fiap.hackgov.bidding.internal.entities.enums.HistoryEventType;
 import com.fiap.hackgov.bidding.internal.entities.enums.ProcessStage;
+import com.fiap.hackgov.bidding.internal.repositories.AnalysisRepository;
 import com.fiap.hackgov.bidding.internal.repositories.ApprovalRepository;
 import com.fiap.hackgov.bidding.internal.repositories.ProcessHistoryRepository;
 import com.fiap.hackgov.bidding.internal.repositories.ProcessStatusRepository;
@@ -27,6 +30,7 @@ public class RequisitionMock {
     private final ProcessStatusRepository processStatusRepository;
     private final ProcessHistoryRepository processHistoryRepository;
     private final ApprovalRepository approvalRepository;
+    private final AnalysisRepository analysisRepository;
 
     public void load(MockContext ctx) {
 
@@ -69,24 +73,163 @@ public class RequisitionMock {
 
         createHistory(pendingApproval, ctx.admin, ProcessStage.HOMOLOGACAO_SECRETARIO, HistoryEventType.STAGE_SENT, "Requisição enviada para homologação do secretário");
 
-        Approval approvalSecretary = new Approval();
-
-        approvalSecretary.setRequisition(pendingApproval);
-
-        approvalSecretary.setApprovalSector(ApprovalSector.REQUISICAO_SECRETARIO);
-
-        approvalSecretary.setApprovalStatus(ApprovalStatus.PENDENTE);
-
-        approvalRepository.save(approvalSecretary);
+        createApproval(pendingApproval, ApprovalSector.REQUISICAO_SECRETARIO, ApprovalStatus.PENDENTE, null, null, null);
 
         /*
          * REQUISIÇÃO 2
+         * Homologação do secretário aprovada, aguardando análise da requisição
+         */
+
+        Requisition pendingAnalysis = new Requisition();
+
+        pendingAnalysis.setRegisterNumber("REQ-2026-000002");
+
+        pendingAnalysis.setSector(ctx.comprasSectorSP);
+
+        pendingAnalysis.setResponsible(ctx.ana);
+
+        pendingAnalysis.setTechnicalDescription("Aquisição de insumos para atendimento municipal");
+
+        pendingAnalysis.setJustification("Reposição de materiais essenciais para continuidade do atendimento");
+
+        pendingAnalysis.setBudgetAllocation("3.3.90.30.00");
+
+        pendingAnalysis = requisitionRepository.save(pendingAnalysis);
+
+        ProcessStatus pendingAnalysisStatus = new ProcessStatus();
+
+        pendingAnalysisStatus.setRequisition(pendingAnalysis);
+
+        pendingAnalysisStatus.setStage(ProcessStage.ANALISE_REQUISICAO);
+
+        pendingAnalysisStatus.setResponsibleId(ctx.ana.getId());
+
+        pendingAnalysisStatus.setObservation("Aguardando análise da área de compras");
+
+        processStatusRepository.save(pendingAnalysisStatus);
+
+        pendingAnalysis.setProcessStatus(pendingAnalysisStatus);
+
+        createHistory(pendingAnalysis, ctx.ana, ProcessStage.REQUISICAO_CADASTRADA, HistoryEventType.REQUISITION_CREATED, "Requisição criada");
+
+        createHistory(pendingAnalysis, ctx.admin, ProcessStage.HOMOLOGACAO_SECRETARIO, HistoryEventType.APPROVED, "Homologação do secretário aprovada");
+
+        createHistory(pendingAnalysis, ctx.ana, ProcessStage.RECEBIMENTO_COMPRAS, HistoryEventType.STAGE_SENT, "Requisição recebida pela área de compras");
+
+        createHistory(pendingAnalysis, ctx.ana, ProcessStage.ANALISE_REQUISICAO, HistoryEventType.STAGE_SENT, "Requisição enviada para análise técnica");
+
+        createApproval(pendingAnalysis, ApprovalSector.REQUISICAO_SECRETARIO, ApprovalStatus.APROVADO, ctx.admin, LocalDateTime.now().minusDays(1), "Abertura do processo homologada");
+
+        createAnalysis(pendingAnalysis, ProcessStage.ANALISE_REQUISICAO, AnalysisResult.PENDENTE, null, null, "Aguardando validação documental e técnica");
+
+        /*
+         * REQUISIÇÃO 3
+         * Análise aprovada, aguardando homologação da área de compras
+         */
+
+        Requisition pendingProcurementApproval = new Requisition();
+
+        pendingProcurementApproval.setRegisterNumber("REQ-2026-000003");
+
+        pendingProcurementApproval.setSector(ctx.comprasSectorSP);
+
+        pendingProcurementApproval.setResponsible(ctx.maria);
+
+        pendingProcurementApproval.setTechnicalDescription("Contratação de serviço de limpeza predial");
+
+        pendingProcurementApproval.setJustification("Atendimento às unidades com maior circulação pública");
+
+        pendingProcurementApproval.setBudgetAllocation("3.3.90.39.00");
+
+        pendingProcurementApproval = requisitionRepository.save(pendingProcurementApproval);
+
+        ProcessStatus pendingProcurementApprovalStatus = new ProcessStatus();
+
+        pendingProcurementApprovalStatus.setRequisition(pendingProcurementApproval);
+
+        pendingProcurementApprovalStatus.setStage(ProcessStage.HOMOLOGACAO_COMPRAS);
+
+        pendingProcurementApprovalStatus.setResponsibleId(ctx.maria.getId());
+
+        pendingProcurementApprovalStatus.setObservation("Aguardando homologação da área de compras");
+
+        processStatusRepository.save(pendingProcurementApprovalStatus);
+
+        pendingProcurementApproval.setProcessStatus(pendingProcurementApprovalStatus);
+
+        createHistory(pendingProcurementApproval, ctx.maria, ProcessStage.REQUISICAO_CADASTRADA, HistoryEventType.REQUISITION_CREATED, "Requisição criada");
+
+        createHistory(pendingProcurementApproval, ctx.admin, ProcessStage.HOMOLOGACAO_SECRETARIO, HistoryEventType.APPROVED, "Homologação do secretário aprovada");
+
+        createHistory(pendingProcurementApproval, ctx.ana, ProcessStage.ANALISE_REQUISICAO, HistoryEventType.APPROVED, "Análise da requisição aprovada");
+
+        createHistory(pendingProcurementApproval, ctx.maria, ProcessStage.HOMOLOGACAO_COMPRAS, HistoryEventType.STAGE_SENT, "Análise enviada para homologação da área de compras");
+
+        createApproval(pendingProcurementApproval, ApprovalSector.REQUISICAO_SECRETARIO, ApprovalStatus.APROVADO, ctx.admin, LocalDateTime.now().minusDays(2), "Abertura do processo homologada");
+
+        createAnalysis(pendingProcurementApproval, ProcessStage.ANALISE_REQUISICAO, AnalysisResult.APROVADO, ctx.ana, LocalDateTime.now().minusDays(1), "Documentação e ETP validados");
+
+        createApproval(pendingProcurementApproval, ApprovalSector.ANALISE_COMPRAS, ApprovalStatus.PENDENTE, null, null, "Aguardando homologação da análise");
+
+        /*
+         * REQUISIÇÃO 4
+         * Homologação e análise aprovadas, pronta para composição do processo
+         */
+
+        Requisition validatedFlow = new Requisition();
+
+        validatedFlow.setRegisterNumber("REQ-2026-000004");
+
+        validatedFlow.setSector(ctx.tiSectorsSP);
+
+        validatedFlow.setResponsible(ctx.joao);
+
+        validatedFlow.setTechnicalDescription("Renovação de certificados digitais institucionais");
+
+        validatedFlow.setJustification("Manter serviços digitais assinados e juridicamente válidos");
+
+        validatedFlow.setBudgetAllocation("3.3.90.40.00");
+
+        validatedFlow = requisitionRepository.save(validatedFlow);
+
+        ProcessStatus validatedFlowStatus = new ProcessStatus();
+
+        validatedFlowStatus.setRequisition(validatedFlow);
+
+        validatedFlowStatus.setStage(ProcessStage.COMPOSICAO_PROCESSO);
+
+        validatedFlowStatus.setResponsibleId(ctx.maria.getId());
+
+        validatedFlowStatus.setObservation("Fluxo de validação concluído e pronto para composição do processo");
+
+        processStatusRepository.save(validatedFlowStatus);
+
+        validatedFlow.setProcessStatus(validatedFlowStatus);
+
+        createHistory(validatedFlow, ctx.joao, ProcessStage.REQUISICAO_CADASTRADA, HistoryEventType.REQUISITION_CREATED, "Requisição criada");
+
+        createHistory(validatedFlow, ctx.admin, ProcessStage.HOMOLOGACAO_SECRETARIO, HistoryEventType.APPROVED, "Homologação do secretário aprovada");
+
+        createHistory(validatedFlow, ctx.ana, ProcessStage.ANALISE_REQUISICAO, HistoryEventType.APPROVED, "Análise técnica aprovada");
+
+        createHistory(validatedFlow, ctx.maria, ProcessStage.HOMOLOGACAO_COMPRAS, HistoryEventType.APPROVED, "Homologação da área de compras aprovada");
+
+        createHistory(validatedFlow, ctx.maria, ProcessStage.COMPOSICAO_PROCESSO, HistoryEventType.STAGE_SENT, "Processo enviado para composição");
+
+        createApproval(validatedFlow, ApprovalSector.REQUISICAO_SECRETARIO, ApprovalStatus.APROVADO, ctx.admin, LocalDateTime.now().minusDays(3), "Abertura do processo homologada");
+
+        createAnalysis(validatedFlow, ProcessStage.ANALISE_REQUISICAO, AnalysisResult.APROVADO, ctx.ana, LocalDateTime.now().minusDays(2), "Requisição validada sem pendências");
+
+        createApproval(validatedFlow, ApprovalSector.ANALISE_COMPRAS, ApprovalStatus.APROVADO, ctx.maria, LocalDateTime.now().minusDays(1), "Análise homologada pela área de compras");
+
+        /*
+         * REQUISIÇÃO 5
          * Já liberada para processo licitatório
          */
 
         Requisition licitationRequisition = new Requisition();
 
-        licitationRequisition.setRegisterNumber("REQ-2026-000002");
+        licitationRequisition.setRegisterNumber("REQ-2026-000005");
 
         licitationRequisition.setSector(ctx.comprasSectorSP);
 
@@ -122,28 +265,20 @@ public class RequisitionMock {
 
         createHistory(licitationRequisition, ctx.maria, ProcessStage.PROCESSO_LICITATORIO, HistoryEventType.STAGE_SENT, "Processo encaminhado para licitação");
 
-        Approval approvalCompleted = new Approval();
+        createApproval(licitationRequisition, ApprovalSector.REQUISICAO_SECRETARIO, ApprovalStatus.APROVADO, ctx.admin, LocalDateTime.now().minusDays(4), "Abertura do processo homologada");
 
-        approvalCompleted.setRequisition(licitationRequisition);
+        createAnalysis(licitationRequisition, ProcessStage.ANALISE_REQUISICAO, AnalysisResult.APROVADO, ctx.ana, LocalDateTime.now().minusDays(3), "Requisição aprovada para composição do processo");
 
-        approvalCompleted.setApprovalSector(ApprovalSector.REQUISICAO_SECRETARIO);
-
-        approvalCompleted.setApprovalStatus(ApprovalStatus.APROVADO);
-
-        approvalCompleted.setApprovedBy(ctx.admin);
-
-        approvalCompleted.setApprovedAt(LocalDateTime.now().minusDays(2));
-
-        approvalRepository.save(approvalCompleted);
+        createApproval(licitationRequisition, ApprovalSector.ANALISE_COMPRAS, ApprovalStatus.APROVADO, ctx.maria, LocalDateTime.now().minusDays(2), "Análise homologada pela área de compras");
 
         /*
-         * REQUISIÇÃO 3
+         * REQUISIÇÃO 6
          * Processo licitatório concluído, pronta para contrato
          */
 
         Requisition completedLicitationRequisition = new Requisition();
 
-        completedLicitationRequisition.setRegisterNumber("REQ-2026-000003");
+        completedLicitationRequisition.setRegisterNumber("REQ-2026-000006");
 
         completedLicitationRequisition.setSector(ctx.financeiroSectorSP);
 
@@ -179,11 +314,23 @@ public class RequisitionMock {
 
         createHistory(completedLicitationRequisition, ctx.maria, ProcessStage.INICIO_SERVICOS, HistoryEventType.STAGE_SENT, "Processo contratual iniciado após licitação concluída");
 
+        createApproval(completedLicitationRequisition, ApprovalSector.REQUISICAO_SECRETARIO, ApprovalStatus.APROVADO, ctx.admin, LocalDateTime.now().minusDays(5), "Abertura do processo homologada");
+
+        createAnalysis(completedLicitationRequisition, ProcessStage.ANALISE_REQUISICAO, AnalysisResult.APROVADO, ctx.ana, LocalDateTime.now().minusDays(4), "Análise da requisição aprovada");
+
+        createApproval(completedLicitationRequisition, ApprovalSector.ANALISE_COMPRAS, ApprovalStatus.APROVADO, ctx.maria, LocalDateTime.now().minusDays(3), "Análise homologada pela área de compras");
+
         /*
          * CONTEXTO
          */
 
         ctx.requisitionPendingApproval = pendingApproval;
+
+        ctx.requisitionPendingAnalysis = pendingAnalysis;
+
+        ctx.requisitionPendingProcurementApproval = pendingProcurementApproval;
+
+        ctx.requisitionWithValidatedFlow = validatedFlow;
 
         ctx.requisitionInLicitation = licitationRequisition;
 
@@ -207,5 +354,43 @@ public class RequisitionMock {
         history.setChangedAt(LocalDateTime.now());
 
         processHistoryRepository.save(history);
+    }
+
+    private void createApproval(Requisition requisition, ApprovalSector sector, ApprovalStatus status, Employee approvedBy, LocalDateTime approvedAt, String observation) {
+
+        Approval approval = new Approval();
+
+        approval.setRequisition(requisition);
+
+        approval.setApprovalSector(sector);
+
+        approval.setApprovalStatus(status);
+
+        approval.setApprovedBy(approvedBy);
+
+        approval.setApprovedAt(approvedAt);
+
+        approval.setObservation(observation);
+
+        approvalRepository.save(approval);
+    }
+
+    private void createAnalysis(Requisition requisition, ProcessStage stage, AnalysisResult result, Employee analyzedBy, LocalDateTime analyzedAt, String observation) {
+
+        Analysis analysis = new Analysis();
+
+        analysis.setRequisition(requisition);
+
+        analysis.setStage(stage);
+
+        analysis.setResult(result);
+
+        analysis.setAnalyzedBy(analyzedBy);
+
+        analysis.setAnalyzedAt(analyzedAt);
+
+        analysis.setObservation(observation);
+
+        analysisRepository.save(analysis);
     }
 }

@@ -20,6 +20,9 @@ public class MockContext {
     public State rj;
 
     public Requisition requisitionPendingApproval;
+    public Requisition requisitionPendingAnalysis;
+    public Requisition requisitionPendingProcurementApproval;
+    public Requisition requisitionWithValidatedFlow;
     public Requisition requisitionInLicitation;
     public Requisition requisitionFinishedLicitation;
     public Requisition requisitionInPaymentStage;
