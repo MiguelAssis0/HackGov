@@ -45,6 +45,83 @@
     gap: 0.5rem;
 }
 
+.sidebar-cityhall {
+    padding: 1rem 1rem 0.5rem;
+}
+
+.sidebar-cityhall-label {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 0.55rem;
+}
+
+.sidebar-cityhall-card,
+.sidebar-cityhall-select {
+    width: 100%;
+    min-height: 44px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(226, 232, 240, 0.28);
+    border-radius: 8px;
+    color: var(--branco);
+}
+
+.sidebar-cityhall-card {
+    display: flex;
+    align-items: center;
+    padding: 0.55rem 0.75rem;
+}
+
+.sidebar-cityhall-name {
+    color: var(--branco);
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.25;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-cityhall-select-wrap {
+    position: relative;
+}
+
+.sidebar-cityhall-select {
+    padding: 0.55rem 2rem 0.55rem 0.75rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
+}
+
+.sidebar-cityhall-select option {
+    background: var(--azul-escuro);
+    color: var(--branco);
+}
+
+.sidebar-cityhall-select:focus {
+    border-color: rgba(46, 139, 255, 0.75);
+    box-shadow: 0 0 0 3px rgba(46, 139, 255, 0.18);
+}
+
+.sidebar-cityhall-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.sidebar-setor,
+.sidebar-search {
+    display: none;
+}
+
 /* Seletor da sidebar */
 .sidebar-setor {
     padding: 1rem 1rem 0.4rem;

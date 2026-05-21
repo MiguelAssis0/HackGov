@@ -92,6 +92,9 @@ export const api = {
   // SECTORS
   getSectors: () => request("/sectors?size=100"),
 
+  // CITY HALLS
+  getCityHalls: () => request("/cityhall?size=100&sort=name,asc"),
+
   // TASK BOARDS
   getBoards: () => requestTaskPath("/boards?size=100&sort=name,asc"),
 
@@ -155,6 +158,21 @@ export function saveSession(loginResponse, email) {
     localStorage.setItem("hackgov.refreshToken", refreshToken);
   }
 
+  const tokenPayload = decodeJwtPayload(accessToken);
+  const role = loginResponse.role || tokenPayload?.role || "";
+  const cityHall = loginResponse.cityHall || loginResponse.prefeitura || "";
+  const cityHallId =
+    loginResponse.cityHallId ||
+    loginResponse.prefeituraId ||
+    cityHall?.id ||
+    tokenPayload?.cityHallId ||
+    "";
+  const cityHallName =
+    cityHall?.name ||
+    loginResponse.cityHallName ||
+    loginResponse.prefeituraNome ||
+    (typeof cityHall === "string" ? cityHall : "");
+
   localStorage.setItem(
     "hackgov.user",
     JSON.stringify({
@@ -166,10 +184,14 @@ export function saveSession(loginResponse, email) {
       email: loginResponse.email || email,
       cargo:
         loginResponse.cargo ||
-        loginResponse.role ||
+        role ||
         "Servidor",
       setor: loginResponse.setor || "",
-      prefeitura: loginResponse.prefeitura || loginResponse.cityHall || "",
+      prefeitura: cityHallName,
+      cityHall: cityHallName ? { id: cityHallId, name: cityHallName } : cityHall || null,
+      cityHallId,
+      role,
+      tipoUsuario: normalizeUserType(loginResponse.tipoUsuario || loginResponse.userType || role, email),
     }),
   );
 }
@@ -181,6 +203,7 @@ export function clearSession() {
   localStorage.removeItem("hackgov.accessToken");
   localStorage.removeItem("hackgov.refreshToken");
   localStorage.removeItem("hackgov.user");
+  localStorage.removeItem("hackgov.selectedCityHall");
 }
 
 /**
@@ -198,6 +221,80 @@ function formatName(value) {
     .split(/\s+/)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+function decodeJwtPayload(token) {
+  if (!token || typeof token !== "string" || !token.includes(".")) return null;
+
+  try {
+    const payload = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const paddedPayload = payload.padEnd(payload.length + ((4 - (payload.length % 4)) % 4), "=");
+    return JSON.parse(globalThis.atob(paddedPayload));
+  } catch {
+    return null;
+  }
+}
+
+export function normalizeUserType(value, email = "") {
+  const raw = String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/^role_/, "")
+    .replace(/[\s-]+/g, "_");
+  const normalizedEmail = String(email || "").toLowerCase();
+
+  if (
+    raw.includes("admin_equipe") ||
+    raw.includes("team_admin") ||
+    raw.includes("platform_admin") ||
+    raw.includes("super_admin") ||
+    normalizedEmail === "admin@admin.com"
+  ) {
+    return "admin_equipe";
+  }
+
+  if (raw.includes("admin_cidade") || raw.includes("city_admin") || raw === "admin") {
+    return "admin_cidade";
+  }
+
+  return "usuario_comum";
+}
+
+export function getUserType(user) {
+  return normalizeUserType(user?.tipoUsuario || user?.userType || user?.role || user?.cargo, user?.email);
+}
+
+export function getUserTypeLabel(type) {
+  return {
+    usuario_comum: "Usuario",
+    admin_cidade: "Administrador da cidade",
+    admin_equipe: "Admin da equipe",
+  }[type || "usuario_comum"];
+}
+
+export function getSelectedCityHall() {
+  try {
+    return JSON.parse(localStorage.getItem("hackgov.selectedCityHall")) || null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveSelectedCityHall(cityHall) {
+  if (!cityHall) {
+    localStorage.removeItem("hackgov.selectedCityHall");
+    return;
+  }
+
+  localStorage.setItem(
+    "hackgov.selectedCityHall",
+    JSON.stringify({
+      id: cityHall.id || "",
+      name: cityHall.name || cityHall.nome || "Prefeitura sem nome",
+      cnpj: cityHall.cnpj || "",
+    }),
+  );
 }
 
 export function getUserDisplayName(user, fallback = "Usuário") {
