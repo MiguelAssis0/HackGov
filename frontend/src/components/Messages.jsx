@@ -11,8 +11,14 @@ export default function Messages({
   usePageStyles(styles, "widget");
 
   return (
-    <section className="chat-float d-none d-lg-flex" id="chatFloat">
-      <div className={`chat-widget ${chatOpen ? "" : "is-collapsed"}`} id="chatWidget">
+    <section
+      className={`chat-float d-none d-lg-flex ${activeTab === "ai" ? "is-ai-mode" : ""}`}
+      id="chatFloat"
+    >
+      <div
+        className={`chat-widget ${chatOpen ? "" : "is-collapsed"} ${activeTab === "ai" ? "chat-widget-ai" : ""}`}
+        id="chatWidget"
+      >
         <div className="chat-widget-header">
           <div className="chat-widget-title-wrap">
             <h5 className="chat-widget-title">
@@ -32,7 +38,7 @@ export default function Messages({
           </div>
         </div>
 
-        <div className="chat-widget-body">
+        <div className={`chat-widget-body ${activeTab === "ai" ? "chat-widget-body-ai" : ""}`}>
           <div className="chat-widget-fixed">
             {activeTab !== "ai" && (
               <div className="msg-busca-wrap">
@@ -56,6 +62,7 @@ export default function Messages({
                   type="button"
                   className={`msg-tab ${activeTab === id ? "active" : ""}`}
                   onClick={() => setActiveTab(id)}
+                  aria-pressed={activeTab === id}
                 >
                   <i className={`bi ${icon}`}></i> {label}
                 </button>
