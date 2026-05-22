@@ -43,8 +43,12 @@ public class EmployeeController {
     @Operation(summary = "Get All Employees", security = @SecurityRequirement(name = "bearer-key"), description = "Retrieve all employees")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Employees retrieved successfully"), @ApiResponse(responseCode = "401", description = "Unauthorized")})
     @GetMapping
-    public ResponseEntity<Page<EmployeeDTO>> getAllEmployees(Pageable pageable) {
-        Page<EmployeeDTO> employeeDTOs = employeeService.findAll(pageable).map(employeeMapper::toEmployeeDTO);
+    public ResponseEntity<Page<EmployeeDTO>> getAllEmployees(Pageable pageable, @AuthenticationPrincipal Employee employee) {
+        if (employee == null) {
+            throw new UnauthorizedException("Is necessary to be authenticated to list the users");
+        }
+
+        Page<EmployeeDTO> employeeDTOs = employeeService.findAll(pageable, employee).map(employeeMapper::toEmployeeDTO);
         return ResponseEntity.ok(employeeDTOs);
 
     }

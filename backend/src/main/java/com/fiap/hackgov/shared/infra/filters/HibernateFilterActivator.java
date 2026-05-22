@@ -25,8 +25,15 @@ public class HibernateFilterActivator {
             return;
         }
 
+        enableFilters((Employee) auth.getPrincipal());
+    }
+
+    public void enableFilters(Employee employee) {
+        if (employee.getCityHallId() == null || employee.getCityHallId().getId() == null) {
+            return;
+        }
+
         Session session = entityManager.unwrap(Session.class);
-        Employee employee = (Employee) auth.getPrincipal();
 
         session.enableFilter("cityHallFilter")
                 .setParameter("cityHallId", employee.getCityHallId().getId());
@@ -47,4 +54,3 @@ public class HibernateFilterActivator {
         }
     }
 }
-

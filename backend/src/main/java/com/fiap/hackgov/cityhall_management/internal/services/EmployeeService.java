@@ -13,16 +13,21 @@ import com.fiap.hackgov.cityhall_management.internal.repositories.OccupationRepo
 import com.fiap.hackgov.cityhall_management.internal.repositories.SectorRepository;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
+import com.fiap.hackgov.shared.infra.filters.HibernateFilterActivator;
 import com.fiap.hackgov.shared.infra.utils.AuditLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -48,6 +53,9 @@ public class EmployeeService {
 
     @Autowired
     private AuditLog auditLog;
+
+    @Autowired
+    private HibernateFilterActivator hibernateFilterActivator;
 
     private static final Logger log = LoggerFactory.getLogger(EmployeeService.class);
 
@@ -80,9 +88,23 @@ public class EmployeeService {
 
     }
 
-    public Page<Employee> findAll(Pageable pageable) {
+    @Transactional(readOnly = true)
+    public Page<Employee> findAll(Pageable pageable, Employee authenticatedEmployee) {
         auditLog.with(log).event("find_all_employees").level(AuditLog.Level.INFO).log();
-        return employeeRepository.findAll(pageable);
+
+        Pageable safePageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), translateSort(pageable.getSort()));
+
+        if (authenticatedEmployee.getCityHallId() == null || authenticatedEmployee.getCityHallId().getId() == null) {
+            throw new BusinessException("Authenticated employee must be linked to a city hall");
+        }
+
+        if (!Roles.ADMIN.equals(authenticatedEmployee.getRole()) && (authenticatedEmployee.getSectorId() == null || authenticatedEmployee.getSectorId().getId() == null)) {
+            throw new BusinessException("Authenticated employee must be linked to a sector");
+        }
+
+        hibernateFilterActivator.enableFilters(authenticatedEmployee);
+
+        return employeeRepository.findAll(safePageable);
     }
 
     public Employee findById(UUID uuid) {
@@ -98,22 +120,16 @@ public class EmployeeService {
 
     @Transactional(readOnly = true)
     public EmployeeDetailsResponseDTO getEmployeeDetails(Employee authenticatedEmployee) {
-        Employee employee = employeeRepository.findByIdWithDetails(authenticatedEmployee.getId())
-                .orElseThrow(() -> {
-                    auditLog.with(log).event("get_employee_details_failed").reason("employee_not_found").level(AuditLog.Level.WARN).log();
-                    return new ResourceNotFoundException("Employee not found: " + authenticatedEmployee.getId());
-                });
+        Employee employee = employeeRepository.findByIdWithDetails(authenticatedEmployee.getId()).orElseThrow(() -> {
+            auditLog.with(log).event("get_employee_details_failed").reason("employee_not_found").level(AuditLog.Level.WARN).log();
+            return new ResourceNotFoundException("Employee not found: " + authenticatedEmployee.getId());
+        });
 
         CityHall cityHall = employee.getCityHallId();
         Occupation occupation = employee.getOccupationId();
         Sector sector = employee.getSectorId();
 
-        return new EmployeeDetailsResponseDTO(
-                employee.getFullName(),
-                cityHall != null ? cityHall.getName() : null,
-                occupation != null ? occupation.getName() : null,
-                sector != null ? sector.getName() : null
-        );
+        return new EmployeeDetailsResponseDTO(employee.getFullName(), cityHall != null ? cityHall.getName() : null, occupation != null ? occupation.getName() : null, sector != null ? sector.getName() : null);
     }
 
     public Employee findByEmail(String email) {
@@ -121,5 +137,22 @@ public class EmployeeService {
             auditLog.with(log).event("find_employee_by_email_failed").reason("employee_not_found").level(AuditLog.Level.WARN).log();
             return new ResourceNotFoundException("Employee not found: " + email);
         });
+    }
+
+    private Sort translateSort(Sort sort) {
+
+        List<Sort.Order> orders = new ArrayList<>();
+
+        for (Sort.Order order : sort) {
+
+            String property = switch (order.getProperty()) {
+                case "name" -> "firstName";
+                default -> order.getProperty();
+            };
+
+            orders.add(new Sort.Order(order.getDirection(), property));
+        }
+
+        return Sort.by(orders);
     }
 }
