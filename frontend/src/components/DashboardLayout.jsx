@@ -195,33 +195,31 @@ export function DashboardLayout({ children, styles = [] }) {
             className={`nav-item ${isActive("/ferramentas") ? "active" : ""}`}
             to="/ferramentas"
           >
-            <i className="bi bi-wrench-adjustable"></i> Ferramentas
+            <i className="bi bi-grid-1x2-fill"></i> Ferramentas
           </Link>
+          <a className="nav-item" href="#">
+            <i className="bi bi-inbox-fill"></i> Caixa de Entrada
+          </a>
           <Link
-            className={`nav-item ${isActive("/processos") ? "active" : ""}`}
-            to="/processos"
+            className={`nav-item ${isActive("/funcionarios") ? "active" : ""}`}
+            to="/funcionarios"
           >
-            <i className="bi bi-diagram-3"></i> Processos
-          </Link>
-          <Link
-            className={`nav-item ${isActive("/tarefas") ? "active" : ""}`}
-            to="/tarefas"
-          >
-            <i className="bi bi-check2-square"></i> Tarefas
+            <i className="bi bi-people-fill"></i> Funcionários
           </Link>
 
-          <div className="sidebar-cityhall-label" style={{ marginTop: "0.5rem" }}>
-            Administração
-          </div>
-          <a className="nav-item" href="#">
-            <i className="bi bi-people"></i> Gestão
-          </a>
-          <a className="nav-item" href="#">
-            <i className="bi bi-bell"></i> Notificações
-          </a>
-          <a className="nav-item" href="/perfil">
-            <i className="bi bi-gear"></i> Configurações
-          </a>
+          {isTeamAdmin && (
+            <>
+              <div className="sidebar-cityhall-label" style={{ marginTop: "0.5rem" }}>
+                Integra Brasil Admin
+              </div>
+              <Link
+                className={`nav-item ${isActive("/nova-prefeitura") ? "active" : ""}`}
+                to="/nova-prefeitura"
+              >
+                <i className="bi bi-building-add"></i> Nova prefeitura
+              </Link>
+            </>
+          )}
         </nav>
 
         <div className="sidebar-footer">

@@ -6,7 +6,7 @@ body {
 /* HERO BANNER */
 .dash-hero {
     background: linear-gradient(135deg, var(--azul-escuro) 0%, #1a4a8a 100%);
-    padding: 2rem 2rem 1.5rem;
+    padding: 2rem 2.25rem 1.75rem;
     border-radius: 16px;
 }
 
@@ -27,6 +27,18 @@ body {
     gap: 0.8rem;
 }
 
+.dash-hero-botoes .btn {
+    min-width: 190px;
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding-inline: 1.25rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
 @media (max-width: 804px) {
     .dash-hero-botoes {
         flex-direction: column;
@@ -39,97 +51,121 @@ body {
 }
 
 .dash-hero-img svg {
-    width: 120px;
-    height: 120px;
+    width: 130px;
+    height: 130px;
 }
 
-/* CARDS DE PROGRESSO */
-.card:hover {
-    transform: none;
+/* RESUMO */
+.dashboard-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
 }
 
-.anel-container {
-    position: relative;
-    width: 90px;
-    height: 90px;
-}
-
-.anel-svg {
-    transform: rotate(-90deg);
-}
-
-.anel-bg {
-    fill: none;
-    stroke: var(--cinza-claro);
-    stroke-width: 8;
-}
-
-.anel-fill {
-    fill: none;
-    stroke-width: 8;
-    stroke-linecap: round;
-    transition: stroke-dashoffset 1s ease;
-}
-
-.anel-progresso {
-    position: absolute;
-    inset: 0;
+.dashboard-stat-card {
+    min-height: 120px;
+    padding: 1.4rem 1.5rem;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--branco);
     display: flex;
-    align-items: center;
+    flex-direction: column;
     justify-content: center;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--azul-escuro);
 }
 
-.anel-status {
-    font-size: 0.8rem;
+.dashboard-stat-card i {
+    color: var(--azul);
+    font-size: 1.55rem;
+    line-height: 1;
+    margin-bottom: 1rem;
+}
+
+.dashboard-stat-card span {
     color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.2;
+}
+
+.dashboard-stat-card strong {
+    color: #000;
+    font-size: 2rem;
+    line-height: 1.1;
+    margin-top: 0.55rem;
 }
 
 /* FERRAMENTAS */
-.tool-item {
+.dashboard-tools-panel {
+    padding: 1.55rem 1.6rem;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--branco);
+}
+
+.dashboard-tools-title {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.65rem 0.75rem;
-    border-radius: 10px;
+    gap: 0.55rem;
+    margin-bottom: 1.35rem;
+}
+
+.dashboard-tools-title i {
+    color: var(--azul);
+    font-size: 1.25rem;
+}
+
+.dashboard-tools-title h3 {
+    color: var(--azul-escuro);
+    font-size: 1.05rem;
+    font-weight: 800;
+    margin: 0;
+}
+
+.dashboard-tools-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.dashboard-tool-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    padding: 1.35rem 1.55rem;
+    border-radius: 8px;
     border: 1.5px solid var(--border-color);
     background: var(--branco);
-    margin-bottom: 0.5rem;
-    cursor: pointer;
-    transition: all 0.15s;
+    color: inherit;
+    text-decoration: none;
+    transition: border-color 0.15s, background 0.15s;
 }
 
-.tool-item:last-child {
-    margin-bottom: 0;
-}
-
-.tool-item:hover {
+.dashboard-tool-card:hover {
     border-color: rgba(46, 139, 255, 0.3);
     background: var(--azul-claro);
 }
 
-.tool-item:hover .tool-arrow {
-    color: var(--azul);
+.dashboard-tool-icon {
+    width: 26px;
+    min-width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
 }
 
-.tool-icon {
-    color: var(--text-muted);
-    font-size: 1rem;
-    min-width: 20px;
-}
-
-.tool-nome {
-    font-size: 0.85rem;
+.dashboard-tool-card h4 {
     color: var(--azul-escuro);
-    font-weight: 500;
+    font-size: 1rem;
+    font-weight: 800;
+    margin: 0 0 0.35rem;
 }
 
-.tool-arrow {
-    margin-left: auto;
-    color: var(--border);
-    font-size: 0.8rem;
+.dashboard-tool-card p {
+    color: var(--azul-escuro);
+    font-size: 0.95rem;
+    line-height: 1.35;
+    margin: 0;
 }
 
 /* COLUNA DIREITA */
@@ -244,4 +280,32 @@ body {
     display: flex;
     align-items: center;
     gap: 0.3rem;
+}
+
+@media (max-width: 1199px) {
+    .dashboard-stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 575px) {
+    .dash-hero {
+        padding: 1.45rem;
+    }
+
+    .hero-h2 {
+        font-size: 1.45rem;
+    }
+
+    .dashboard-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-tools-panel {
+        padding: 1.2rem;
+    }
+
+    .dashboard-tool-card {
+        padding: 1.1rem;
+    }
 }

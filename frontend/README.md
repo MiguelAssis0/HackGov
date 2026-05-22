@@ -1,6 +1,6 @@
 # HackGov Frontend React
 
-Este diretório substitui a antiga interface Django por uma aplicação React com Vite.
+Interface React do HackGov, integrada ao backend Java Spring Boot.
 
 ## Rotas recriadas
 

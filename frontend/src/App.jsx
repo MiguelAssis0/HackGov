@@ -9,6 +9,11 @@ import ToolsPage from "./pages/ToolsPage.jsx";
 import ProcessesPage from "./pages/ProcessesPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import TasksPage from "./pages/TasksPage.jsx";
+import SectorsPage from "./pages/SectorsPage.jsx";
+import JobsPage from "./pages/JobsPage.jsx";
+import EmployeesPage from "./pages/EmployeesPage.jsx";
+import AccessControlPage from "./pages/AccessControlPage.jsx";
+import CityHallFormPage from "./pages/CityHallFormPage.jsx";
 
 function normalizePath(pathname) {
   const cleanPath = (pathname || "/").split(/[?#]/)[0];
@@ -48,6 +53,11 @@ export default function App() {
     "/processos": <ProcessesPage />,
     "/tarefas": <TasksPage />,
     "/perfil": <ProfilePage />,
+    "/setores": <SectorsPage />,
+    "/cargos": <JobsPage />,
+    "/funcionarios": <EmployeesPage />,
+    "/controle-acesso": <AccessControlPage />,
+    "/nova-prefeitura": <CityHallFormPage />,
   }[path] || <HomePage />;
 
   return <RouterContext.Provider value={router}>{page}</RouterContext.Provider>;

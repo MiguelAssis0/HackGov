@@ -1,5 +1,15 @@
 .chat-float { display: none !important; }
 
+.eyebrow {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--azul);
+}
+
+.eyebrow.dark { color: var(--azul); }
+
 .ferramentas-layout {
     display: grid;
     grid-template-columns: 260px 1fr;
@@ -7,13 +17,6 @@
     align-items: start;
 }
 
-@media (max-width: 991px) {
-    .ferramentas-layout {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* PAINEL LATERAL DE FERRAMENTAS */
 .ferramentas-nav {
     background: var(--branco);
     border: var(--border1-5);
@@ -21,14 +24,17 @@
     overflow: hidden;
     position: sticky;
     top: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
 }
 
 .ferramentas-nav-header {
-    padding: 1rem 1.25rem 0.75rem;
+    padding: 1rem 1rem 0.75rem;
     border-bottom: var(--border1);
 }
 
 .ferr-busca-wrap { position: relative; }
+
 .ferr-busca-wrap i {
     position: absolute;
     left: 0.7rem;
@@ -36,7 +42,9 @@
     transform: translateY(-50%);
     color: var(--text-muted);
     font-size: 0.78rem;
+    pointer-events: none;
 }
+
 .ferr-busca {
     width: 100%;
     background: var(--cinza-claro);
@@ -48,7 +56,12 @@
     outline: none;
     transition: border-color 0.15s;
 }
-.ferr-busca:focus { border-color: var(--azul); background: var(--branco); }
+
+.ferr-busca:focus {
+    border-color: var(--azul);
+    background: var(--branco);
+}
+
 .ferr-busca::placeholder { color: var(--text-muted); }
 
 .ferr-categoria-label {
@@ -57,136 +70,158 @@
     text-transform: uppercase;
     letter-spacing: 1px;
     color: var(--text-muted);
-    padding: 0.8rem 1.25rem 0.3rem;
+    padding: 0.75rem 1rem 0.3rem;
 }
 
 .ferr-item {
     display: flex;
     align-items: center;
-    gap: 0.7rem;
-    padding: 0.65rem 1.25rem;
+    gap: 0.65rem;
+    padding: 0.6rem 1rem;
     cursor: pointer;
     border: none;
+    border-left: 3px solid transparent;
     background: none;
     width: 100%;
     text-align: left;
-    border-left: 3px solid transparent;
     transition: all 0.15s;
 }
+
 .ferr-item:hover { background: var(--cinza-claro); }
+
 .ferr-item.active {
     background: var(--azul-claro);
     border-left-color: var(--azul);
 }
 
 .ferr-item-icon {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     flex-shrink: 0;
     background: var(--cinza-claro);
     color: var(--text-muted);
     transition: all 0.15s;
 }
-.ferr-item.active .ferr-item-icon { background: var(--azul); color: #fff; }
-.ferr-item:hover .ferr-item-icon { background: var(--azul-claro); color: var(--azul); }
-.ferr-item.active:hover .ferr-item-icon { background: var(--azul); color: #fff; }
+
+.ferr-item.active .ferr-item-icon {
+    background: var(--azul);
+    color: #fff;
+}
+
+.ferr-item:hover:not(.active) .ferr-item-icon {
+    background: var(--azul-claro);
+    color: var(--azul);
+}
 
 .ferr-item-nome {
     font-size: 0.82rem;
     font-weight: 500;
     color: var(--azul-escuro);
+    flex: 1;
     line-height: 1.3;
 }
-.ferr-item.active .ferr-item-nome { color: var(--azul); font-weight: 600; }
+
+.ferr-item.active .ferr-item-nome {
+    color: var(--azul);
+    font-weight: 600;
+}
 
 .ferr-badge {
-    margin-left: auto;
     font-size: 0.62rem;
     font-weight: 700;
     padding: 0.1rem 0.4rem;
     border-radius: 50px;
-    background: var(--azul-claro);
-    color: var(--azul);
     flex-shrink: 0;
 }
-.ferr-badge.novo { background: #dcfce7; color: #16a34a; }
-.ferr-badge.em-breve { background: var(--cinza-claro); color: var(--text-muted); }
 
-/* ÁREA DE CONTEÚDO DA FERRAMENTA */
-.ferramenta-painel { display: none; }
-.ferramenta-painel.active { display: flex; flex-direction: column; gap: 1rem; }
+.ferr-badge.em-breve {
+    background: var(--cinza-claro);
+    color: var(--text-muted);
+}
 
-.ferramenta-header {
+.ferr-badge.obrigatoria {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.ferramentas-conteudo {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.ferr-painel-header {
     background: var(--branco);
     border: var(--border1-5);
     border-radius: 16px;
-    padding: 1.5rem 1.75rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
+    padding: 1.25rem 1.5rem;
 }
 
-.ferramenta-header-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.3rem;
-    flex-shrink: 0;
-}
-
-.ferramenta-titulo {
-    font-size: 1.1rem;
-    font-weight: 700;
+.ferr-painel-header h4 {
+    font-size: 1.25rem;
     color: var(--azul-escuro);
-    margin: 0 0 0.15rem;
-}
-.ferramenta-desc {
-    font-size: 0.82rem;
-    color: var(--text-muted);
-    margin: 0;
 }
 
-/* TELA INICIAL - GRADE DE FERRAMENTAS */
+.ferr-painel-header p {
+    font-size: 0.85rem;
+}
+
 .ferr-grade {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 0.85rem;
+    gap: 1rem;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .ferr-card {
-    background: var(--branco);
-    border: var(--border1-5);
-    border-radius: 14px;
-    padding: 1.25rem 1rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.65rem;
+    border-radius: 16px;
+    gap: 0.5rem;
+    min-height: 152px;
+    padding: 1.35rem 0.75rem 1rem;
     text-align: center;
     cursor: pointer;
-    transition: all 0.18s;
+    border: var(--border1-5);
+    background: var(--branco);
+    transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
     position: relative;
-    text-decoration: none;
 }
+
 .ferr-card:hover {
+    background: var(--cinza-claro);
     border-color: var(--border1-5-hover);
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(11,31,58,0.08);
 }
+
 .ferr-card.disabled {
     opacity: 0.55;
-    cursor: not-allowed;
-    pointer-events: none;
+    cursor: default;
 }
+
+.ferr-card.ferr-card-selected {
+    background: #eef5ff;
+    outline: 2px solid var(--azul);
+    outline-offset: -2px;
+}
+
+.ferr-card-tag {
+    position: absolute;
+    top: 0.55rem;
+    right: 0.55rem;
+    font-size: 0.62rem;
+    font-weight: 700;
+    padding: 0.12rem 0.45rem;
+    border-radius: 50px;
+}
+
+.ferr-card-tag.ativo { background: #dcfce7; color: #16a34a; }
+.ferr-card-tag.inativo { background: var(--cinza-claro); color: var(--text-muted); }
+.ferr-card-tag.obrigatoria { background: #dbeafe; color: #1d4ed8; }
 
 .ferr-card-icon {
     width: 52px;
@@ -199,182 +234,60 @@
 }
 
 .ferr-card-nome {
-    font-size: 0.82rem;
+    min-height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
     font-weight: 600;
     color: var(--azul-escuro);
     line-height: 1.3;
 }
-.ferr-card-tag {
-    font-size: 0.65rem;
-    font-weight: 600;
-    padding: 0.15rem 0.5rem;
-    border-radius: 50px;
-    position: absolute;
-    top: 0.6rem;
-    right: 0.6rem;
+
+.ferr-card-toggle { margin-top: auto; }
+
+.ferr-card-toggle .form-check-input {
+    cursor: pointer;
+    width: 2em;
+    height: 1em;
 }
 
-/* FORMULÁRIO - CADASTRO DE USUÁRIOS */
-.usuario-form-card {
+.ferr-permissoes-wrap {
     background: var(--branco);
     border: var(--border1-5);
     border-radius: 16px;
     overflow: hidden;
 }
 
-.usuario-form-body { padding: 1.5rem 1.75rem; }
-
-.field-label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.7px;
-    color: var(--text-muted);
-    margin-bottom: 0.35rem;
-    display: block;
-}
-
-.field-input {
-    width: 100%;
-    background: var(--cinza-claro);
-    border: var(--border1-5);
-    border-radius: 8px;
-    padding: 0.55rem 0.85rem;
-    font-size: 0.9rem;
-    color: var(--azul-escuro);
-    outline: none;
-    transition: border-color 0.15s, background 0.15s;
-}
-.field-input:focus { border-color: var(--azul); background: var(--branco); box-shadow: 0 0 0 3px rgba(46,139,255,0.1); }
-.field-input::placeholder { color: #b0bac9; }
-.field-input.is-invalid { border-color: var(--vermelho); }
-.field-input.is-valid   { border-color: var(--verde); }
-
-select.field-input {
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7a93' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.75rem center;
-    padding-right: 2rem;
-    background-color: var(--cinza-claro);
-}
-
-/* TABELA DE USUÁRIOS */
-.usuarios-table-wrap {
-    background: var(--branco);
-    border: var(--border1-5);
-    border-radius: 16px;
-    overflow: hidden;
-}
-
-.usuarios-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.83rem;
-}
-
-.usuarios-table thead tr {
-    background: var(--cinza-claro);
-    border-bottom: var(--border1-5);
-}
-
-.usuarios-table th {
-    padding: 0.75rem 1rem;
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.7px;
-    color: var(--text-muted);
-    text-align: left;
-    white-space: nowrap;
-}
-
-.usuarios-table td {
-    padding: 0.75rem 1rem;
+.ferr-permissoes-header {
+    padding: 1rem 1.5rem;
     border-bottom: var(--border1);
+}
+
+.ferr-permissoes-header h5 {
+    font-size: 1rem;
     color: var(--azul-escuro);
-    vertical-align: middle;
 }
 
-.usuarios-table tbody tr:last-child td { border-bottom: none; }
-
-.usuarios-table tbody tr:hover td { background: var(--cinza-claro); }
-
-.user-cell {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
+.ferr-permissoes-body {
+    padding: 1.25rem 1.5rem;
+    border-bottom: var(--border1);
 }
 
-.user-table-avatar {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: var(--azul);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: #fff;
-    flex-shrink: 0;
+@media (max-width: 1200px) {
+    .ferr-grade { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
-.role-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.15rem 0.5rem;
-    border-radius: 50px;
-    font-size: 0.68rem;
-    font-weight: 600;
-}
-.role-admin     { background: #e8f2ff; color: var(--azul); }
-.role-gestor    { background: #f3e8ff; color: #7c3aed; }
-.role-servidor  { background: var(--cinza-claro); color: var(--text-muted); }
-
-.table-action-btn {
-    width: 28px;
-    height: 28px;
-    border: var(--border1-5);
-    border-radius: 6px;
-    background: var(--branco);
-    color: var(--text-muted);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 0.78rem;
-    transition: all 0.15s;
-}
-.table-action-btn:hover { background: var(--cinza-claro); color: var(--azul-escuro); border-color: var(--border1-5-hover); }
-.table-action-btn.danger:hover { background: #fee2e2; color: var(--vermelho); border-color: #fca5a5; }
-
-.table-paginacao {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.65rem 1rem;
-    border-top: var(--border1-5);
-    background: var(--cinza-claro);
-    font-size: 0.72rem;
-    color: var(--text-muted);
+@media (max-width: 991px) {
+    .ferramentas-layout { grid-template-columns: 1fr; }
+    .ferramentas-nav {
+        position: static;
+        max-height: none;
+    }
+    .ferr-grade { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
-/* EM BREVE */
-.em-breve-wrap {
-    background: var(--branco);
-    border: var(--border1-5);
-    border-radius: 16px;
-    padding: 3rem 2rem;
-    text-align: center;
+@media (max-width: 576px) {
+    .ferr-grade { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
-.em-breve-wrap i { font-size: 2.5rem; color: var(--border-color); margin-bottom: 1rem; display: block; }
-.em-breve-wrap p { font-size: 0.9rem; color: var(--text-muted); max-width: 320px; margin: 0 auto; }
 
-/* CHECKBOX AZUL */
-input[type="checkbox"] {
-    accent-color: var(--azul);
-    width: 16px;
-    height: 16px;
-    cursor: pointer;
-}

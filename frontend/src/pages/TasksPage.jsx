@@ -1,48 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "../components/DashboardLayout.jsx";
 import { api } from "../services/api.js";
-
-const demoBoards = [
-  { id: "demo-administracao", name: "Administracao Geral", sector: { name: "Administracao Geral" } },
-  { id: "demo-obras", name: "Secretaria de Obras", sector: { name: "Secretaria de Obras" } },
-  { id: "demo-fazenda", name: "Secretaria da Fazenda", sector: { name: "Secretaria da Fazenda" } },
-];
-
-const demoEmployees = [
-  { id: "demo-ana", firstName: "Ana", lastName: "Souza", email: "ana@prefeitura.local" },
-  { id: "demo-maria", firstName: "Maria", lastName: "Oliveira", email: "maria@prefeitura.local" },
-  { id: "demo-carlos", firstName: "Carlos", lastName: "Mendes", email: "carlos@prefeitura.local" },
-];
-
-const demoTasks = [
-  {
-    id: "demo-task-1",
-    title: "Validar documentos da requisicao",
-    description: "Conferir anexos enviados pelo setor de Obras antes de encaminhar para compras.",
-    responsible: demoEmployees[0],
-    board: demoBoards[0],
-    startDate: "2026-05-20T09:00:00",
-    endDate: "2026-05-22T17:00:00",
-  },
-  {
-    id: "demo-task-2",
-    title: "Solicitar parecer tecnico",
-    description: "Atribuir analise tecnica ao setor de Obras e acompanhar retorno.",
-    responsible: demoEmployees[1],
-    board: demoBoards[1],
-    startDate: "2026-05-18T10:00:00",
-    endDate: "2026-05-21T16:00:00",
-  },
-  {
-    id: "demo-task-3",
-    title: "Conferir dotacao orcamentaria",
-    description: "Validar disponibilidade orcamentaria para o processo em andamento.",
-    responsible: demoEmployees[2],
-    board: demoBoards[2],
-    startDate: "2026-05-23T08:30:00",
-    endDate: "2026-05-24T12:00:00",
-  },
-];
+import {
+  mockupTaskBoards,
+  mockupTaskEmployees,
+  mockupTasks,
+  pageItems,
+} from "../services/mockupService.js";
 
 const emptyForm = {
   title: "",
@@ -52,11 +16,6 @@ const emptyForm = {
   startDate: "",
   endDate: "",
 };
-
-function pageItems(payload) {
-  if (Array.isArray(payload)) return payload;
-  return payload?.content || [];
-}
 
 function isDemoId(id) {
   return typeof id === "string" && id.startsWith("demo-");
@@ -348,9 +307,10 @@ export default function TasksPage() {
         employeesResult.status === "fulfilled";
       const hasSession = Boolean(localStorage.getItem("hackgov.accessToken"));
 
-      const nextTasks = tasksResult.status === "fulfilled" ? pageItems(tasksResult.value) : hasSession ? [] : demoTasks;
-      const nextBoards = boardsResult.status === "fulfilled" ? pageItems(boardsResult.value) : hasSession ? [] : demoBoards;
-      const nextEmployees = employeesResult.status === "fulfilled" ? pageItems(employeesResult.value) : hasSession ? [] : demoEmployees;
+      const nextTasks = tasksResult.status === "fulfilled" ? pageItems(tasksResult.value) : hasSession ? [] : mockupTasks;
+      const nextBoards = boardsResult.status === "fulfilled" ? pageItems(boardsResult.value) : hasSession ? [] : mockupTaskBoards;
+      const nextEmployees =
+        employeesResult.status === "fulfilled" ? pageItems(employeesResult.value) : hasSession ? [] : mockupTaskEmployees;
 
       setTasks(nextTasks);
       setBoards(nextBoards.length ? nextBoards : mergeBoards([], nextTasks));

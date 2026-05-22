@@ -89,11 +89,32 @@ export const api = {
   // EMPLOYEES
   getEmployees: () => request("/employee?size=100&sort=firstName,asc"),
 
+  createEmployee: (payload) =>
+    request("/employee", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
   // SECTORS
   getSectors: () => request("/sectors?size=100"),
 
+  createSector: (payload) =>
+    request("/sectors", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  // STATES
+  getStates: () => request("/state?size=100&sort=name,asc"),
+
   // CITY HALLS
   getCityHalls: () => request("/cityhall?size=100&sort=name,asc"),
+
+  createCityHall: (payload) =>
+    request("/cityhall", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
 
   // TASK BOARDS
   getBoards: () => requestTaskPath("/boards?size=100&sort=name,asc"),
@@ -284,6 +305,7 @@ export function getSelectedCityHall() {
 export function saveSelectedCityHall(cityHall) {
   if (!cityHall) {
     localStorage.removeItem("hackgov.selectedCityHall");
+    window.dispatchEvent(new Event("hackgov:selectedCityHall"));
     return;
   }
 
@@ -295,6 +317,7 @@ export function saveSelectedCityHall(cityHall) {
       cnpj: cityHall.cnpj || "",
     }),
   );
+  window.dispatchEvent(new Event("hackgov:selectedCityHall"));
 }
 
 export function getUserDisplayName(user, fallback = "Usuário") {
