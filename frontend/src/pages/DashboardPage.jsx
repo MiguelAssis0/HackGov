@@ -108,7 +108,7 @@ export default function DashboardPage() {
               <section className="dashboard-tools-panel">
                 <div className="dashboard-tools-title">
                   <i className="bi bi-grid-1x2-fill"></i>
-                  <h3>Ferramentas dispon&iacute;veis</h3>
+                  <h4 className="mb-0">Ferramentas disponíveis</h4>
                 </div>
 
                 <div className="dashboard-tools-list">
