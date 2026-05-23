@@ -14,6 +14,7 @@ import JobsPage from "./pages/JobsPage.jsx";
 import EmployeesPage from "./pages/EmployeesPage.jsx";
 import AccessControlPage from "./pages/AccessControlPage.jsx";
 import CityHallFormPage from "./pages/CityHallFormPage.jsx";
+import ManagementPage from "./pages/ManagementPage.jsx";
 
 function normalizePath(pathname) {
   const cleanPath = (pathname || "/").split(/[?#]/)[0];
@@ -56,6 +57,7 @@ export default function App() {
     "/setores": <SectorsPage />,
     "/cargos": <JobsPage />,
     "/funcionarios": <EmployeesPage />,
+    "/gestao": <ManagementPage />,
     "/controle-acesso": <AccessControlPage />,
     "/nova-prefeitura": <CityHallFormPage />,
   }[path] || <HomePage />;

@@ -206,6 +206,12 @@ export function DashboardLayout({ children, styles = [] }) {
           >
             <i className="bi bi-people-fill"></i> Funcionários
           </Link>
+          <Link
+            className={`nav-item ${isActive("/gestao") ? "active" : ""}`}
+            to="/gestao"
+          >
+            <i className="bi bi-graph-up-arrow"></i> Gest&atilde;o
+          </Link>
 
           {isTeamAdmin && (
             <>
@@ -288,15 +294,15 @@ export function DashboardLayout({ children, styles = [] }) {
             >
               <i className="bi bi-check2-square"></i>Tarefas
             </Link>
-            <button className="bnav-btn">
-              <i className="bi bi-chat-dots-fill"></i>Chats
-            </button>
             <Link
               to="/perfil"
               className={`bnav-btn ${isActive("/perfil") ? "active" : ""}`}
             >
               <i className="bi bi-person-fill"></i>Perfil
             </Link>
+            <button className="bnav-btn">
+              <i className="bi bi-chat-dots-fill"></i>Chats
+            </button>
           </div>
         </div>
       </nav>

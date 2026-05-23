@@ -1,0 +1,437 @@
+.gestao-page {
+    min-height: 100vh;
+}
+
+.gestao-sector-select {
+    min-width: 260px;
+}
+
+.gestao-hero {
+    min-height: 180px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 310px;
+    gap: 1.5rem;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.gestao-hero h2 {
+    margin: 0 0 0.55rem;
+    color: var(--azul-escuro);
+    font-size: 2rem;
+    font-weight: 800;
+}
+
+.gestao-hero p:not(.eyebrow) {
+    max-width: 660px;
+    margin: 0;
+    color: var(--text-muted);
+}
+
+.gestao-score-card {
+    min-height: 138px;
+    border-radius: 8px;
+    padding: 1.15rem;
+    color: var(--branco);
+    background: linear-gradient(135deg, var(--azul-escuro), #1a4a8a);
+}
+
+.gestao-score-card span,
+.gestao-score-card small {
+    display: block;
+    color: rgba(255, 255, 255, 0.74);
+    font-size: 0.85rem;
+}
+
+.gestao-score-card strong {
+    display: block;
+    color: var(--branco);
+    font-size: 2.4rem;
+    line-height: 1.05;
+    margin: 0.2rem 0 0.75rem;
+}
+
+.gestao-progress {
+    height: 9px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    margin-bottom: 0.65rem;
+}
+
+.gestao-progress div {
+    height: 100%;
+    border-radius: inherit;
+    background: var(--azul);
+}
+
+.gestao-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.gestao-metric-card {
+    min-height: 128px;
+    display: flex;
+    gap: 0.9rem;
+    align-items: flex-start;
+    padding: 1.2rem;
+    border: var(--border1-5);
+    border-radius: 8px;
+    background: var(--branco);
+}
+
+.gestao-metric-icon {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    font-size: 1.25rem;
+}
+
+.gestao-metric-card span {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.25;
+}
+
+.gestao-metric-card strong {
+    display: block;
+    margin-top: 0.35rem;
+    color: #000;
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.gestao-metric-card small {
+    display: block;
+    margin-top: 0.45rem;
+    color: var(--text-muted);
+}
+
+.gestao-metric-card.blue .gestao-metric-icon {
+    color: var(--azul);
+    background: var(--azul-claro);
+}
+
+.gestao-metric-card.green .gestao-metric-icon {
+    color: #16a34a;
+    background: #dcfce7;
+}
+
+.gestao-metric-card.red .gestao-metric-icon {
+    color: var(--vermelho);
+    background: #fee2e2;
+}
+
+.gestao-metric-card.purple .gestao-metric-icon {
+    color: #7c3aed;
+    background: #f3e8ff;
+}
+
+.gestao-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.65fr);
+    gap: 1rem;
+}
+
+.gestao-card {
+    min-width: 0;
+}
+
+.gestao-main-chart {
+    min-height: 360px;
+}
+
+.gestao-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.35rem;
+}
+
+.gestao-card-header h3 {
+    margin: 0;
+    color: var(--azul-escuro);
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+
+.gestao-goal {
+    flex: 0 0 auto;
+    padding: 0.35rem 0.55rem;
+    border-radius: 999px;
+    background: var(--azul-claro);
+    color: var(--azul);
+    font-size: 0.8rem;
+    font-weight: 800;
+}
+
+.gestao-chart-bars {
+    height: 250px;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    align-items: end;
+    gap: 0.85rem;
+    padding-top: 0.35rem;
+}
+
+.gestao-chart-column {
+    height: 100%;
+    min-width: 0;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    gap: 0.65rem;
+    text-align: center;
+}
+
+.gestao-bar-track {
+    height: 100%;
+    display: flex;
+    align-items: end;
+    border-radius: 8px;
+    background: #f1f5f9;
+    overflow: hidden;
+}
+
+.gestao-bar-fill {
+    width: 100%;
+    border-radius: 8px 8px 0 0;
+    background: linear-gradient(180deg, var(--azul), #1767d9);
+}
+
+.gestao-chart-column span {
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.gestao-donut-wrap {
+    display: grid;
+    gap: 1rem;
+    justify-items: center;
+}
+
+.gestao-donut {
+    width: 190px;
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+}
+
+.gestao-donut > div {
+    width: 118px;
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    border-radius: 50%;
+    background: var(--branco);
+    text-align: center;
+}
+
+.gestao-donut strong {
+    display: block;
+    color: var(--azul-escuro);
+    font-size: 1.7rem;
+    line-height: 1;
+}
+
+.gestao-donut span {
+    margin-top: 0.3rem;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+}
+
+.gestao-donut-legend {
+    width: 100%;
+    display: grid;
+    gap: 0.45rem;
+}
+
+.gestao-donut-legend span {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--azul-escuro);
+    font-size: 0.9rem;
+}
+
+.gestao-donut-legend i {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.gestao-donut-legend .blue { background: var(--azul); }
+.gestao-donut-legend .yellow { background: #f59e0b; }
+.gestao-donut-legend .red { background: var(--vermelho); }
+
+.gestao-week-chart {
+    display: grid;
+    gap: 0.85rem;
+}
+
+.gestao-week-row {
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr) 36px;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.gestao-week-row span,
+.gestao-week-row strong {
+    color: var(--azul-escuro);
+    font-size: 0.85rem;
+}
+
+.gestao-week-row span {
+    color: var(--text-muted);
+    font-weight: 700;
+}
+
+.gestao-week-track {
+    height: 9px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #f1f5f9;
+}
+
+.gestao-week-track div {
+    height: 100%;
+    border-radius: inherit;
+    background: #16a34a;
+}
+
+.gestao-indicators {
+    display: grid;
+    gap: 0.8rem;
+}
+
+.gestao-indicators div {
+    min-height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.9rem 1rem;
+    border: var(--border1-5);
+    border-radius: 8px;
+    background: #fbfdff;
+}
+
+.gestao-indicators span {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.gestao-indicators strong {
+    color: var(--azul-escuro);
+    font-size: 1.15rem;
+}
+
+.gestao-ranking {
+    grid-column: 1 / -1;
+}
+
+.gestao-ranking-list {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.gestao-ranking-item {
+    min-height: 94px;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.85rem;
+    border: var(--border1-5);
+    border-radius: 8px;
+    background: var(--branco);
+    text-align: left;
+}
+
+.gestao-ranking-item.active,
+.gestao-ranking-item:hover {
+    border-color: rgba(46, 139, 255, 0.45);
+    background: var(--azul-claro);
+}
+
+.gestao-ranking-item > span {
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    background: var(--azul);
+    color: var(--branco);
+    font-weight: 800;
+}
+
+.gestao-ranking-item strong,
+.gestao-ranking-item b {
+    color: var(--azul-escuro);
+}
+
+.gestao-ranking-item small {
+    display: block;
+    margin-top: 0.2rem;
+    color: var(--text-muted);
+}
+
+.gestao-empty {
+    min-height: 240px;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.gestao-empty i {
+    font-size: 2rem;
+    color: var(--azul);
+}
+
+@media (max-width: 1199px) {
+    .gestao-metrics-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .gestao-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .gestao-ranking-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .gestao-hero {
+        grid-template-columns: 1fr;
+    }
+
+    .gestao-sector-select {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .gestao-metrics-grid,
+    .gestao-ranking-list {
+        grid-template-columns: 1fr;
+    }
+
+    .gestao-chart-bars {
+        height: 210px;
+        gap: 0.45rem;
+    }
+}

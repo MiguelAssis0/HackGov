@@ -67,6 +67,16 @@ export const mockupTools = [
     route: "/setores",
   },
   {
+    id: "gestao",
+    name: "Gest\u00e3o",
+    category: "Gestao",
+    icon: "bi-graph-up-arrow",
+    description: "Acompanhe produtividade, prazos e desempenho por setor.",
+    mandatory: true,
+    enabled: true,
+    route: "/gestao",
+  },
+  {
     id: "compras-licitacoes",
     name: "Compras e Licita\u00e7\u00f5es",
     category: "Processos",
@@ -275,11 +285,19 @@ export const mockupDashboardTaskPreview = [
   { name: "Entrega 2", color: "vermelho", meta: "At\u00e9 dia 31 de Abril, 14:00h" },
 ];
 
-export const mockupTaskBoards = [
-  { id: "demo-administracao", name: "Administracao Geral", sector: { name: "Administracao Geral" } },
-  { id: "demo-obras", name: "Secretaria de Obras", sector: { name: "Secretaria de Obras" } },
-  { id: "demo-fazenda", name: "Secretaria da Fazenda", sector: { name: "Secretaria da Fazenda" } },
-];
+export const mockupTaskBoards = mockupSectors.map((sector) => ({
+  id: `demo-${sector.id}`,
+  name: sector.name,
+  sector: {
+    id: sector.id,
+    name: sector.name,
+    slug: sector.slug,
+  },
+}));
+
+function mockupBoardBySector(sectorId) {
+  return mockupTaskBoards.find((board) => board.sector.id === sectorId) || mockupTaskBoards[0];
+}
 
 export const mockupTaskEmployees = [
   { id: "demo-ana", firstName: "Ana", lastName: "Souza", email: "ana@prefeitura.local" },
@@ -293,7 +311,7 @@ export const mockupTasks = [
     title: "Validar documentos da requisicao",
     description: "Conferir anexos enviados pelo setor de Obras antes de encaminhar para compras.",
     responsible: mockupTaskEmployees[0],
-    board: mockupTaskBoards[0],
+    board: mockupBoardBySector("compras"),
     startDate: "2026-05-20T09:00:00",
     endDate: "2026-05-22T17:00:00",
   },
@@ -302,7 +320,7 @@ export const mockupTasks = [
     title: "Solicitar parecer tecnico",
     description: "Atribuir analise tecnica ao setor de Obras e acompanhar retorno.",
     responsible: mockupTaskEmployees[1],
-    board: mockupTaskBoards[1],
+    board: mockupBoardBySector("obras"),
     startDate: "2026-05-18T10:00:00",
     endDate: "2026-05-21T16:00:00",
   },
@@ -311,9 +329,156 @@ export const mockupTasks = [
     title: "Conferir dotacao orcamentaria",
     description: "Validar disponibilidade orcamentaria para o processo em andamento.",
     responsible: mockupTaskEmployees[2],
-    board: mockupTaskBoards[2],
+    board: mockupBoardBySector("fazenda"),
     startDate: "2026-05-23T08:30:00",
     endDate: "2026-05-24T12:00:00",
+  },
+];
+
+export const mockupSectorPerformance = [
+  {
+    sectorId: "administracao",
+    productivity: 86,
+    completed: 58,
+    inProgress: 12,
+    overdue: 3,
+    averageResponseHours: 5.4,
+    goal: 82,
+    quality: 91,
+    monthly: [72, 76, 80, 83, 86, 89],
+    weekly: [14, 18, 17, 21, 19],
+  },
+  {
+    sectorId: "agricultura",
+    productivity: 78,
+    completed: 31,
+    inProgress: 8,
+    overdue: 4,
+    averageResponseHours: 8.2,
+    goal: 75,
+    quality: 84,
+    monthly: [65, 68, 70, 74, 78, 80],
+    weekly: [8, 9, 11, 13, 12],
+  },
+  {
+    sectorId: "assistencia-social",
+    productivity: 81,
+    completed: 44,
+    inProgress: 10,
+    overdue: 5,
+    averageResponseHours: 7.1,
+    goal: 78,
+    quality: 87,
+    monthly: [70, 72, 76, 78, 81, 83],
+    weekly: [10, 12, 14, 16, 15],
+  },
+  {
+    sectorId: "compras",
+    productivity: 92,
+    completed: 73,
+    inProgress: 9,
+    overdue: 2,
+    averageResponseHours: 4.8,
+    goal: 85,
+    quality: 94,
+    monthly: [78, 82, 85, 88, 92, 94],
+    weekly: [18, 21, 23, 25, 24],
+  },
+  {
+    sectorId: "cultura",
+    productivity: 74,
+    completed: 26,
+    inProgress: 7,
+    overdue: 4,
+    averageResponseHours: 9.5,
+    goal: 74,
+    quality: 82,
+    monthly: [62, 66, 69, 72, 74, 77],
+    weekly: [6, 7, 9, 10, 9],
+  },
+  {
+    sectorId: "educacao",
+    productivity: 88,
+    completed: 67,
+    inProgress: 14,
+    overdue: 4,
+    averageResponseHours: 6.0,
+    goal: 84,
+    quality: 90,
+    monthly: [76, 79, 82, 84, 88, 90],
+    weekly: [17, 18, 20, 24, 23],
+  },
+  {
+    sectorId: "fazenda",
+    productivity: 84,
+    completed: 49,
+    inProgress: 11,
+    overdue: 3,
+    averageResponseHours: 5.9,
+    goal: 82,
+    quality: 89,
+    monthly: [73, 76, 78, 81, 84, 86],
+    weekly: [12, 15, 16, 19, 18],
+  },
+  {
+    sectorId: "meio-ambiente",
+    productivity: 79,
+    completed: 33,
+    inProgress: 8,
+    overdue: 4,
+    averageResponseHours: 8.6,
+    goal: 76,
+    quality: 85,
+    monthly: [66, 69, 72, 75, 79, 81],
+    weekly: [7, 10, 11, 13, 12],
+  },
+  {
+    sectorId: "obras",
+    productivity: 76,
+    completed: 39,
+    inProgress: 16,
+    overdue: 7,
+    averageResponseHours: 10.4,
+    goal: 80,
+    quality: 79,
+    monthly: [68, 70, 71, 74, 76, 78],
+    weekly: [9, 13, 12, 14, 16],
+  },
+  {
+    sectorId: "recursos-humanos",
+    productivity: 83,
+    completed: 41,
+    inProgress: 8,
+    overdue: 2,
+    averageResponseHours: 5.7,
+    goal: 80,
+    quality: 88,
+    monthly: [71, 74, 77, 80, 83, 85],
+    weekly: [11, 12, 15, 17, 16],
+  },
+  {
+    sectorId: "saude",
+    productivity: 89,
+    completed: 82,
+    inProgress: 18,
+    overdue: 5,
+    averageResponseHours: 6.3,
+    goal: 86,
+    quality: 92,
+    monthly: [79, 81, 84, 87, 89, 91],
+    weekly: [20, 23, 25, 28, 27],
+  },
+  {
+    sectorId: "transporte",
+    productivity: 77,
+    completed: 35,
+    inProgress: 10,
+    overdue: 5,
+    averageResponseHours: 9.1,
+    goal: 76,
+    quality: 83,
+    monthly: [64, 68, 71, 74, 77, 79],
+    weekly: [8, 10, 12, 13, 14],
   },
 ];
 
@@ -569,4 +734,102 @@ export function useCityHallSelection() {
   }
 
   return [cityHall, updateCityHall];
+}
+
+function normalizeComparable(value) {
+  return slugify(value)
+    .replace(/^secretaria-/, "")
+    .replace(/-geral$/, "")
+    .replace(/^(da|de|do)-/, "");
+}
+
+function taskSectorName(task) {
+  return (
+    task?.sector?.name ||
+    task?.sectorName ||
+    task?.board?.sector?.name ||
+    task?.board?.name ||
+    task?.boardId?.name ||
+    ""
+  );
+}
+
+function taskMatchesSector(task, sector) {
+  const taskKey = normalizeComparable(taskSectorName(task));
+  const sectorKey = normalizeComparable(sector.name || sector.slug || sector.id);
+  if (!taskKey || !sectorKey) return false;
+  return taskKey === sectorKey || taskKey.includes(sectorKey) || sectorKey.includes(taskKey);
+}
+
+function performanceFallback(sector, index) {
+  const productivity = Math.max(68, Math.min(92, 76 + ((index * 7) % 18)));
+  return {
+    sectorId: sector.id,
+    productivity,
+    completed: 28 + index * 3,
+    inProgress: 7 + (index % 5),
+    overdue: 2 + (index % 4),
+    averageResponseHours: 5.5 + (index % 6),
+    goal: 78,
+    quality: Math.min(94, productivity + 4),
+    monthly: [
+      Math.max(45, productivity - 15),
+      Math.max(48, productivity - 11),
+      Math.max(52, productivity - 8),
+      Math.max(55, productivity - 4),
+      productivity,
+      Math.min(96, productivity + 2),
+    ],
+    weekly: [8, 10, 12, 13, 15].map((value) => value + (index % 4)),
+  };
+}
+
+export function useSectorPerformance() {
+  const [sectors] = useSectors();
+  const [employees] = useEmployees();
+  const [tasks, setTasks] = useState(mockupTasks);
+
+  useEffect(() => {
+    let mounted = true;
+
+    api
+      .getTasks()
+      .then((response) => {
+        if (!mounted) return;
+        const next = pageItems(response);
+        if (next.length) setTasks(next);
+      })
+      .catch(() => {});
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  return useMemo(
+    () =>
+      sectors.map((sector, index) => {
+        const profile =
+          mockupSectorPerformance.find((item) => item.sectorId === sector.id || item.sectorId === sector.slug) ||
+          performanceFallback(sector, index);
+        const sectorEmployees = employees.filter(
+          (employee) => normalizeComparable(employee.sector) === normalizeComparable(sector.name),
+        );
+        const sectorTasks = tasks.filter((task) => taskMatchesSector(task, sector));
+        const taskBoost = sectorTasks.length ? sectorTasks.length : profile.inProgress;
+        const totalTasks = profile.completed + taskBoost + profile.overdue;
+        const completionRate = totalTasks ? Math.round((profile.completed / totalTasks) * 100) : profile.productivity;
+
+        return {
+          ...sector,
+          ...profile,
+          employees: sectorEmployees.length,
+          activeTasks: taskBoost,
+          totalTasks,
+          completionRate,
+          trend: profile.monthly.at(-1) - profile.monthly[0],
+        };
+      }),
+    [sectors, employees, tasks],
+  );
 }
