@@ -184,23 +184,23 @@ export default function ManagementPage() {
             }
           />
 
-          <section className="gestao-hero panel">
-            <div>
+          <section className="gestao-hero-row">
+            <article className="gestao-hero panel">
               <p className="eyebrow dark mb-2">Desempenho do setor</p>
               <h2>{selectedSector.name}</h2>
               <p>
                 Acompanhe produtividade, prazos e volume de entregas para apoiar decis&otilde;es do gestor do setor.
               </p>
-            </div>
+            </article>
 
-            <div className="gestao-score-card">
+            <article className="gestao-score-card">
               <span>Produtividade atual</span>
               <strong>{selectedSector.productivity}%</strong>
               <div className="gestao-progress">
                 <div style={{ width: `${selectedSector.productivity}%` }}></div>
               </div>
               <small>{productivityDelta} nos &uacute;ltimos meses</small>
-            </div>
+            </article>
           </section>
 
           <section className="gestao-metrics-grid" aria-label="Resumo de desempenho">

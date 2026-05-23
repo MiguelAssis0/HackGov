@@ -6,13 +6,19 @@
     min-width: 260px;
 }
 
-.gestao-hero {
+.gestao-hero-row {
     min-height: 180px;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 310px;
-    gap: 1.5rem;
-    align-items: center;
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 420px);
+    gap: 1rem;
+    align-items: stretch;
     margin-bottom: 1rem;
+}
+
+.gestao-hero {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .gestao-hero h2 {
@@ -29,23 +35,27 @@
 }
 
 .gestao-score-card {
-    min-height: 138px;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     border-radius: 8px;
-    padding: 1.15rem;
-    color: var(--branco);
-    background: linear-gradient(135deg, var(--azul-escuro), #1a4a8a);
+    padding: 1.55rem;
+    border: var(--border1-5);
+    color: var(--azul-escuro);
+    background: var(--branco);
 }
 
 .gestao-score-card span,
 .gestao-score-card small {
     display: block;
-    color: rgba(255, 255, 255, 0.74);
+    color: var(--text-muted);
     font-size: 0.85rem;
 }
 
 .gestao-score-card strong {
     display: block;
-    color: var(--branco);
+    color: #000;
     font-size: 2.4rem;
     line-height: 1.05;
     margin: 0.2rem 0 0.75rem;
@@ -55,7 +65,7 @@
     height: 9px;
     overflow: hidden;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.18);
+    background: #edf2f7;
     margin-bottom: 0.65rem;
 }
 
@@ -416,7 +426,7 @@
 }
 
 @media (max-width: 768px) {
-    .gestao-hero {
+    .gestao-hero-row {
         grid-template-columns: 1fr;
     }
 

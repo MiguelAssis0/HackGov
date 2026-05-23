@@ -285,19 +285,11 @@ export const mockupDashboardTaskPreview = [
   { name: "Entrega 2", color: "vermelho", meta: "At\u00e9 dia 31 de Abril, 14:00h" },
 ];
 
-export const mockupTaskBoards = mockupSectors.map((sector) => ({
-  id: `demo-${sector.id}`,
-  name: sector.name,
-  sector: {
-    id: sector.id,
-    name: sector.name,
-    slug: sector.slug,
-  },
-}));
-
-function mockupBoardBySector(sectorId) {
-  return mockupTaskBoards.find((board) => board.sector.id === sectorId) || mockupTaskBoards[0];
-}
+export const mockupTaskBoards = [
+  { id: "demo-administracao", name: "Administracao Geral", sector: { name: "Administracao Geral" } },
+  { id: "demo-obras", name: "Secretaria de Obras", sector: { name: "Secretaria de Obras" } },
+  { id: "demo-fazenda", name: "Secretaria da Fazenda", sector: { name: "Secretaria da Fazenda" } },
+];
 
 export const mockupTaskEmployees = [
   { id: "demo-ana", firstName: "Ana", lastName: "Souza", email: "ana@prefeitura.local" },
@@ -311,7 +303,7 @@ export const mockupTasks = [
     title: "Validar documentos da requisicao",
     description: "Conferir anexos enviados pelo setor de Obras antes de encaminhar para compras.",
     responsible: mockupTaskEmployees[0],
-    board: mockupBoardBySector("compras"),
+    board: mockupTaskBoards[0],
     startDate: "2026-05-20T09:00:00",
     endDate: "2026-05-22T17:00:00",
   },
@@ -320,7 +312,7 @@ export const mockupTasks = [
     title: "Solicitar parecer tecnico",
     description: "Atribuir analise tecnica ao setor de Obras e acompanhar retorno.",
     responsible: mockupTaskEmployees[1],
-    board: mockupBoardBySector("obras"),
+    board: mockupTaskBoards[1],
     startDate: "2026-05-18T10:00:00",
     endDate: "2026-05-21T16:00:00",
   },
@@ -329,7 +321,7 @@ export const mockupTasks = [
     title: "Conferir dotacao orcamentaria",
     description: "Validar disponibilidade orcamentaria para o processo em andamento.",
     responsible: mockupTaskEmployees[2],
-    board: mockupBoardBySector("fazenda"),
+    board: mockupTaskBoards[2],
     startDate: "2026-05-23T08:30:00",
     endDate: "2026-05-24T12:00:00",
   },
@@ -785,7 +777,7 @@ function performanceFallback(sector, index) {
 }
 
 export function useSectorPerformance() {
-  const [sectors] = useSectors();
+  const sectors = mockupSectors;
   const [employees] = useEmployees();
   const [tasks, setTasks] = useState(mockupTasks);
 
