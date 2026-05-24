@@ -1,5 +1,5 @@
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+  import.meta.env.VITE_API_URL || "/api";
 const API_ROOT_URL = API_BASE_URL.replace(/\/api\/?$/, "");
 
 /**
@@ -117,7 +117,7 @@ export const api = {
     }),
 
   // TASK BOARDS
-  getBoards: () => requestTaskPath("/boards?size=100&sort=name,asc"),
+  getBoards: () => request("/boards?size=100&sort=name,asc"),
 
   createBoard: (payload) =>
     requestTaskPath("/boards", {
@@ -126,22 +126,16 @@ export const api = {
     }),
 
   // TASKS
-  getTasks: () => requestTaskPath("/tasks?size=100&sort=title,asc"),
-
-  createTask: (payload) =>
-    requestTaskPath("/tasks", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    }),
+  getTasks: () => request("/tasks?size=100&sort=title,asc"),
 
   updateTask: (id, payload) =>
-    requestTaskPath(`/tasks/${id}`, {
+    request(`/tasks/${id}`, {
       method: "PATCH",
       body: JSON.stringify(payload),
     }),
 
   deleteTask: (id) =>
-    requestTaskPath(`/tasks/${id}`, {
+    request(`/tasks/${id}`, {
       method: "DELETE",
     }),
 

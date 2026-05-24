@@ -39,6 +39,12 @@ public class JwtAuthenticationFilter extends BaseSecurityFilter {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain)
             throws ServletException, IOException {
+        applyCorsHeaders(request, response);
+
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            response.setStatus(HttpServletResponse.SC_OK);
+            return;
+        }
 
         String token = getToken(request);
 
@@ -74,6 +80,8 @@ public class JwtAuthenticationFilter extends BaseSecurityFilter {
 
     private void writeError(HttpServletResponse response, HttpServletRequest request,
                             int status, String error, String message) throws IOException {
+        applyCorsHeaders(request, response);
+
         StandardError standardError = new StandardError(
                 Instant.now(),
                 status,

@@ -17,7 +17,7 @@ import java.net.URI;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/boards")
+@RequestMapping("/api/boards")
 @AllArgsConstructor
 public class BoardController {
 

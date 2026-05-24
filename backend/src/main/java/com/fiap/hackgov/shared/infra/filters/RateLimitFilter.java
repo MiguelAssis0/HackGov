@@ -42,6 +42,17 @@ public class RateLimitFilter extends BaseSecurityFilter {
     public void doFilterInternal(@NonNull HttpServletRequest request,
                                  @NonNull HttpServletResponse response,
                                  @NonNull FilterChain filterChain) throws ServletException, IOException {
+        applyCorsHeaders(request, response);
+
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            response.setStatus(HttpServletResponse.SC_OK);
+            return;
+        }
+
+        if (!isAuthRoute(request)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String clientIp = getClientIp(request);
         String routeKey = clientIp + ":" + getRouteKey(request);
@@ -58,10 +69,8 @@ public class RateLimitFilter extends BaseSecurityFilter {
     }
 
     private Bucket newBucket(HttpServletRequest request) {
-        boolean isAuthRoute = isAuthRoute(request);
-
-        int maxRequests = isAuthRoute ? AUTH_MAX_REQUESTS : DEFAULT_MAX_REQUESTS;
-        int windowMinutes = isAuthRoute ? AUTH_WINDOW_MINUTES : DEFAULT_WINDOW_MINUTES;
+        int maxRequests = AUTH_MAX_REQUESTS;
+        int windowMinutes = AUTH_WINDOW_MINUTES;
         return Bucket.builder()
                 .addLimit(limit -> limit
                         .capacity(maxRequests)
@@ -79,6 +88,6 @@ public class RateLimitFilter extends BaseSecurityFilter {
         String uri = request.getRequestURI();
         if (uri.contains("/api/auth/login")) return "auth:login";
         if (uri.contains("/api/auth/2fa")) return "auth:2fa";
-        return "default";
+        return "auth";
     }
 }
