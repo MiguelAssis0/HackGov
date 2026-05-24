@@ -130,7 +130,15 @@ export const api = {
   getBoards: () => request("/boards?size=100&sort=name,asc"),
 
   createBoard: (payload) =>
-    requestTaskPath("/boards", {
+    request("/boards", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  getTasks: () => request("/tasks?size=100&sort=title,asc"),
+
+  createTask: (payload) =>
+    request("/tasks", {
       method: "POST",
       body: JSON.stringify(payload),
     }),
