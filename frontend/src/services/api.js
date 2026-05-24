@@ -91,6 +91,14 @@ export const api = {
 
   getEmployeeDetails: () => request("/employee/details"),
 
+  getOccupations: () => request("/occupations?size=100&sort=name,asc"),
+
+  createOccupation: (payload) =>
+    request("/occupations", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
   createEmployee: (payload) =>
     request("/employee", {
       method: "POST",

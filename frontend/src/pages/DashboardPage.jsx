@@ -1,16 +1,145 @@
+import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "../components/DashboardLayout.jsx";
 import { Link } from "../components/RouterContext.jsx";
-import { getStoredUser, getUserDisplayName } from "../services/api.js";
-import {
-  mockupDashboardCalendarDays,
-  mockupDashboardTaskPreview,
-  toolColors,
-  useAvailableTools,
-  useCityHallName,
-  useEmployees,
-  useJobs,
-  useSectors,
-} from "../services/mockupService.js";
+import { api, getSelectedCityHall, getStoredUser, getUserDisplayName } from "../services/api.js";
+
+const toolColors = [
+  { bg: "#e8f2ff", fg: "var(--azul)" },
+  { bg: "#f3e8ff", fg: "#7c3aed" },
+  { bg: "#fef3c7", fg: "#d97706" },
+  { bg: "#fce7f3", fg: "#be185d" },
+  { bg: "#dcfce7", fg: "#16a34a" },
+  { bg: "#e0f2fe", fg: "#0284c7" },
+];
+
+const dashboardTools = [
+  {
+    id: "cargos",
+    name: "Cargos",
+    icon: "bi-person-badge-fill",
+    description: "Cadastro e organizacao dos cargos por setor da prefeitura.",
+    route: "/cargos",
+  },
+  {
+    id: "setores",
+    name: "Setores",
+    icon: "bi-building-gear",
+    description: "Estruture secretarias, departamentos e areas internas.",
+    route: "/setores",
+  },
+  {
+    id: "gestao",
+    name: "Gestao",
+    icon: "bi-graph-up-arrow",
+    description: "Acompanhe produtividade, prazos e desempenho por setor.",
+    route: "/gestao",
+  },
+  {
+    id: "compras-licitacoes",
+    name: "Compras e Licitacoes",
+    icon: "bi-bag-check-fill",
+    description: "Fluxos de compras, licitacoes e acompanhamento de requisicoes.",
+    route: "/processos",
+  },
+  {
+    id: "controle-acesso",
+    name: "Controle de Acesso",
+    icon: "bi-shield-lock-fill",
+    description: "Configure permissoes de acesso por setor e cargo.",
+    route: "/controle-acesso",
+  },
+  {
+    id: "funcionarios",
+    name: "Funcionarios",
+    icon: "bi-people-fill",
+    description: "Gerencie servidores, perfis, setores e cargos vinculados.",
+    route: "/funcionarios",
+  },
+];
+
+function pageItems(payload) {
+  if (Array.isArray(payload)) return payload;
+  return payload?.content || payload?.items || [];
+}
+
+function resolveCityHallName(user) {
+  const selectedCityHall = getSelectedCityHall();
+  if (selectedCityHall?.name) return selectedCityHall.name;
+
+  const cityHall = user?.cityHall;
+  if (cityHall?.name) return cityHall.name;
+  if (typeof cityHall === "string" && cityHall.trim()) return cityHall;
+  if (typeof user?.prefeitura === "string" && user.prefeitura.trim()) return user.prefeitura;
+  if (user?.prefeitura?.name) return user.prefeitura.name;
+
+  return "Prefeitura vinculada";
+}
+
+function taskStatus(task) {
+  const now = new Date();
+  const start = task.startDate ? new Date(task.startDate) : null;
+  const end = task.endDate ? new Date(task.endDate) : null;
+
+  if (end && end < now) return "vermelho";
+  if (start && start > now) return "amarelo";
+  return "primary";
+}
+
+function taskMeta(task) {
+  if (!task?.endDate) return "Sem prazo definido";
+
+  const date = new Date(task.endDate);
+  if (Number.isNaN(date.getTime())) return "Prazo indisponivel";
+
+  const formatted = new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "long",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+
+  return `Ate ${formatted}`;
+}
+
+function buildCalendarDays(viewDate, tasks) {
+  const year = viewDate.getFullYear();
+  const month = viewDate.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const start = new Date(firstDay);
+  start.setDate(firstDay.getDate() - firstDay.getDay());
+
+  const today = new Date();
+  const deadlineKeys = new Set(
+    tasks
+      .map((task) => {
+        if (!task?.endDate) return null;
+        const date = new Date(task.endDate);
+        if (Number.isNaN(date.getTime())) return null;
+        return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+      })
+      .filter(Boolean),
+  );
+
+  return Array.from({ length: 35 }, (_, index) => {
+    const date = new Date(start);
+    date.setDate(start.getDate() + index);
+
+    const classes = [];
+    if (date.getMonth() !== month) classes.push("outro-mes");
+    if (
+      date.getFullYear() === today.getFullYear() &&
+      date.getMonth() === today.getMonth() &&
+      date.getDate() === today.getDate()
+    ) {
+      classes.push("hoje");
+    }
+    if (deadlineKeys.has(`${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`)) {
+      classes.push("has-event");
+    }
+
+    return [String(date.getDate()), classes.join(" ").trim()];
+  });
+}
 
 function StatCard({ icon, label, value }) {
   return (
@@ -30,54 +159,137 @@ function ToolCard({ tool, color }) {
       </div>
       <div>
         <h4>{tool.name}</h4>
-        <p>{tool.description || "Ferramenta disponivel para a prefeitura."}</p>
+        <p>{tool.description}</p>
       </div>
     </>
   );
 
-  if (tool.route) {
-    return (
-      <Link to={tool.route} className="dashboard-tool-card">
-        {content}
-      </Link>
-    );
-  }
-
-  return <div className="dashboard-tool-card">{content}</div>;
+  return tool.route ? (
+    <Link to={tool.route} className="dashboard-tool-card">
+      {content}
+    </Link>
+  ) : (
+    <div className="dashboard-tool-card">{content}</div>
+  );
 }
 
 export default function DashboardPage() {
-  const user = getStoredUser() || { nome: "Usuario", setor: "" };
+  const user = getStoredUser() || { nome: "Usuario" };
   const displayName = getUserDisplayName(user);
-  const cityHallName = useCityHallName();
-  const [employees] = useEmployees();
-  const [sectors] = useSectors();
-  const [jobs] = useJobs();
-  const availableTools = useAvailableTools();
+  const cityHallName = resolveCityHallName(user);
+  const [employees, setEmployees] = useState([]);
+  const [occupations, setOccupations] = useState([]);
+  const [sectors, setSectors] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState(null);
+  const [monthDate, setMonthDate] = useState(() => new Date());
 
-  const monthLabel = new Intl.DateTimeFormat("pt-BR", {
-    month: "long",
-    year: "numeric",
-  }).format(new Date());
+  useEffect(() => {
+    let mounted = true;
 
-  const stats = [
-    { icon: "bi-people-fill", label: "Funcion\u00e1rios", value: employees.length },
-    { icon: "bi-diagram-3-fill", label: "Setores", value: sectors.length },
-    { icon: "bi-person-badge-fill", label: "Cargos", value: jobs.length },
-    { icon: "bi-grid-1x2-fill", label: "Ferramentas dispon\u00edveis", value: availableTools.length },
-  ];
+    async function loadDashboard() {
+      setLoading(true);
+      setMessage(null);
+
+      const [employeesResult, occupationsResult, sectorsResult, tasksResult] = await Promise.allSettled([
+        api.getEmployees(),
+        api.getOccupations(),
+        api.getSectors(),
+        api.getTasks(),
+      ]);
+
+      if (!mounted) return;
+
+      const nextEmployees = employeesResult.status === "fulfilled" ? pageItems(employeesResult.value) : [];
+      const nextOccupations = occupationsResult.status === "fulfilled" ? pageItems(occupationsResult.value) : [];
+      const nextSectors = sectorsResult.status === "fulfilled" ? pageItems(sectorsResult.value) : [];
+      const nextTasks = tasksResult.status === "fulfilled" ? pageItems(tasksResult.value) : [];
+      const failures = [];
+
+      if (employeesResult.status === "rejected") failures.push("funcionarios");
+      if (occupationsResult.status === "rejected") failures.push("cargos");
+      if (sectorsResult.status === "rejected") failures.push("setores");
+      if (tasksResult.status === "rejected") failures.push("tarefas");
+
+      setEmployees(nextEmployees);
+      setOccupations(nextOccupations);
+      setSectors(nextSectors);
+      setTasks(nextTasks);
+      setLoading(false);
+
+      if (failures.length > 0) {
+        setMessage({
+          type: "warning",
+          text: `Nao foi possivel carregar ${failures.join(", ")} no backend. O dashboard exibira apenas os dados disponiveis.`,
+        });
+      }
+    }
+
+    loadDashboard();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const monthLabel = useMemo(
+    () =>
+      new Intl.DateTimeFormat("pt-BR", {
+        month: "long",
+        year: "numeric",
+      }).format(monthDate),
+    [monthDate],
+  );
+
+  const stats = useMemo(
+    () => [
+      { icon: "bi-people-fill", label: "Funcionarios", value: employees.length },
+      { icon: "bi-diagram-3-fill", label: "Setores", value: sectors.length },
+      { icon: "bi-person-badge-fill", label: "Cargos", value: occupations.length },
+      { icon: "bi-grid-1x2-fill", label: "Ferramentas disponiveis", value: dashboardTools.length },
+    ],
+    [employees.length, sectors.length, occupations.length],
+  );
+
+  const calendarDays = useMemo(() => buildCalendarDays(monthDate, tasks), [monthDate, tasks]);
+
+  const taskPreview = useMemo(
+    () =>
+      tasks
+        .filter((task) => task?.title)
+        .sort((a, b) => {
+          const aTime = a?.endDate ? new Date(a.endDate).getTime() : Number.MAX_SAFE_INTEGER;
+          const bTime = b?.endDate ? new Date(b.endDate).getTime() : Number.MAX_SAFE_INTEGER;
+          return aTime - bTime;
+        })
+        .slice(0, 3)
+        .map((task) => ({
+          id: task.id,
+          name: task.title,
+          color: taskStatus(task),
+          meta: taskMeta(task),
+        })),
+    [tasks],
+  );
 
   return (
     <DashboardLayout styles={["/css/dashboard.css"]}>
       <div className="dashboard">
         <div className="container">
+          {message && (
+            <div className={`auth-message ${message.type} mb-3`}>
+              <i className="bi bi-info-circle-fill"></i>
+              {message.text}
+            </div>
+          )}
+
           <div className="row">
             <div className="col-12 col-lg-8 d-flex flex-column gap-3">
               <section className="dash-hero">
                 <div className="row">
                   <div className="col-12 col-md-8">
-                    <h2 className="hero-h2">Ol&aacute;, {displayName}</h2>
-                    <p className="hero-p">Bem-vindo/a &agrave; prefeitura digital de {cityHallName}</p>
+                    <h2 className="hero-h2">Ola, {displayName}</h2>
+                    <p className="hero-p">Bem-vindo/a a prefeitura digital de {cityHallName}</p>
 
                     <div className="dash-hero-botoes">
                       <Link to="/processos" className="btn btn-primary">
@@ -108,11 +320,11 @@ export default function DashboardPage() {
               <section className="dashboard-tools-panel">
                 <div className="dashboard-tools-title">
                   <i className="bi bi-grid-1x2-fill"></i>
-                  <h4 className="mb-0">Ferramentas disponíveis</h4>
+                  <h4 className="mb-0">Ferramentas disponiveis</h4>
                 </div>
 
                 <div className="dashboard-tools-list">
-                  {availableTools.map((tool, index) => (
+                  {dashboardTools.map((tool, index) => (
                     <ToolCard tool={tool} color={toolColors[index % toolColors.length]} key={tool.id} />
                   ))}
                 </div>
@@ -128,10 +340,20 @@ export default function DashboardPage() {
                       {monthLabel}
                     </h4>
                     <div className="cal-nav d-flex">
-                      <button className="cal-nav-btn" type="button" aria-label="Mes anterior">
+                      <button
+                        className="cal-nav-btn"
+                        type="button"
+                        aria-label="Mes anterior"
+                        onClick={() => setMonthDate((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1))}
+                      >
                         <i className="bi bi-chevron-left"></i>
                       </button>
-                      <button className="cal-nav-btn" type="button" aria-label="Proximo mes">
+                      <button
+                        className="cal-nav-btn"
+                        type="button"
+                        aria-label="Proximo mes"
+                        onClick={() => setMonthDate((current) => new Date(current.getFullYear(), current.getMonth() + 1, 1))}
+                      >
                         <i className="bi bi-chevron-right"></i>
                       </button>
                     </div>
@@ -143,8 +365,8 @@ export default function DashboardPage() {
                         {label}
                       </div>
                     ))}
-                    {mockupDashboardCalendarDays.map(([day, className], index) => (
-                      <div className={`cal-dia ${className}`} key={`${day}-${index}`}>
+                    {calendarDays.map(([day, className], index) => (
+                      <div className={`cal-dia ${className}`.trim()} key={`${day}-${index}`}>
                         {day}
                       </div>
                     ))}
@@ -161,17 +383,29 @@ export default function DashboardPage() {
                     </Link>
                   </div>
 
-                  {mockupDashboardTaskPreview.map(({ name, color, meta }) => (
-                    <div className="item-tarefa" key={name}>
-                      <div className="nome-tarefa">{name}</div>
-                      <div className="tarefa-meta">
-                        <span className={color}>
-                          <i className="bi bi-clock-fill"></i>
-                        </span>
-                        {meta}
-                      </div>
+                  {loading ? (
+                    <div className="empty-state">
+                      <i className="bi bi-arrow-repeat"></i>
+                      <span>Carregando dashboard...</span>
                     </div>
-                  ))}
+                  ) : taskPreview.length === 0 ? (
+                    <div className="empty-state">
+                      <i className="bi bi-check2-circle"></i>
+                      <span>Nenhuma tarefa encontrada para exibicao.</span>
+                    </div>
+                  ) : (
+                    taskPreview.map(({ id, name, color, meta }) => (
+                      <div className="item-tarefa" key={id || name}>
+                        <div className="nome-tarefa">{name}</div>
+                        <div className="tarefa-meta">
+                          <span className={color}>
+                            <i className="bi bi-clock-fill"></i>
+                          </span>
+                          {meta}
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </aside>
             </div>
