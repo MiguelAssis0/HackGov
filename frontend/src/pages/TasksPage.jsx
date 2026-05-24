@@ -1,12 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "../components/DashboardLayout.jsx";
 import { api } from "../services/api.js";
-import {
-  mockupTaskBoards,
-  mockupTaskEmployees,
-  mockupTasks,
-  pageItems,
-} from "../services/mockupService.js";
 
 const emptyForm = {
   title: "",
@@ -17,12 +11,9 @@ const emptyForm = {
   endDate: "",
 };
 
-function isDemoId(id) {
-  return typeof id === "string" && id.startsWith("demo-");
-}
-
-function randomId(prefix) {
-  return `${prefix}-${globalThis.crypto?.randomUUID?.() || Date.now()}`;
+function pageItems(payload) {
+  if (Array.isArray(payload)) return payload;
+  return payload?.content || payload?.items || [];
 }
 
 function employeeName(employee) {
@@ -44,12 +35,35 @@ function sectorName(board) {
   return board?.sector?.name || board?.sectorId?.name || board?.name || "Setor sem nome";
 }
 
+function boardOptionLabel(board) {
+  const boardTitle = board?.name || "";
+  const sectorTitle = board?.sector?.name || board?.sectorId?.name || "";
+
+  if (sectorTitle && boardTitle && sectorTitle !== boardTitle) {
+    return `${sectorTitle} - ${boardTitle}`;
+  }
+
+  return sectorTitle || boardTitle || "Setor sem nome";
+}
+
 function boardName(board) {
   return board?.name || sectorName(board);
 }
 
 function taskBoardKey(task) {
-  return task?.board?.id || task?.boardId || sectorName(task?.board);
+  return task?.board?.id || task?.boardId || null;
+}
+
+function taskResponsibleKey(task) {
+  return task?.responsible?.id || task?.responsibleId || null;
+}
+
+function sectorKey(value) {
+  return value?.sector?.id || value?.sectorId?.id || value?.id || null;
+}
+
+function taskSectorKey(task) {
+  return sectorKey(task?.board);
 }
 
 function taskStatus(task) {
@@ -92,6 +106,29 @@ function normalizeLocalDate(value) {
   return value ? `${value}:00` : null;
 }
 
+function validateForm(form) {
+  if (!form.title.trim() || !form.description.trim() || !form.boardId || !form.responsibleId) {
+    return "Preencha titulo, descricao, setor e responsavel para salvar a tarefa.";
+  }
+
+  if (!form.startDate || !form.endDate) {
+    return "Informe data de inicio e prazo para salvar a tarefa.";
+  }
+
+  const start = new Date(normalizeLocalDate(form.startDate));
+  const end = new Date(normalizeLocalDate(form.endDate));
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    return "As datas informadas para a tarefa sao invalidas.";
+  }
+
+  if (end <= start) {
+    return "O prazo da tarefa precisa ser posterior ao inicio.";
+  }
+
+  return null;
+}
+
 function mergeBoards(boards, tasks) {
   const map = new Map();
 
@@ -101,29 +138,47 @@ function mergeBoards(boards, tasks) {
 
   tasks.forEach((task) => {
     const board = task?.board;
-    const key = taskBoardKey(task);
-    if (key && !map.has(key)) {
-      map.set(key, board || { id: key, name: key, sector: { name: key } });
+    if (board?.id && !map.has(board.id)) {
+      map.set(board.id, board);
     }
   });
 
   return Array.from(map.values());
 }
 
-function buildLocalTask(form, boards, employees, currentTask) {
-  const board = boards.find((item) => String(item.id) === String(form.boardId));
-  const responsible = employees.find((item) => String(item.id) === String(form.responsibleId));
+function hydrateTasks(rawTasks, boards, employees) {
+  const boardMap = new Map(boards.map((board) => [String(board.id), board]));
+  const employeeMap = new Map(employees.map((employee) => [String(employee.id), employee]));
 
-  return {
-    ...(currentTask || {}),
-    id: currentTask?.id || randomId("local-task"),
-    title: form.title,
-    description: form.description,
-    board,
-    responsible,
-    startDate: normalizeLocalDate(form.startDate),
-    endDate: normalizeLocalDate(form.endDate),
-  };
+  return rawTasks.map((task) => ({
+    ...task,
+    board: task?.board || boardMap.get(String(task.boardId)) || null,
+    responsible: task?.responsible || employeeMap.get(String(task.responsibleId)) || null,
+  }));
+}
+
+function mergeSectors(sectors, boards, tasks) {
+  const map = new Map();
+
+  sectors.forEach((sector) => {
+    if (sector?.id) map.set(sector.id, sector);
+  });
+
+  boards.forEach((board) => {
+    const relatedSector = board?.sector || board?.sectorId;
+    if (relatedSector?.id && !map.has(relatedSector.id)) {
+      map.set(relatedSector.id, relatedSector);
+    }
+  });
+
+  tasks.forEach((task) => {
+    const relatedSector = task?.board?.sector || task?.board?.sectorId;
+    if (relatedSector?.id && !map.has(relatedSector.id)) {
+      map.set(relatedSector.id, relatedSector);
+    }
+  });
+
+  return Array.from(map.values());
 }
 
 function TaskModal({ open, editingTask, boards, employees, form, saving, onClose, onChange, onSubmit }) {
@@ -197,7 +252,7 @@ function TaskModal({ open, editingTask, boards, employees, form, saving, onClose
                 <option value="">Selecionar setor...</option>
                 {boards.map((board) => (
                   <option value={board.id} key={board.id}>
-                    {sectorName(board)}
+                    {boardOptionLabel(board)}
                   </option>
                 ))}
               </select>
@@ -276,12 +331,12 @@ export default function TasksPage() {
   const params = new URLSearchParams(window.location.search);
   const [tasks, setTasks] = useState([]);
   const [boards, setBoards] = useState([]);
+  const [sectors, setSectors] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [apiReady, setApiReady] = useState(false);
   const [message, setMessage] = useState(null);
   const [query, setQuery] = useState("");
-  const [boardFilter, setBoardFilter] = useState("todos");
+  const [sectorFilter, setSectorFilter] = useState("todos");
   const [statusFilter, setStatusFilter] = useState("todos");
   const [modalOpen, setModalOpen] = useState(() => params.get("nova") === "1");
   const [editingTask, setEditingTask] = useState(null);
@@ -293,37 +348,38 @@ export default function TasksPage() {
 
     async function loadTasksContext() {
       setLoading(true);
-      const [tasksResult, boardsResult, employeesResult] = await Promise.allSettled([
+      setMessage(null);
+
+      const [tasksResult, boardsResult, sectorsResult, employeesResult] = await Promise.allSettled([
         api.getTasks(),
         api.getBoards(),
+        api.getSectors(),
         api.getEmployees(),
       ]);
 
       if (!mounted) return;
 
-      const ready =
-        tasksResult.status === "fulfilled" &&
-        boardsResult.status === "fulfilled" &&
-        employeesResult.status === "fulfilled";
-      const hasSession = Boolean(localStorage.getItem("hackgov.accessToken"));
+      const nextTasks = tasksResult.status === "fulfilled" ? pageItems(tasksResult.value) : [];
+      const nextBoards = boardsResult.status === "fulfilled" ? pageItems(boardsResult.value) : [];
+      const nextSectors = sectorsResult.status === "fulfilled" ? pageItems(sectorsResult.value) : [];
+      const nextEmployees = employeesResult.status === "fulfilled" ? pageItems(employeesResult.value) : [];
+      const failures = [];
 
-      const nextTasks = tasksResult.status === "fulfilled" ? pageItems(tasksResult.value) : hasSession ? [] : mockupTasks;
-      const nextBoards = boardsResult.status === "fulfilled" ? pageItems(boardsResult.value) : hasSession ? [] : mockupTaskBoards;
-      const nextEmployees =
-        employeesResult.status === "fulfilled" ? pageItems(employeesResult.value) : hasSession ? [] : mockupTaskEmployees;
+      if (tasksResult.status === "rejected") failures.push("tarefas");
+      if (boardsResult.status === "rejected") failures.push("quadros");
+      if (sectorsResult.status === "rejected") failures.push("setores");
+      if (employeesResult.status === "rejected") failures.push("responsaveis");
 
-      setTasks(nextTasks);
-      setBoards(nextBoards.length ? nextBoards : mergeBoards([], nextTasks));
+      setBoards(nextBoards);
+      setSectors(nextSectors);
       setEmployees(nextEmployees);
-      setApiReady(ready);
+      setTasks(hydrateTasks(nextTasks, nextBoards, nextEmployees));
       setLoading(false);
 
-      if (!ready) {
+      if (failures.length > 0) {
         setMessage({
           type: "warning",
-          text: hasSession
-            ? "Nao foi possivel carregar todos os dados do backend. A tela vai mostrar somente o que a API retornar para sua permissao."
-            : "Nao foi possivel carregar todos os dados do backend. A tela esta usando dados de apoio ate a API responder.",
+          text: `Nao foi possivel carregar ${failures.join(", ")} no backend. A tela exibira somente os dados retornados pela API.`,
         });
       }
     }
@@ -335,38 +391,39 @@ export default function TasksPage() {
   }, []);
 
   const allBoards = useMemo(() => mergeBoards(boards, tasks), [boards, tasks]);
+  const allSectors = useMemo(() => mergeSectors(sectors, allBoards, tasks), [sectors, allBoards, tasks]);
 
   const visibleTasks = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
     return tasks.filter((task) => {
       const status = taskStatus(task).key;
-      const boardKey = taskBoardKey(task);
+      const currentSectorKey = taskSectorKey(task);
       const haystack = [
         task.title,
         task.description,
         employeeName(task.responsible),
         boardName(task.board),
-        sectorName(task.board),
+        sectorName(task.board?.sector || task.board?.sectorId || task.board),
       ]
         .join(" ")
         .toLowerCase();
 
       return (
         (!normalizedQuery || haystack.includes(normalizedQuery)) &&
-        (boardFilter === "todos" || String(boardKey) === String(boardFilter)) &&
+        (sectorFilter === "todos" || String(currentSectorKey) === String(sectorFilter)) &&
         (statusFilter === "todos" || status === statusFilter)
       );
     });
-  }, [tasks, query, boardFilter, statusFilter]);
+  }, [tasks, query, sectorFilter, statusFilter]);
 
-  const visibleBoards = useMemo(() => {
-    if (boardFilter !== "todos") {
-      return allBoards.filter((board) => String(board.id) === String(boardFilter));
+  const visibleSectors = useMemo(() => {
+    if (sectorFilter !== "todos") {
+      return allSectors.filter((sector) => String(sector.id) === String(sectorFilter));
     }
 
-    return allBoards;
-  }, [allBoards, boardFilter]);
+    return allSectors;
+  }, [allSectors, sectorFilter]);
 
   const stats = useMemo(() => {
     const byStatus = tasks.reduce(
@@ -381,9 +438,9 @@ export default function TasksPage() {
       ["Tarefas", tasks.length, "bi-list-check", "azul"],
       ["Em andamento", byStatus.andamento, "bi-play-circle-fill", "verde"],
       ["Atrasadas", byStatus.atrasada, "bi-exclamation-circle-fill", "vermelho"],
-      ["Setores", allBoards.length, "bi-diagram-3-fill", "amarelo"],
+      ["Setores", allSectors.length, "bi-diagram-3-fill", "amarelo"],
     ];
-  }, [tasks, allBoards.length]);
+  }, [tasks, allSectors.length]);
 
   function updateForm(field, value) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -405,7 +462,7 @@ export default function TasksPage() {
       title: task.title || "",
       description: task.description || "",
       boardId: taskBoardKey(task) || "",
-      responsibleId: task.responsible?.id || "",
+      responsibleId: taskResponsibleKey(task) || "",
       startDate: toDatetimeLocal(task.startDate),
       endDate: toDatetimeLocal(task.endDate),
     });
@@ -420,17 +477,17 @@ export default function TasksPage() {
 
   async function submitTask(event) {
     event.preventDefault();
-    const localTask = buildLocalTask(form, allBoards, employees, editingTask);
-    const canPersist =
-      apiReady &&
-      !isDemoId(localTask.id) &&
-      !isDemoId(form.boardId) &&
-      !isDemoId(form.responsibleId);
+    const validationError = validateForm(form);
+
+    if (validationError) {
+      setMessage({ type: "error", text: validationError });
+      return;
+    }
 
     setSaving(true);
 
     try {
-      if (canPersist && editingTask) {
+      if (editingTask) {
         const updatedTask = await api.updateTask(editingTask.id, {
           title: form.title,
           description: form.description,
@@ -443,16 +500,11 @@ export default function TasksPage() {
         setTasks((current) =>
           current.map((task) =>
             task.id === editingTask.id
-              ? {
-                  ...localTask,
-                  ...updatedTask,
-                  board: updatedTask.board || localTask.board,
-                  responsible: updatedTask.responsible || localTask.responsible,
-                }
+              ? hydrateTasks([updatedTask], allBoards, employees)[0]
               : task,
           ),
         );
-      } else if (canPersist) {
+      } else {
         const createdTask = await api.createTask({
           title: form.title,
           description: form.description,
@@ -462,24 +514,12 @@ export default function TasksPage() {
           endDate: normalizeLocalDate(form.endDate),
         });
 
-        setTasks((current) => [
-          {
-            ...localTask,
-            ...createdTask,
-            board: createdTask.board || localTask.board,
-            responsible: createdTask.responsible || localTask.responsible,
-          },
-          ...current,
-        ]);
-      } else if (editingTask) {
-        setTasks((current) => current.map((task) => (task.id === editingTask.id ? localTask : task)));
-      } else {
-        setTasks((current) => [localTask, ...current]);
+        setTasks((current) => [hydrateTasks([createdTask], allBoards, employees)[0], ...current]);
       }
 
       setMessage({
         type: "success",
-        text: canPersist ? "Tarefa salva no backend com sucesso." : "Tarefa registrada localmente enquanto a API de tarefas nao responde.",
+        text: "Tarefa salva no backend com sucesso.",
       });
       closeModal();
     } catch (error) {
@@ -494,10 +534,7 @@ export default function TasksPage() {
     if (!confirmed) return;
 
     try {
-      if (apiReady && !isDemoId(task.id)) {
-        await api.deleteTask(task.id);
-      }
-
+      await api.deleteTask(task.id);
       setTasks((current) => current.filter((item) => item.id !== task.id));
       setMessage({ type: "success", text: "Tarefa removida com sucesso." });
     } catch (error) {
@@ -567,11 +604,11 @@ export default function TasksPage() {
                     />
                   </div>
 
-                  <select className="tarefas-filter" value={boardFilter} onChange={(event) => setBoardFilter(event.target.value)}>
+                  <select className="tarefas-filter" value={sectorFilter} onChange={(event) => setSectorFilter(event.target.value)}>
                     <option value="todos">Todos os setores</option>
-                    {allBoards.map((board) => (
-                      <option value={board.id} key={board.id}>
-                        {sectorName(board)}
+                    {allSectors.map((sector) => (
+                      <option value={sector.id} key={sector.id}>
+                        {sectorName(sector)}
                       </option>
                     ))}
                   </select>
@@ -591,31 +628,31 @@ export default function TasksPage() {
                   </div>
                 ) : (
                   <div className="tarefas-board-grid">
-                    {visibleBoards.length === 0 && (
+                    {visibleSectors.length === 0 && (
                       <div className="tarefas-empty-state">
                         <i className="bi bi-kanban"></i>
                         <span>Nenhum setor encontrado para organizar tarefas.</span>
                       </div>
                     )}
 
-                    {visibleBoards.map((board) => {
-                      const boardTasks = visibleTasks.filter((task) => String(taskBoardKey(task)) === String(board.id));
+                    {visibleSectors.map((sector) => {
+                      const sectorTasks = visibleTasks.filter((task) => String(taskSectorKey(task)) === String(sector.id));
 
                       return (
-                        <section className="tarefas-column" key={board.id}>
+                        <section className="tarefas-column" key={sector.id}>
                           <div className="tarefas-column-header">
                             <div>
                               <span>Setor</span>
-                              <strong>{sectorName(board)}</strong>
+                              <strong>{sectorName(sector)}</strong>
                             </div>
-                            <small>{boardTasks.length}</small>
+                            <small>{sectorTasks.length}</small>
                           </div>
 
                           <div className="tarefas-column-body">
-                            {boardTasks.length === 0 ? (
+                            {sectorTasks.length === 0 ? (
                               <div className="tarefas-column-empty">Sem tarefas neste filtro.</div>
                             ) : (
-                              boardTasks.map((task) => {
+                              sectorTasks.map((task) => {
                                 const status = taskStatus(task);
 
                                 return (
@@ -677,23 +714,23 @@ export default function TasksPage() {
                     Fluxo entre setores
                   </div>
                   <div className="tarefas-sector-list">
-                    {allBoards.map((board) => {
-                      const count = tasks.filter((task) => String(taskBoardKey(task)) === String(board.id)).length;
+                    {allSectors.map((sector) => {
+                      const count = tasks.filter((task) => String(taskSectorKey(task)) === String(sector.id)).length;
                       return (
                         <button
                           type="button"
-                          className={`tarefas-sector-item ${boardFilter === board.id ? "active" : ""}`}
-                          onClick={() => setBoardFilter(board.id)}
-                          key={board.id}
+                          className={`tarefas-sector-item ${sectorFilter === sector.id ? "active" : ""}`}
+                          onClick={() => setSectorFilter(sector.id)}
+                          key={sector.id}
                         >
-                          <span>{sectorName(board)}</span>
+                          <span>{sectorName(sector)}</span>
                           <strong>{count}</strong>
                         </button>
                       );
                     })}
                   </div>
-                  {boardFilter !== "todos" && (
-                    <button type="button" className="task-btn-muted w-100 mt-2" onClick={() => setBoardFilter("todos")}>
+                  {sectorFilter !== "todos" && (
+                    <button type="button" className="task-btn-muted w-100 mt-2" onClick={() => setSectorFilter("todos")}>
                       Ver todos os setores
                     </button>
                   )}

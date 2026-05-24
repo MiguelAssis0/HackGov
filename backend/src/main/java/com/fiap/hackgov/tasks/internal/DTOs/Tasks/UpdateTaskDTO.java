@@ -1,18 +1,15 @@
 package com.fiap.hackgov.tasks.internal.DTOs.Tasks;
 
 import jakarta.validation.constraints.AssertTrue;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record UpdateTaskDTO(
+public record UpdateTok doaskDTO(
         @Size(min = 3, max = 120, message = "O titulo da tarefa deve ter entre 3 e 120 caracteres")
-        @Pattern(regexp = ".*\\S.*", message = "O titulo da tarefa nao pode ser vazio")
         String title,
         @Size(min = 3, max = 2000, message = "A descricao da tarefa deve ter entre 3 e 2000 caracteres")
-        @Pattern(regexp = ".*\\S.*", message = "A descricao da tarefa nao pode ser vazia")
         String description,
         UUID responsibleId,
         UUID boardId,
@@ -27,6 +24,16 @@ public record UpdateTaskDTO(
                 boardId != null ||
                 startDate != null ||
                 endDate != null;
+    }
+
+    @AssertTrue(message = "O titulo da tarefa nao pode ser vazio")
+    public boolean isTitleValid() {
+        return title == null || !title.isBlank();
+    }
+
+    @AssertTrue(message = "A descricao da tarefa nao pode ser vazia")
+    public boolean isDescriptionValid() {
+        return description == null || !description.isBlank();
     }
 
     @AssertTrue(message = "A data final da tarefa deve ser posterior ou igual a data inicial")

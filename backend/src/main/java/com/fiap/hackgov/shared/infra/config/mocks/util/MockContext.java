@@ -2,6 +2,7 @@ package com.fiap.hackgov.shared.infra.config.mocks.util;
 
 import com.fiap.hackgov.bidding.internal.entities.*;
 import com.fiap.hackgov.cityhall_management.internal.entities.*;
+import com.fiap.hackgov.tasks.internal.entities.Board;
 
 public class MockContext {
 
@@ -66,4 +67,15 @@ public class MockContext {
     public Employee bruno;
     public Employee patricia;
     public Employee lucas;
+
+    public Board tiBoardSP;
+    public Board comprasBoardSP;
+    public Board financeiroBoardSP;
+    public Board contratosBoardSP;
+    public Board juridicoBoardSP;
+    public Board tiBoardRJ;
+    public Board comprasBoardRJ;
+    public Board financeiroBoardRJ;
+    public Board contratosBoardRJ;
+    public Board juridicoBoardRJ;
 }

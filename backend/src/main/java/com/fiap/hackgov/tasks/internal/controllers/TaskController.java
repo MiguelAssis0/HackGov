@@ -29,11 +29,7 @@ public class TaskController {
 
         TaskResponseDTO response = taskService.create(dto, employee);
 
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(response.id())
-                .toUri();
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(response.id()).toUri();
 
         return ResponseEntity.created(location).body(response);
     }

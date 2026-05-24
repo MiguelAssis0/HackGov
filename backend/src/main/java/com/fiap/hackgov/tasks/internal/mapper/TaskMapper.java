@@ -15,5 +15,7 @@ public interface TaskMapper {
     @Mapping(target = "updatedAt", ignore = true)
     Task toEntity(CreateTaskDTO dto);
 
+    @Mapping(target = "responsibleId", source = "responsible.id")
+    @Mapping(target = "boardId", source = "board.id")
     TaskResponseDTO toDTO(Task task);
 }

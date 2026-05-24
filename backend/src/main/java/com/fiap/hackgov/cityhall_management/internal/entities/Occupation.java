@@ -1,5 +1,6 @@
 package com.fiap.hackgov.cityhall_management.internal.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fiap.hackgov.cityhall_management.internal.entities.enums.LevelOccupation;
 import com.fiap.hackgov.cityhall_management.internal.entities.enums.TypeJobLevel;
 import jakarta.persistence.*;
@@ -42,9 +43,11 @@ public class Occupation implements Serializable {
     private LevelOccupation level;
 
     @OneToMany(mappedBy = "pk.occupation", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<PermissionsOccupation> permissions = new ArrayList<>();
 
     @ManyToOne
+    @JsonIgnore
     private Sector sectorId;
 
     @CreationTimestamp

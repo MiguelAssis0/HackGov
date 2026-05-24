@@ -1,5 +1,6 @@
 package com.fiap.hackgov.cityhall_management.internal.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -40,9 +41,11 @@ public class Sector implements Serializable {
     private CityHall cityHall;
 
     @ManyToOne
+    @JsonIgnore
     private Occupation occupationId;
 
     @OneToMany
+    @JsonIgnore
     private List<SectorTools> sectorTools = new ArrayList<>();
 
 

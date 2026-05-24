@@ -1,5 +1,6 @@
 package com.fiap.hackgov.tasks.internal.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fiap.hackgov.cityhall_management.internal.entities.CityHall;
 import com.fiap.hackgov.cityhall_management.internal.entities.Sector;
 import jakarta.persistence.*;
@@ -31,6 +32,7 @@ public class Board {
     private CityHall cityHall;
 
     @OneToMany(mappedBy = "board")
+    @JsonIgnore
     private List<Task> tasks;
 
     @ManyToOne
