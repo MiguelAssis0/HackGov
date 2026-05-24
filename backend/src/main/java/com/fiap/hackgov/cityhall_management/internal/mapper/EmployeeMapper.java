@@ -2,6 +2,7 @@ package com.fiap.hackgov.cityhall_management.internal.mapper;
 
 
 import com.fiap.hackgov.cityhall_management.internal.DTOs.Employee.CreateEmployeeDTO;
+import com.fiap.hackgov.cityhall_management.internal.DTOs.Employee.EmployeeDetailsResponseDTO;
 import com.fiap.hackgov.cityhall_management.internal.entities.CityHall;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.cityhall_management.internal.entities.Occupation;
@@ -35,6 +36,12 @@ public interface EmployeeMapper {
 
     @Mapping(target = "cityHallId", source = "cityHallId.id")
     EmployeeDTO toEmployeeDTO(Employee employee);
+
+    @Mapping(target = "name", expression = "java(employee.getFullName())")
+    @Mapping(target = "cityhall", source = "cityHallId.name")
+    @Mapping(target = "occupation", source = "occupationId.name")
+    @Mapping(target = "sector", source = "sectorId.name")
+    EmployeeDetailsResponseDTO toEmployeeDetailsResponseDTO(Employee employee);
 
     default CityHall map(UUID id) {
         if (id == null) return null;

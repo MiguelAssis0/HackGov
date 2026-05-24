@@ -1,45 +1,47 @@
 import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "../components/DashboardLayout.jsx";
 import { Link, useRouter } from "../components/RouterContext.jsx";
-import { clearSession, getStoredUser } from "../services/api.js";
+import { api, clearSession } from "../services/api.js";
 
 const defaultProfile = {
-  id: 1,
-  nome: "Admin Integra Brasil",
-  email: "admin@integrabrasil.local",
+  id: "",
+  nome: "",
+  email: "",
   cpf: "",
   celular: "",
-  prefeitura: "Prefeitura Demo",
+  prefeitura: "",
   setor: "",
   cargo: "",
   avatar: "",
+  twoFactor: false,
+  accessibility: false,
 };
 
-function loadProfile() {
-  try {
-    return JSON.parse(localStorage.getItem("hackgov.profile")) || null;
-  } catch {
-    return null;
-  }
+function mapProfile(details) {
+  return {
+    id: details?.id || "",
+    nome: details?.name || "",
+    email: details?.email || "",
+    cpf: details?.cpf || "",
+    celular: details?.phone || "",
+    prefeitura: details?.cityhall || "",
+    setor: details?.sector || "",
+    cargo: details?.occupation || "",
+    avatar: details?.avatarPath || "",
+    twoFactor: Boolean(details?.twoFactor),
+    accessibility: Boolean(details?.accessibility),
+  };
 }
 
-function mergeUserProfile() {
-  const storedUser = getStoredUser() || {};
-  const storedProfile = loadProfile() || {};
-  const email = storedProfile.email || storedUser.email || (storedUser.nome?.includes("@") ? storedUser.nome : "");
-
-  return {
-    ...defaultProfile,
-    nome:
-      storedProfile.nome ||
-      (storedUser.nome?.includes("@") ? defaultProfile.nome : storedUser.nome) ||
-      defaultProfile.nome,
-    email: email || defaultProfile.email,
-    cargo: storedProfile.cargo || storedUser.cargo || defaultProfile.cargo,
-    setor: storedProfile.setor || storedUser.setor || defaultProfile.setor,
-    prefeitura: storedProfile.prefeitura || storedUser.prefeitura || defaultProfile.prefeitura,
-    ...storedProfile,
-  };
+function hasProfileData(profile) {
+  return Boolean(
+    profile?.id ||
+    profile?.nome ||
+    profile?.email ||
+    profile?.prefeitura ||
+    profile?.setor ||
+    profile?.cargo,
+  );
 }
 
 function Accordion({ id, title, icon, openSection, setOpenSection, children }) {
@@ -175,7 +177,9 @@ function EditProfileModal({ open, profile, onClose, onSave }) {
 
 export default function ProfilePage() {
   const { navigate } = useRouter();
-  const [profile, setProfile] = useState(mergeUserProfile);
+  const [profile, setProfile] = useState(defaultProfile);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [openSection, setOpenSection] = useState("settings");
   const [editOpen, setEditOpen] = useState(false);
   const [settings, setSettings] = useState(() => {
@@ -193,6 +197,45 @@ export default function ProfilePage() {
       return { darkMode: false, notifications: true, twoFactor: false, vlibras: false, fontSize: "Médio" };
     }
   });
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadProfile() {
+      setLoading(true);
+      setLoadError("");
+
+      try {
+        const response = await api.getEmployeeDetails();
+        if (!mounted) return;
+
+        const nextProfile = mapProfile(response);
+        setProfile(nextProfile);
+        setSettings((current) => {
+          const next = {
+            ...current,
+            twoFactor: nextProfile.twoFactor,
+            vlibras: nextProfile.accessibility,
+          };
+          saveSettings(next);
+          return next;
+        });
+      } catch (error) {
+        if (!mounted) return;
+        setProfile(defaultProfile);
+        setLoadError(error.message || "Nao foi possivel carregar os dados do perfil.");
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadProfile();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const userAgent = useMemo(() => navigator.userAgent.slice(0, 82), []);
   const lastAccess = useMemo(() => {
@@ -219,18 +262,6 @@ export default function ProfilePage() {
 
   function saveProfile(nextProfile) {
     setProfile(nextProfile);
-    localStorage.setItem("hackgov.profile", JSON.stringify(nextProfile));
-    localStorage.setItem(
-      "hackgov.user",
-      JSON.stringify({
-        id: nextProfile.id,
-        nome: nextProfile.nome,
-        email: nextProfile.email,
-        cargo: nextProfile.cargo,
-        setor: nextProfile.setor,
-        prefeitura: nextProfile.prefeitura,
-      }),
-    );
     setEditOpen(false);
   }
 
@@ -244,9 +275,20 @@ export default function ProfilePage() {
     <DashboardLayout styles={["/css/perfil.css"]}>
       <div className="dashboard">
         <div className="container perfil-page">
+          {loadError && (
+            <div className="auth-message error mb-3">
+              <i className="bi bi-exclamation-circle-fill"></i>
+              {loadError}
+            </div>
+          )}
+
           <section className="perfil-hero">
             <div className="perfil-avatar-wrap">
-              {profile.avatar ? (
+              {loading ? (
+                <div className="perfil-avatar-icon">
+                  <i className="bi bi-arrow-repeat"></i>
+                </div>
+              ) : profile.avatar ? (
                 <img className="perfil-avatar-img" src={profile.avatar} alt={`Avatar de ${profile.nome}`} />
               ) : (
                 <div className="perfil-avatar-icon">
@@ -256,9 +298,10 @@ export default function ProfilePage() {
             </div>
             <div className="perfil-hero-info">
               <span>Meu perfil</span>
-              <h2>{profile.nome}</h2>
+              <h2>{loading ? "Carregando perfil..." : profile.nome || "Perfil sem nome"}</h2>
               <p>
-                #{profile.id} · {profile.email}
+                {profile.id ? `#${profile.id} · ` : ""}
+                {profile.email || "Sem e-mail cadastrado"}
               </p>
               <small>
                 <i className="bi bi-building-fill"></i> {profile.prefeitura || "Sem prefeitura ativa"}
@@ -271,10 +314,18 @@ export default function ProfilePage() {
               type="button"
               title="Editar perfil"
               onClick={() => setEditOpen(true)}
+              disabled={loading}
             >
               <i className="bi bi-pencil-fill"></i>
             </button>
           </section>
+
+          {!loading && !hasProfileData(profile) && !loadError && (
+            <div className="auth-message warning mb-3">
+              <i className="bi bi-info-circle-fill"></i>
+              Nenhum dado de perfil foi retornado pela API.
+            </div>
+          )}
 
           <div className="perfil-grid">
             <div className="perfil-main">

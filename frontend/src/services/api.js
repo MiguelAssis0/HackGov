@@ -89,6 +89,8 @@ export const api = {
   // EMPLOYEES
   getEmployees: () => request("/employee?size=100&sort=firstName,asc"),
 
+  getEmployeeDetails: () => request("/employee/details"),
+
   createEmployee: (payload) =>
     request("/employee", {
       method: "POST",

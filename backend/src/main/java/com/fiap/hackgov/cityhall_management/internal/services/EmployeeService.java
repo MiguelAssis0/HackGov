@@ -125,11 +125,7 @@ public class EmployeeService {
             return new ResourceNotFoundException("Employee not found: " + authenticatedEmployee.getId());
         });
 
-        CityHall cityHall = employee.getCityHallId();
-        Occupation occupation = employee.getOccupationId();
-        Sector sector = employee.getSectorId();
-
-        return new EmployeeDetailsResponseDTO(employee.getFullName(), cityHall != null ? cityHall.getName() : null, occupation != null ? occupation.getName() : null, sector != null ? sector.getName() : null);
+        return employeeMapper.toEmployeeDetailsResponseDTO(employee);
     }
 
     public Employee findByEmail(String email) {
