@@ -2,7 +2,7 @@ package com.fiap.hackgov.cityhall_management.internal.controllers;
 
 import com.fiap.hackgov.cityhall_management.internal.DTOs.Employee.EmployeeDetailsResponseDTO;
 import com.fiap.hackgov.cityhall_management.internal.DTOs.Employee.CreateEmployeeDTO;
-import com.fiap.hackgov.cityhall_management.internal.DTOs.Employee.EmployeeDTO;
+import com.fiap.hackgov.cityhall_management.internal.DTOs.Employee.EmployeeResponseDTO;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.cityhall_management.internal.mapper.EmployeeMapper;
 import com.fiap.hackgov.cityhall_management.internal.services.EmployeeService;
@@ -43,12 +43,12 @@ public class EmployeeController {
     @Operation(summary = "Get All Employees", security = @SecurityRequirement(name = "bearer-key"), description = "Retrieve all employees")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Employees retrieved successfully"), @ApiResponse(responseCode = "401", description = "Unauthorized")})
     @GetMapping
-    public ResponseEntity<Page<EmployeeDTO>> getAllEmployees(Pageable pageable, @AuthenticationPrincipal Employee employee) {
+    public ResponseEntity<Page<EmployeeResponseDTO>> getAllEmployees(Pageable pageable, @AuthenticationPrincipal Employee employee) {
         if (employee == null) {
             throw new UnauthorizedException("Is necessary to be authenticated to list the users");
         }
 
-        Page<EmployeeDTO> employeeDTOs = employeeService.findAll(pageable, employee).map(employeeMapper::toEmployeeDTO);
+        Page<EmployeeResponseDTO> employeeDTOs = employeeService.findAll(pageable, employee).map(employeeMapper::toEmployeeDTO);
         return ResponseEntity.ok(employeeDTOs);
 
     }
@@ -56,7 +56,7 @@ public class EmployeeController {
     @Operation(summary = "Get Employee by ID", security = @SecurityRequirement(name = "bearer-key"), description = "Retrieve an employee by their ID")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Employee retrieved successfully"), @ApiResponse(responseCode = "404", description = "Employee not found"), @ApiResponse(responseCode = "401", description = "Unauthorized")})
     @GetMapping("/{id}")
-    public ResponseEntity<EmployeeDTO> getEmployeeById(@PathVariable UUID id) {
+    public ResponseEntity<EmployeeResponseDTO> getEmployeeById(@PathVariable UUID id) {
         return ResponseEntity.ok(employeeMapper.toEmployeeDTO(employeeService.findById(id)));
     }
 

@@ -6,7 +6,7 @@ import com.fiap.hackgov.cityhall_management.internal.entities.enums.RequisitionS
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record EmployeeDTO(
+public record EmployeeResponseDTO(
 
         // User
         UUID id,
@@ -31,7 +31,9 @@ public record EmployeeDTO(
         LocalDateTime dismissalDate,
         String registrationNumber,
         Double hoursWorked,
-        UUID cityHallId
+        UUID cityHallId,
+        String occupationName,
+        String sectorName
 
 ) {
 }
