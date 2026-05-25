@@ -1,5 +1,7 @@
+import { lazy, Suspense } from "react";
 import { usePageStyles } from "../hooks/usePageStyles.js";
-import Chatbot from "./Chatbot.jsx";
+
+const Chatbot = lazy(() => import("./Chatbot.jsx"));
 
 export default function Messages({
   styles = [],
@@ -72,7 +74,9 @@ export default function Messages({
 
           <div className="chat-widget-scroll">
             {activeTab === "ai" ? (
-              <Chatbot />
+              <Suspense fallback={<div className="chatbot-loading">Carregando assistente...</div>}>
+                <Chatbot />
+              </Suspense>
             ) : (
               <div className="d-flex flex-column">
                 {[

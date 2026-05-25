@@ -1,6 +1,33 @@
 import { useState, useRef, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { api } from "../services/api";
 import "../../public/css/messages.css";
+
+const markdownComponents = {
+  a: ({ node, href, children, ...props }) => (
+    <a href={href} target="_blank" rel="noreferrer" {...props}>
+      {children}
+    </a>
+  ),
+};
+
+function MessageText({ message }) {
+  if (message.from === "user") {
+    return <p className="chat-plain-text">{message.text}</p>;
+  }
+
+  return (
+    <div className="chat-markdown">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={markdownComponents}
+      >
+        {message.text}
+      </ReactMarkdown>
+    </div>
+  );
+}
 
 export default function Chatbot() {
   const [message, setMessage] = useState("");
@@ -87,7 +114,7 @@ export default function Chatbot() {
           <div key={msg.id} className={`chat-bubble-row ${msg.from === "user" ? "row-user" : "row-bot"}`}>
             {msg.from === "bot" && <div className="bubble-avatar">IA</div>}
             <div className={`chat-bubble ${msg.from === "user" ? "bubble-user" : "bubble-bot"}`}>
-              <p>{msg.text}</p>
+              <MessageText message={msg} />
               <span className="bubble-time">{msg.time}</span>
             </div>
           </div>

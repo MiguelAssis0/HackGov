@@ -13,6 +13,16 @@
   font-family: "Segoe UI", sans-serif;
 }
 
+.chatbot-loading {
+  width: 100%;
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  color: #667799;
+  font-size: 0.92rem;
+  background: #f3f6fa;
+}
+
 /* ── Header ─────────────────────────────────────────────── */
 .chat-header {
   display: flex;
@@ -140,6 +150,60 @@
   margin: 0;
 }
 
+.chat-plain-text {
+  color: inherit;
+}
+
+.chat-markdown {
+  color: inherit;
+}
+
+.chat-markdown > :first-child {
+  margin-top: 0;
+}
+
+.chat-markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.chat-markdown p,
+.chat-markdown ul,
+.chat-markdown ol {
+  margin: 0 0 0.6rem;
+}
+
+.chat-markdown ul,
+.chat-markdown ol {
+  padding-left: 1.2rem;
+}
+
+.chat-markdown li + li {
+  margin-top: 0.25rem;
+}
+
+.chat-markdown strong {
+  color: inherit;
+  font-weight: 800;
+}
+
+.chat-markdown code {
+  padding: 0.1rem 0.28rem;
+  border-radius: 5px;
+  background: rgba(19, 81, 180, 0.08);
+  color: #0d3f8f;
+  font-size: 0.86em;
+}
+
+.chat-markdown a {
+  color: #1351b4;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.chat-markdown a:hover {
+  text-decoration: underline;
+}
+
 .bubble-bot {
   background: #ffffff;
   color: #1f2937;
@@ -150,6 +214,17 @@
   background: #1351b4;
   color: #ffffff;
   border-bottom-right-radius: 4px;
+}
+
+.bubble-user,
+.bubble-user p,
+.bubble-user .chat-plain-text {
+  color: #ffffff;
+}
+
+.bubble-user .bubble-time {
+  color: rgba(255, 255, 255, 0.86);
+  opacity: 1;
 }
 
 .bubble-time {
