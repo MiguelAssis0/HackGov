@@ -14,7 +14,6 @@ import com.fiap.hackgov.messages.internal.mapper.ChatMapper;
 import com.fiap.hackgov.messages.internal.repositories.ChatParticipantRepository;
 import com.fiap.hackgov.messages.internal.repositories.ChatRepository;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
-import com.fiap.hackgov.shared.infra.services.TokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,9 +37,6 @@ public class ChatService {
     private final EmployeeService employeeService;
 
     private final ChatMapper chatMapper;
-
-    private final TokenService tokenService;
-
     @Transactional
     public ChatDTO createPrivateChat(Employee authenticatedEmployee, CreatePrivateChatDTO dto) {
 
@@ -141,7 +137,6 @@ public class ChatService {
 
     @Transactional(readOnly = true)
     public List<ChatDTO> getEmployeeChats(Employee employee) {
-
         List<Chat> chats = chatRepository.findAllByParticipant(employee.getId());
 
         return chats.stream().map(chatMapper::toDTO).toList();

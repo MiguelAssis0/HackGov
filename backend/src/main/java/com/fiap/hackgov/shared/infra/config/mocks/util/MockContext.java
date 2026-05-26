@@ -55,6 +55,7 @@ public class MockContext {
     public Occupation assessorJuridico;
 
     public Employee admin;
+    public Employee adminSistema;
     public Employee maria;
     public Employee joao;
     public Employee carlos;
@@ -62,7 +63,6 @@ public class MockContext {
     public Employee roberto;
     public Employee fernanda;
     public Employee paula;
-    public Employee ricardo;
     public Employee juliana;
     public Employee bruno;
     public Employee patricia;

@@ -34,6 +34,7 @@ public class EmployeeMock {
         Employee lucas = factory.create("Lucas", "Freitas", "lucas.juridico@rj.gov.br", "437.548.659-20", "RJ-JUR-005", 9700.0, ctx.assessorJuridico, ctx.juridicoSectorRJ, ctx.cityHallRJ, Roles.EMPLOYEE);
 
         repository.saveAll(List.of(adminSistema, admin, maria, joao, ana, roberto, fernanda, paula, carlos, juliana, bruno, patricia, lucas));
+        ctx.adminSistema = adminSistema;
         ctx.admin = admin;
         ctx.maria = maria;
         ctx.joao = joao;
