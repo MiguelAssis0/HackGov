@@ -25,6 +25,36 @@ button {
   cursor: pointer;
 }
 
+.route-loading {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  place-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  background: var(--cinza-claro, #f4f7fb);
+  color: var(--azul-escuro, #061b33);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.route-loading::before {
+  width: 2rem;
+  height: 2rem;
+  content: "";
+  border: 3px solid rgba(45, 137, 255, 0.18);
+  border-top-color: var(--azul, #2d89ff);
+  border-radius: 999px;
+  animation: route-loading-spin 0.75s linear infinite;
+}
+
+@keyframes route-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .auth-message {
   display: flex;
   align-items: center;

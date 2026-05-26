@@ -2,60 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "../components/DashboardLayout.jsx";
 import { Link } from "../components/RouterContext.jsx";
 import { api, getSelectedCityHall, getStoredUser, getUserDisplayName } from "../services/api.js";
-
-const toolColors = [
-  { bg: "#e8f2ff", fg: "var(--azul)" },
-  { bg: "#f3e8ff", fg: "#7c3aed" },
-  { bg: "#fef3c7", fg: "#d97706" },
-  { bg: "#fce7f3", fg: "#be185d" },
-  { bg: "#dcfce7", fg: "#16a34a" },
-  { bg: "#e0f2fe", fg: "#0284c7" },
-];
-
-const dashboardTools = [
-  {
-    id: "cargos",
-    name: "Cargos",
-    icon: "bi-person-badge-fill",
-    description: "Cadastro e organizacao dos cargos por setor da prefeitura.",
-    route: "/cargos",
-  },
-  {
-    id: "setores",
-    name: "Setores",
-    icon: "bi-building-gear",
-    description: "Estruture secretarias, departamentos e areas internas.",
-    route: "/setores",
-  },
-  {
-    id: "gestao",
-    name: "Gestao",
-    icon: "bi-graph-up-arrow",
-    description: "Acompanhe produtividade, prazos e desempenho por setor.",
-    route: "/gestao",
-  },
-  {
-    id: "compras-licitacoes",
-    name: "Compras e Licitacoes",
-    icon: "bi-bag-check-fill",
-    description: "Fluxos de compras, licitacoes e acompanhamento de requisicoes.",
-    route: "/processos",
-  },
-  {
-    id: "controle-acesso",
-    name: "Controle de Acesso",
-    icon: "bi-shield-lock-fill",
-    description: "Configure permissoes de acesso por setor e cargo.",
-    route: "/controle-acesso",
-  },
-  {
-    id: "funcionarios",
-    name: "Funcionarios",
-    icon: "bi-people-fill",
-    description: "Gerencie servidores, perfis, setores e cargos vinculados.",
-    route: "/funcionarios",
-  },
-];
+import { toolColors, useAvailableTools } from "../services/mockupService.js";
 
 function pageItems(payload) {
   if (Array.isArray(payload)) return payload;
@@ -177,6 +124,7 @@ export default function DashboardPage() {
   const user = getStoredUser() || { nome: "Usuario" };
   const displayName = getUserDisplayName(user);
   const cityHallName = resolveCityHallName(user);
+  const dashboardTools = useAvailableTools();
   const [employees, setEmployees] = useState([]);
   const [occupations, setOccupations] = useState([]);
   const [sectors, setSectors] = useState([]);
@@ -248,7 +196,7 @@ export default function DashboardPage() {
       { icon: "bi-person-badge-fill", label: "Cargos", value: occupations.length },
       { icon: "bi-grid-1x2-fill", label: "Ferramentas disponiveis", value: dashboardTools.length },
     ],
-    [employees.length, sectors.length, occupations.length],
+    [employees.length, sectors.length, occupations.length, dashboardTools.length],
   );
 
   const calendarDays = useMemo(() => buildCalendarDays(monthDate, tasks), [monthDate, tasks]);

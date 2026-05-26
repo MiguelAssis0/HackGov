@@ -77,6 +77,16 @@ export const mockupTools = [
     route: "/gestao",
   },
   {
+    id: "tarefas",
+    name: "Tarefas",
+    category: "Gestao",
+    icon: "bi-check2-square",
+    description: "Atribuicao, acompanhamento e gerenciamento de tarefas entre setores.",
+    mandatory: true,
+    enabled: true,
+    route: "/tarefas",
+  },
+  {
     id: "compras-licitacoes",
     name: "Compras e Licita\u00e7\u00f5es",
     category: "Processos",

@@ -10,7 +10,9 @@ export default function Messages({
   activeTab,
   setActiveTab,
 }) {
-  usePageStyles(styles, "widget");
+  const stylesReady = usePageStyles(styles, "widget");
+
+  if (!stylesReady) return null;
 
   return (
     <section

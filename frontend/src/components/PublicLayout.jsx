@@ -4,7 +4,13 @@ import { usePageStyles } from "../hooks/usePageStyles.js";
 
 export function PublicLayout({ children, styles = [] }) {
   const [showScrollTop, setShowScrollTop] = useState(false);
-  usePageStyles(["/css/index.css", ...styles]);
+  const stylesReady = usePageStyles(["/css/index.css", ...styles]);
+
+  useEffect(() => {
+    document.body.classList.add("public-body");
+    document.body.classList.remove("dashboard-body");
+    return () => document.body.classList.remove("public-body");
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setShowScrollTop(window.scrollY > 400);
@@ -29,6 +35,14 @@ export function PublicLayout({ children, styles = [] }) {
 
   function scrollToTop() {
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  if (!stylesReady) {
+    return (
+      <div className="route-loading" role="status" aria-live="polite">
+        Carregando interface...
+      </div>
+    );
   }
 
   return (

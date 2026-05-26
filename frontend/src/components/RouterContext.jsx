@@ -1,37 +1,31 @@
-import { createContext, useContext } from "react";
+import {
+  Link as RouterLink,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 
-export const RouterContext = createContext({
-  path: "/",
-  navigate: () => {},
-});
-
-export function useRouter() {
-  return useContext(RouterContext);
+function normalizePath(pathname) {
+  const cleanPath = (pathname || "/").split(/[?#]/)[0];
+  if (cleanPath === "/home") return "/";
+  return cleanPath.endsWith("/") && cleanPath !== "/" ? cleanPath.slice(0, -1) : cleanPath;
 }
 
-export function Link({ to, className, children, onClick, ...props }) {
-  const { navigate } = useRouter();
+export function useRouter() {
+  const location = useLocation();
+  const navigateRouter = useNavigate();
 
-  function handleClick(event) {
-    if (onClick) onClick(event);
-    if (
-      event.defaultPrevented ||
-      event.metaKey ||
-      event.ctrlKey ||
-      event.shiftKey ||
-      event.altKey ||
-      props.target === "_blank"
-    ) {
-      return;
-    }
+  return {
+    path: normalizePath(location.pathname),
+    navigate(to, options) {
+      navigateRouter(to, options);
+    },
+  };
+}
 
-    event.preventDefault();
-    navigate(to);
-  }
-
+export function Link({ to, className, children, ...props }) {
   return (
-    <a href={to} className={className} onClick={handleClick} {...props}>
+    <RouterLink to={to} className={className} {...props}>
       {children}
-    </a>
+    </RouterLink>
   );
 }

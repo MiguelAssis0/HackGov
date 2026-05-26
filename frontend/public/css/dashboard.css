@@ -1,5 +1,5 @@
 /* DASHBOARD */
-body {
+body.dashboard-body {
     background: var(--cinza-claro);
 }
 

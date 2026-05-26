@@ -13,6 +13,18 @@ import { usePageStyles } from "../hooks/usePageStyles.js";
 import { Link, useRouter } from "./RouterContext.jsx";
 import Messages from "./Messages.jsx";
 
+const dashboardStyles = [
+  "/css/index_dashboard.css",
+  "/css/dashboard.css",
+  "/css/ferramentas.css",
+  "/css/setores.css",
+  "/css/management.css",
+  "/css/processos.css",
+  "/css/tarefas.css",
+  "/css/perfil.css",
+  "/css/gestao.css",
+];
+
 const demoUser = {
   nome: "Usuário",
   cargo: "Servidor",
@@ -77,10 +89,13 @@ export function DashboardLayout({ children, styles = [] }) {
   const isTeamAdmin = userType === "admin_equipe";
   const fixedCityHall = userCityHall(user) || normalizeCityHall("Prefeitura Demo");
   const activeCityHall = isTeamAdmin ? selectedCityHall || fixedCityHall : fixedCityHall;
-  usePageStyles(["/css/index_dashboard.css", ...styles]);
+  const stylesReady = usePageStyles([...dashboardStyles, ...styles]);
 
   useEffect(() => {
+    document.body.classList.add("dashboard-body");
+    document.body.classList.remove("public-body");
     document.body.classList.toggle("modal-open", false);
+    return () => document.body.classList.remove("dashboard-body");
   }, []);
 
   useEffect(() => {
@@ -140,6 +155,14 @@ export function DashboardLayout({ children, styles = [] }) {
         ? [activeCityHall]
         : [];
 
+  if (!stylesReady) {
+    return (
+      <div className="route-loading" role="status" aria-live="polite">
+        Carregando interface...
+      </div>
+    );
+  }
+
   return (
     <section className="app-layout">
       <aside className={`sidebar ${sidebarOpen ? "open" : ""}`} id="sidebar">
@@ -196,6 +219,12 @@ export function DashboardLayout({ children, styles = [] }) {
             to="/ferramentas"
           >
             <i className="bi bi-grid-1x2-fill"></i> Ferramentas
+          </Link>
+          <Link
+            className={`nav-item ${isActive("/tarefas") ? "active" : ""}`}
+            to="/tarefas"
+          >
+            <i className="bi bi-check2-square"></i> Tarefas
           </Link>
           <a className="nav-item" href="#">
             <i className="bi bi-inbox-fill"></i> Caixa de Entrada

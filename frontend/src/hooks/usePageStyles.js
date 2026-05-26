@@ -1,33 +1,119 @@
-import { useInsertionEffect, useLayoutEffect } from "react";
+import { useLayoutEffect, useState } from "react";
 
-const styleEffect = useInsertionEffect || useLayoutEffect;
+const loadedStyles = new Set();
+const loadingStyles = new Map();
+
+function styleKey(href) {
+  return new URL(href, document.baseURI).href;
+}
+
+function findStylesheet(href) {
+  const key = styleKey(href);
+
+  return Array.from(document.querySelectorAll('link[rel="stylesheet"]')).find(
+    (link) =>
+      link.href === key ||
+      link.dataset.reactPageStyle === key ||
+      link.getAttribute("href") === href,
+  );
+}
+
+function markStylesheetLoaded(link, key) {
+  loadedStyles.add(key);
+  link.dataset.reactStyleLoaded = "true";
+}
+
+function isStylesheetLoaded(link, key) {
+  if (!link) return false;
+  if (loadedStyles.has(key) || link.dataset.reactStyleLoaded === "true") return true;
+
+  return false;
+}
+
+function areStylesLoaded(paths) {
+  return paths.every((href) => {
+    const key = styleKey(href);
+    return isStylesheetLoaded(findStylesheet(href), key);
+  });
+}
 
 function ensureStylesheet(href, group) {
-  let link = document.querySelector(`link[data-react-page-style="${href}"]`);
+  const key = styleKey(href);
+  let link = findStylesheet(href);
+  const created = !link;
 
   if (!link) {
     link = document.createElement("link");
     link.rel = "stylesheet";
     link.href = href;
-    link.dataset.reactPageStyle = href;
-    link.dataset.reactStyleGroup = group;
+  }
+
+  link.dataset.reactPageStyle = key;
+  link.dataset.reactStyleGroup = group;
+  link.disabled = false;
+
+  if (isStylesheetLoaded(link, key)) {
+    return Promise.resolve(link);
+  }
+
+  if (loadingStyles.has(key)) {
+    return loadingStyles.get(key);
+  }
+
+  const promise = new Promise((resolve) => {
+    let timeoutId;
+
+    const finish = () => {
+      window.clearTimeout(timeoutId);
+      link.removeEventListener("load", finish);
+      link.removeEventListener("error", finish);
+      markStylesheetLoaded(link, key);
+      resolve(link);
+    };
+
+    link.addEventListener("load", finish);
+    link.addEventListener("error", finish);
+    timeoutId = window.setTimeout(finish, 8000);
+  });
+
+  loadingStyles.set(key, promise);
+  promise.finally(() => loadingStyles.delete(key));
+
+  if (created) {
     document.head.appendChild(link);
   }
 
-  link.disabled = false;
-  return link;
+  return promise;
 }
 
 export function usePageStyles(paths, group = "page") {
-  styleEffect(() => {
-    const active = new Set(paths);
+  const stylePaths = Array.from(new Set(paths.filter(Boolean)));
+  const signature = stylePaths.join("|");
+  const [ready, setReady] = useState(() => stylePaths.length === 0 || areStylesLoaded(stylePaths));
 
-    paths.forEach((href) => ensureStylesheet(href, group));
+  useLayoutEffect(() => {
+    let cancelled = false;
 
-    document
-      .querySelectorAll(`link[data-react-style-group="${group}"]`)
-      .forEach((link) => {
-        link.disabled = !active.has(link.dataset.reactPageStyle);
+    if (stylePaths.length === 0) {
+      setReady(true);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    setReady(false);
+
+    Promise.all(stylePaths.map((href) => ensureStylesheet(href, group))).then(() => {
+      if (cancelled) return;
+      window.requestAnimationFrame(() => {
+        if (!cancelled) setReady(true);
       });
-  }, [paths.join("|"), group]);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [signature, group]);
+
+  return ready;
 }
