@@ -1,7 +1,3 @@
-.chat-float {
-    display: none !important;
-}
-
 .processo-header {
     background: var(--branco);
     border: var(--border1-5);

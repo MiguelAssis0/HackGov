@@ -6,8 +6,6 @@
     color: var(--azul);
 }
 
-.chat-float { display: none !important; }
-
 .eyebrow.dark { color: var(--azul); }
 
 .management-title {
