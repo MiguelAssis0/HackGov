@@ -247,20 +247,20 @@ export default function HomePage() {
         <div className="container py-5">
           <div className="row align-items-center g-5">
             <div className="col-lg-6 hero-content d-flex flex-column text-center text-lg-start justify-content-center justify-content-lg-start">
-              <div className="hero-badge fade-up visible me-auto ms-auto ms-lg-0">
+              <div className="hero-badge fade-up me-auto ms-auto ms-lg-0">
                 Um projeto desenvolvido por alunos da FIAP!
               </div>
-              <h1 className="fade-up visible delay-1">
+              <h1 className="fade-up delay-1">
                 Gestão pública
                 <br />
                 mais <span className="primary">inteligente</span>
                 <br />e transparente
               </h1>
-              <p className="section-sub fade-up visible delay-2">
+              <p className="section-sub fade-up delay-2">
                 Centralize processos, tarefas e comunicação da sua prefeitura em um único sistema. Mais
                 agilidade, controle e automação.
               </p>
-              <div className="d-flex justify-content-center justify-content-lg-start flex-wrap gap-3 fade-up visible delay-3">
+              <div className="d-flex justify-content-center justify-content-lg-start flex-wrap gap-3 fade-up delay-3">
                 <Link to="/contato" className="btn btn-primary">
                   Entre em contato
                 </Link>
@@ -270,7 +270,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="col-lg-6 fade-up visible delay-2 d-none d-lg-flex justify-content-center hero-img-col">
+            <div className="col-lg-6 fade-up delay-2 d-none d-lg-flex justify-content-center hero-img-col">
               <div className="hero-img-wrapper">
                 <img src="/img/brasil.png" alt="imagem do brasil" className="img-fluid hero-img" />
               </div>

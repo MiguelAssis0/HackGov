@@ -20,18 +20,29 @@ export function PublicLayout({ children, styles = [] }) {
   }, []);
 
   useEffect(() => {
+    if (!stylesReady) return undefined;
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) entry.target.classList.add("visible");
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+            observer.unobserve(entry.target);
+          }
         });
       },
       { threshold: 0.15 },
     );
 
-    document.querySelectorAll(".fade-up").forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, [children]);
+    const frameId = window.requestAnimationFrame(() => {
+      document.querySelectorAll(".fade-up").forEach((el) => observer.observe(el));
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      observer.disconnect();
+    };
+  }, [children, stylesReady]);
 
   function scrollToTop() {
     window.scrollTo({ top: 0, behavior: "smooth" });
