@@ -15,6 +15,7 @@ import com.fiap.hackgov.shared.infra.pagination.PageResponseDTO;
 import com.fiap.hackgov.shared.infra.pagination.PaginationMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -77,7 +78,8 @@ public class MessageService {
             throw new BusinessException("You are not a participant of this chat");
         }
 
-        Page<Message> messages = messageRepository.findByChatIdOrderBySentAtDesc(chatId, pageable);
+        Pageable safePageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
+        Page<Message> messages = messageRepository.findByChatIdOrderBySentAtDesc(chatId, safePageable);
 
         Page<MessageDTO> dtoPage = messages.map(messageMapper::toDTO);
 

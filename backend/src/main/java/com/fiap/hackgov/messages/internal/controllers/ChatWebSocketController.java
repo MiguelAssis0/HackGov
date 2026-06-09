@@ -24,8 +24,6 @@ public class ChatWebSocketController {
     @MessageMapping("/chat.send")
     public void sendMessage(@Payload SendMessageDTO dto, Principal principal) {
 
-        System.out.println("Principals: " + principal);
-
         Employee employee = (Employee) ((Authentication) principal).getPrincipal();
 
         MessageDTO response = messageService.sendMessage(employee, dto);

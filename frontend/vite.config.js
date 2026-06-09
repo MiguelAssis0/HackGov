@@ -10,6 +10,11 @@ export default defineConfig({
         target: "http://hackgov-backend:8080",
         changeOrigin: true,
       },
+      "/ws": {
+        target: "ws://hackgov-backend:8080",
+        changeOrigin: true,
+        ws: true,
+      },
     },
   },
 });

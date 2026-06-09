@@ -3,6 +3,7 @@ package com.fiap.hackgov.messages.internal.services;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.cityhall_management.internal.repositories.EmployeeRepository;
 import com.fiap.hackgov.cityhall_management.internal.services.EmployeeService;
+import com.fiap.hackgov.messages.internal.DTOs.chat.ChatContactDTO;
 import com.fiap.hackgov.messages.internal.DTOs.chat.ChatDTO;
 import com.fiap.hackgov.messages.internal.DTOs.chat.CreatePrivateChatDTO;
 import com.fiap.hackgov.messages.internal.DTOs.group.CreateGroupChatDTO;
@@ -14,7 +15,9 @@ import com.fiap.hackgov.messages.internal.mapper.ChatMapper;
 import com.fiap.hackgov.messages.internal.repositories.ChatParticipantRepository;
 import com.fiap.hackgov.messages.internal.repositories.ChatRepository;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Session;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +40,31 @@ public class ChatService {
     private final EmployeeService employeeService;
 
     private final ChatMapper chatMapper;
+
+    private final EntityManager entityManager;
+
+    @Transactional(readOnly = true)
+    public List<ChatContactDTO> getContacts(Employee authenticatedEmployee) {
+        if (authenticatedEmployee.getCityHallId() == null) {
+            throw new BusinessException("Authenticated employee must be linked to a city hall");
+        }
+
+        entityManager.unwrap(Session.class).disableFilter("sectorFilter");
+
+        return employeeRepository.findChatContacts(
+                        authenticatedEmployee.getCityHallId().getId(),
+                        authenticatedEmployee.getId()
+                ).stream()
+                .map(employee -> new ChatContactDTO(
+                        employee.getId(),
+                        employee.getFullName(),
+                        employee.getAvatarPath(),
+                        employee.getOccupationId() != null ? employee.getOccupationId().getName() : null,
+                        employee.getSectorId() != null ? employee.getSectorId().getName() : null
+                ))
+                .toList();
+    }
+
     @Transactional
     public ChatDTO createPrivateChat(Employee authenticatedEmployee, CreatePrivateChatDTO dto) {
 
@@ -86,6 +114,7 @@ public class ChatService {
     @Transactional
     public ChatDTO createGroupChat(Employee authenticatedEmployee, CreateGroupChatDTO dto) {
 
+        entityManager.unwrap(Session.class).disableFilter("sectorFilter");
         List<Employee> foundParticipants = employeeRepository.findAllById(dto.participantIds());
 
         if (foundParticipants.size() != new HashSet<>(dto.participantIds()).size()) {

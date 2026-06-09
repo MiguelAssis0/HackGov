@@ -91,6 +91,32 @@ export const api = {
 
   getEmployeeDetails: () => request("/employee/details"),
 
+  // MESSAGES
+  getChats: () => request("/chats"),
+
+  getChatContacts: () => request("/chats/contacts"),
+
+  getChatMessages: (chatId, page = 0, size = 100) =>
+    request(`/chats/chat/${chatId}?page=${page}&size=${size}&sort=sentAt,desc`),
+
+  createPrivateChat: (employeeId) =>
+    request("/chats/private", {
+      method: "POST",
+      body: JSON.stringify({ employeeId }),
+    }),
+
+  createGroupChat: (title, participantIds) =>
+    request("/chats/group", {
+      method: "POST",
+      body: JSON.stringify({ title, participantIds }),
+    }),
+
+  sendMessage: (chatId, content) =>
+    request("/messages", {
+      method: "POST",
+      body: JSON.stringify({ chatId, content }),
+    }),
+
   getOccupations: () => request("/occupations?size=100&sort=name,asc"),
 
   createOccupation: (payload) =>

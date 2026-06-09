@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,5 +32,18 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
     Optional<Employee> findByIdWithDetails(@Param("id") UUID id);
 
     Optional<Employee> findByEmail(String email);
+
+    @EntityGraph(attributePaths = {"occupationId", "sectorId"})
+    @Query("""
+            SELECT e
+            FROM Employee e
+            WHERE e.cityHallId.id = :cityHallId
+              AND e.id <> :employeeId
+            ORDER BY e.firstName, e.lastName
+            """)
+    List<Employee> findChatContacts(
+            @Param("cityHallId") UUID cityHallId,
+            @Param("employeeId") UUID employeeId
+    );
 
 }

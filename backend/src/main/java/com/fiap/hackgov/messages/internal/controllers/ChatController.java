@@ -1,6 +1,7 @@
 package com.fiap.hackgov.messages.internal.controllers;
 
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
+import com.fiap.hackgov.messages.internal.DTOs.chat.ChatContactDTO;
 import com.fiap.hackgov.messages.internal.DTOs.chat.ChatDTO;
 import com.fiap.hackgov.messages.internal.DTOs.chat.CreatePrivateChatDTO;
 import com.fiap.hackgov.messages.internal.DTOs.group.CreateGroupChatDTO;
@@ -11,6 +12,8 @@ import com.fiap.hackgov.shared.infra.pagination.PageResponseDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -33,6 +36,11 @@ public class ChatController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/contacts")
+    public ResponseEntity<List<ChatContactDTO>> getContacts(@AuthenticationPrincipal Employee employee) {
+        return ResponseEntity.ok(chatService.getContacts(employee));
+    }
+
     @GetMapping("/chat/{chatId}")
     public ResponseEntity<PageResponseDTO<MessageDTO>> getMessages(
 
@@ -40,6 +48,7 @@ public class ChatController {
 
             @PathVariable UUID chatId,
 
+            @PageableDefault(sort = "sentAt", direction = Sort.Direction.DESC)
             Pageable pageable) {
 
         return ResponseEntity.ok(messageService.getChatMessages(employee, chatId, pageable));
