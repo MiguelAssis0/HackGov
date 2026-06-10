@@ -30,11 +30,14 @@ public interface RequisitionMapper {
     @Mapping(target = "etp", ignore = true)
     @Mapping(target = "sector", ignore = true)
     @Mapping(target = "responsible", ignore = true)
+    @Mapping(target = "procurementResponsible", ignore = true)
     Requisition toEntity(CreateRequisitionDTO dto);
 
     @Mapping(source = "processStatus.stage", target = "currentStage", qualifiedByName = "mapCurrentStage")
     @Mapping(source = "sector", target = "sector", qualifiedByName = "mapSector")
     @Mapping(source = "responsible", target = "responsible", qualifiedByName = "mapResponsible")
+    @Mapping(source = "procurementResponsible", target = "procurementResponsible", qualifiedByName = "mapResponsible")
+    @Mapping(source = "processStatus.finishedAt", target = "finishedAt")
     @Mapping(source = "etp", target = "etp")
     RequisitionResponseDTO toDTO(Requisition entity);
 

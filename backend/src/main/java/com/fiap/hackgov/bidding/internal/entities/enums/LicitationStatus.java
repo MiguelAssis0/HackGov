@@ -6,5 +6,8 @@ public enum LicitationStatus {
     OPEN,
     IN_PROGRESS,
     FINISHED,
+    IMPUGNED,
+    POSTPONED,
+    CLOSED,
     CANCELED
 }

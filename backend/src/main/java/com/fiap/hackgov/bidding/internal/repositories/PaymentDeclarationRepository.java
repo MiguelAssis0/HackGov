@@ -21,4 +21,7 @@ public interface PaymentDeclarationRepository extends JpaRepository<PaymentDecla
 
     @EntityGraph(attributePaths = {"commitment", "commitment.contract", "approvedBy"})
     Page<PaymentDeclaration> findAllByCommitmentId(UUID commitmentId, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"commitment", "commitment.contract", "approvedBy"})
+    Optional<PaymentDeclaration> findFirstByCommitmentContractLicitationProcessRequisitionIdOrderByCreatedAtDesc(UUID requisitionId);
 }

@@ -2,6 +2,7 @@ package com.fiap.hackgov.bidding.internal.entities;
 
 import com.fiap.hackgov.bidding.internal.entities.enums.LicitationStatus;
 import com.fiap.hackgov.bidding.internal.entities.enums.LicitationType;
+import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,6 +31,10 @@ public class LicitationProcess {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "requisition_id", nullable = false)
     private Requisition requisition;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "responsible_id")
+    private Employee responsible;
 
     @Enumerated(EnumType.STRING)
     private LicitationType type;

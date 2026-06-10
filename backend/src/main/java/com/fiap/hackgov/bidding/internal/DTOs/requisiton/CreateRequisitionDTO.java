@@ -1,6 +1,7 @@
 package com.fiap.hackgov.bidding.internal.DTOs.requisiton;
 
 import com.fiap.hackgov.bidding.internal.DTOs.etp.CreateETPDTO;
+import com.fiap.hackgov.bidding.internal.entities.enums.AcquisitionType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -27,6 +28,9 @@ public record CreateRequisitionDTO(
         @Size(max = 255,
                 message = "Budget allocation must have at most 255 characters")
         String budgetAllocation,
+
+        @NotNull(message = "Acquisition type is required")
+        AcquisitionType type,
 
         @Valid
         @NotNull(message = "ETP is required")

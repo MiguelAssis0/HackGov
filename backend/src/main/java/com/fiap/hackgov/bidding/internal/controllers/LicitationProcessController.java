@@ -3,6 +3,7 @@ package com.fiap.hackgov.bidding.internal.controllers;
 import com.fiap.hackgov.bidding.internal.DTOs.licitation.CreateLicitationProcessDTO;
 import com.fiap.hackgov.bidding.internal.DTOs.licitation.LicitationHistoryDTO;
 import com.fiap.hackgov.bidding.internal.DTOs.licitation.LicitationProcessResponseDTO;
+import com.fiap.hackgov.bidding.internal.DTOs.licitation.PublishLicitationResultDTO;
 import com.fiap.hackgov.bidding.internal.DTOs.licitation.UpdateLicitationStatusDTO;
 import com.fiap.hackgov.bidding.internal.entities.LicitationHistory;
 import com.fiap.hackgov.bidding.internal.entities.LicitationProcess;
@@ -61,10 +62,30 @@ public class LicitationProcessController {
         return ResponseEntity.ok(licitationProcessMapper.toDTO(licitationProcess));
     }
 
+    @GetMapping("/requisition/{requisitionId}")
+    public ResponseEntity<LicitationProcessResponseDTO> findByRequisitionId(@PathVariable UUID requisitionId) {
+
+        LicitationProcess licitationProcess = licitationProcessService.findByRequisitionId(requisitionId);
+
+        return ResponseEntity.ok(licitationProcessMapper.toDTO(licitationProcess));
+    }
+
     @PatchMapping("/{id}/status")
     public ResponseEntity<LicitationProcessResponseDTO> updateStatus(@PathVariable UUID id, @Valid @RequestBody UpdateLicitationStatusDTO dto, @AuthenticationPrincipal Employee employee) {
 
         LicitationProcess licitationProcess = licitationProcessService.updateStatus(id, dto.status(), dto.observation(), employee);
+
+        return ResponseEntity.ok(licitationProcessMapper.toDTO(licitationProcess));
+    }
+
+    @PatchMapping("/{id}/result")
+    public ResponseEntity<LicitationProcessResponseDTO> publishResult(
+            @PathVariable UUID id,
+            @Valid @RequestBody PublishLicitationResultDTO dto,
+            @AuthenticationPrincipal Employee employee
+    ) {
+
+        LicitationProcess licitationProcess = licitationProcessService.publishResult(id, dto, employee);
 
         return ResponseEntity.ok(licitationProcessMapper.toDTO(licitationProcess));
     }

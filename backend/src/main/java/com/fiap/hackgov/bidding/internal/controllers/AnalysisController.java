@@ -47,6 +47,11 @@ public class AnalysisController {
         return ResponseEntity.ok(analysisService.findPending(pageable));
     }
 
+    @GetMapping("/pending/requisition/{requisitionId}")
+    public ResponseEntity<AnalysisResponseDTO> findPendingByRequisition(@PathVariable UUID requisitionId) {
+        return ResponseEntity.ok(analysisService.findPendingByRequisition(requisitionId));
+    }
+
     @PatchMapping("/{id}")
     public ResponseEntity<AnalysisResponseDTO> processAnalysis(@AuthenticationPrincipal Employee employee, @PathVariable UUID id, @RequestBody @Valid UpdateAnalysisDTO dto) {
         return ResponseEntity.ok(analysisService.processAnalysis(id, dto, employee));

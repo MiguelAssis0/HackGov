@@ -21,4 +21,7 @@ public interface AccountabilityReportRepository extends JpaRepository<Accountabi
 
     @EntityGraph(attributePaths = {"contract", "responsible"})
     Page<AccountabilityReport> findAllByContractId(UUID contractId, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"contract", "responsible"})
+    Optional<AccountabilityReport> findFirstByContractLicitationProcessRequisitionIdOrderByCreatedAtDesc(UUID requisitionId);
 }

@@ -7,6 +7,7 @@ import com.fiap.hackgov.bidding.internal.entities.Address;
 import com.fiap.hackgov.bidding.internal.entities.Supplier;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 import java.util.List;
 
@@ -20,6 +21,14 @@ public interface SupplierMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     Supplier toEntity(CreateSupplierDTO dto);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "wonProcesses", ignore = true)
+    @Mapping(target = "proposals", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    void updateEntity(CreateSupplierDTO dto, @MappingTarget Supplier entity);
 
     Address toEntity(AddressDTO dto);
 

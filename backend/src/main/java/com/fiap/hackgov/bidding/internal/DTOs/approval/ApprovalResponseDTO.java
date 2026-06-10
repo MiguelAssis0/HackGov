@@ -9,6 +9,7 @@ import java.util.UUID;
 public record ApprovalResponseDTO(
 
         UUID id,
+        UUID requisitionId,
         ApprovalSector sector,
         ApprovalStatus status,
         UUID approvedById,

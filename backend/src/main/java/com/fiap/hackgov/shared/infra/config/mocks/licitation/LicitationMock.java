@@ -30,6 +30,7 @@ public class LicitationMock {
         licitationProcess.setProcessNumber("LIC-2026-000001");
 
         licitationProcess.setRequisition(ctx.requisitionInLicitation);
+        licitationProcess.setResponsible(ctx.maria);
 
         licitationProcess.setType(LicitationType.PREGAO_ELETRONICO);
 

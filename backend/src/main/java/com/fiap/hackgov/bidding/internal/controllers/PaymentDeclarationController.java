@@ -1,10 +1,12 @@
 package com.fiap.hackgov.bidding.internal.controllers;
 
 import com.fiap.hackgov.bidding.internal.DTOs.paymentDeclaration.CreatePaymentDeclarationDTO;
+import com.fiap.hackgov.bidding.internal.DTOs.paymentDeclaration.CreateRequisitionPaymentDeclarationDTO;
 import com.fiap.hackgov.bidding.internal.DTOs.paymentDeclaration.PaymentDeclarationResponseDTO;
 import com.fiap.hackgov.bidding.internal.entities.PaymentDeclaration;
 import com.fiap.hackgov.bidding.internal.mappers.PaymentDeclarationMapper;
 import com.fiap.hackgov.bidding.internal.services.PaymentDeclarationService;
+import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.shared.infra.pagination.PageResponseDTO;
 import com.fiap.hackgov.shared.infra.pagination.PaginationMapper;
 import jakarta.validation.Valid;
@@ -15,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -34,6 +37,16 @@ public class PaymentDeclarationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(paymentDeclarationMapper.toDTO(declaration));
     }
 
+    @PostMapping("/requisition/{requisitionId}")
+    public ResponseEntity<PaymentDeclarationResponseDTO> createForRequisition(
+            @PathVariable UUID requisitionId,
+            @Valid @RequestBody CreateRequisitionPaymentDeclarationDTO dto,
+            @AuthenticationPrincipal Employee employee
+    ) {
+        PaymentDeclaration declaration = paymentDeclarationService.createForRequisition(requisitionId, dto, employee);
+        return ResponseEntity.status(HttpStatus.CREATED).body(paymentDeclarationMapper.toDTO(declaration));
+    }
+
     @GetMapping
     public ResponseEntity<PageResponseDTO<PaymentDeclarationResponseDTO>> findAll(@PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<PaymentDeclarationResponseDTO> dtoPage = paymentDeclarationService.findAll(pageable).map(paymentDeclarationMapper::toDTO);
@@ -43,6 +56,11 @@ public class PaymentDeclarationController {
     @GetMapping("/{id}")
     public ResponseEntity<PaymentDeclarationResponseDTO> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(paymentDeclarationMapper.toDTO(paymentDeclarationService.findById(id)));
+    }
+
+    @GetMapping("/requisition/{requisitionId}")
+    public ResponseEntity<PaymentDeclarationResponseDTO> findByRequisitionId(@PathVariable UUID requisitionId) {
+        return ResponseEntity.ok(paymentDeclarationMapper.toDTO(paymentDeclarationService.findByRequisitionId(requisitionId)));
     }
 
     @GetMapping("/commitment/{commitmentId}")

@@ -3,6 +3,8 @@ package com.fiap.hackgov.bidding.internal.controllers;
 import com.fiap.hackgov.bidding.internal.DTOs.processHistory.ProcessHistoryDTO;
 import com.fiap.hackgov.bidding.internal.DTOs.processStatus.AdvanceRequisitionStageDTO;
 import com.fiap.hackgov.bidding.internal.DTOs.requisiton.CreateRequisitionDTO;
+import com.fiap.hackgov.bidding.internal.DTOs.requisiton.AssignProcurementResponsibleDTO;
+import com.fiap.hackgov.bidding.internal.DTOs.requisiton.RequisitionResponsibleDTO;
 import com.fiap.hackgov.bidding.internal.DTOs.requisiton.RequisitionResponseDTO;
 import com.fiap.hackgov.bidding.internal.services.RequisitionService;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
@@ -39,8 +41,16 @@ public class RequisitionController {
         return ResponseEntity.ok(requisitionService.getHistory(id));
     }
 
+    @GetMapping("/{id}/procurement-employees")
+    public ResponseEntity<List<RequisitionResponsibleDTO>> getProcurementEmployees(@PathVariable UUID id) {
+        return ResponseEntity.ok(requisitionService.findProcurementEmployees(id));
+    }
+
     @PostMapping
-    public ResponseEntity<RequisitionResponseDTO> create(@AuthenticationPrincipal Employee employee, @RequestBody CreateRequisitionDTO dto) {
+    public ResponseEntity<RequisitionResponseDTO> create(
+            @AuthenticationPrincipal Employee employee,
+            @Valid @RequestBody CreateRequisitionDTO dto
+    ) {
 
         RequisitionResponseDTO requisition = requisitionService.create(employee, dto);
 
@@ -53,5 +63,14 @@ public class RequisitionController {
         RequisitionResponseDTO response = requisitionService.advanceStage(id, dto, employee);
 
         return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{id}/procurement-responsible")
+    public ResponseEntity<RequisitionResponseDTO> assignProcurementResponsible(
+            @PathVariable UUID id,
+            @Valid @RequestBody AssignProcurementResponsibleDTO dto,
+            @AuthenticationPrincipal Employee employee
+    ) {
+        return ResponseEntity.ok(requisitionService.assignProcurementResponsible(id, dto, employee));
     }
 }

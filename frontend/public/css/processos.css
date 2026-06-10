@@ -293,6 +293,119 @@
     line-height: 1.5;
 }
 
+.process-actions {
+    margin-top: 1.25rem;
+    padding: 1rem;
+    border: var(--border1-5);
+    border-radius: 12px;
+    background: var(--cinza-claro);
+}
+
+.process-action-observation {
+    border: var(--border1-5);
+    border-radius: 8px;
+    font-size: 0.82rem;
+    resize: vertical;
+}
+
+.process-action-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.process-action-buttons.approval-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.process-action-buttons.licitation-result-actions {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.winner-supplier-modal {
+    width: min(860px, calc(100vw - 2rem));
+    max-height: calc(100vh - 2rem);
+    overflow: hidden;
+}
+
+.commitment-modal {
+    width: min(560px, calc(100vw - 2rem));
+}
+
+.winner-supplier-modal-body {
+    overflow-y: auto;
+}
+
+.process-assignment-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.5rem;
+    align-items: stretch;
+}
+
+.process-action-button {
+    min-height: 38px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 0.5rem 0.7rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    font-size: 0.76rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s, filter 0.15s;
+}
+
+.process-action-button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    filter: brightness(0.97);
+}
+
+.process-action-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.process-action-success {
+    background: #dcfce7;
+    border-color: #86efac;
+    color: #15803d;
+}
+
+.process-action-warning {
+    background: #fef3c7;
+    border-color: #fcd34d;
+    color: #b45309;
+}
+
+.process-action-danger {
+    background: #fee2e2;
+    border-color: #fca5a5;
+    color: #b91c1c;
+}
+
+.process-action-neutral {
+    background: #e5e7eb;
+    border-color: #cbd5e1;
+    color: #475569;
+}
+
+@media (max-width: 991px) {
+    .process-action-buttons.licitation-result-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 575px) {
+    .process-action-buttons.licitation-result-actions,
+    .process-assignment-row {
+        grid-template-columns: 1fr;
+    }
+}
+
 .docs-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
@@ -548,5 +661,9 @@
 
     .painel-lista {
         position: static;
+    }
+
+    .process-assignment-row {
+        grid-template-columns: 1fr;
     }
 }

@@ -25,5 +25,8 @@ public interface CommitmentRepository extends JpaRepository<Commitment, UUID> {
     @EntityGraph(attributePaths = {"contract", "executionOrder", "issuedBy"})
     Page<Commitment> findAllByExecutionOrderId(UUID executionOrderId, Pageable pageable);
 
+    @EntityGraph(attributePaths = {"contract", "executionOrder", "issuedBy"})
+    Optional<Commitment> findFirstByContractLicitationProcessRequisitionIdOrderByCreatedAtDesc(UUID requisitionId);
+
     boolean existsByCommitmentNumber(String commitmentNumber);
 }

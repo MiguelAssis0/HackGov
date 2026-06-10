@@ -47,6 +47,11 @@ public class ApprovalController {
         return approvalService.findPending(pageable);
     }
 
+    @GetMapping("/pending/requisition/{requisitionId}")
+    public ResponseEntity<ApprovalResponseDTO> findPendingByRequisition(@PathVariable UUID requisitionId) {
+        return ResponseEntity.ok(approvalService.findPendingByRequisition(requisitionId));
+    }
+
     @PatchMapping("/{id}")
     public ResponseEntity<ApprovalResponseDTO> processApproval(@AuthenticationPrincipal Employee employee, @PathVariable UUID id, @RequestBody @Valid UpdateApprovalDTO dto) {
         return ResponseEntity.ok(approvalService.processApproval(id, dto, employee));

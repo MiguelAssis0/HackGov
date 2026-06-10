@@ -45,6 +45,22 @@ public enum ProcessStage {
 
             case COMPOSICAO_PROCESSO -> nextStage == PROCESSO_LICITATORIO;
 
+            case PROCESSO_LICITATORIO -> nextStage == SETOR_CONTRATOS;
+
+            case SETOR_CONTRATOS -> nextStage == INICIO_SERVICOS;
+
+            case INICIO_SERVICOS -> nextStage == EMISSAO_EMPENHO;
+
+            case EMISSAO_EMPENHO -> nextStage == DECLARACAO_PAGAMENTO;
+
+            case DECLARACAO_PAGAMENTO -> nextStage == EXECUCAO_PAGAMENTO;
+
+            case EXECUCAO_PAGAMENTO -> nextStage == PRESTACAO_CONTAS;
+
+            case PRESTACAO_CONTAS -> nextStage == ANALISE_PRESTACAO_CONTAS;
+
+            case ANALISE_PRESTACAO_CONTAS -> nextStage == HOMOLOGACAO_PRESTACAO_CONTAS;
+
             default -> false;
         };
     }

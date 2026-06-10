@@ -22,5 +22,8 @@ public interface ExecutionOrderRepository extends JpaRepository<ExecutionOrder, 
     @EntityGraph(attributePaths = {"contract", "issuedBy"})
     Page<ExecutionOrder> findAllByContractId(UUID contractId, Pageable pageable);
 
+    @EntityGraph(attributePaths = {"contract", "issuedBy"})
+    Optional<ExecutionOrder> findFirstByContractLicitationProcessRequisitionIdOrderByCreatedAtDesc(UUID requisitionId);
+
     boolean existsByNumber(String number);
 }

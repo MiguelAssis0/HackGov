@@ -1,10 +1,12 @@
 package com.fiap.hackgov.bidding.internal.services;
 
 import com.fiap.hackgov.bidding.internal.DTOs.paymentDeclaration.CreatePaymentDeclarationDTO;
+import com.fiap.hackgov.bidding.internal.DTOs.paymentDeclaration.CreateRequisitionPaymentDeclarationDTO;
 import com.fiap.hackgov.bidding.internal.entities.Commitment;
 import com.fiap.hackgov.bidding.internal.entities.Contract;
 import com.fiap.hackgov.bidding.internal.entities.PaymentDeclaration;
 import com.fiap.hackgov.bidding.internal.entities.Approval;
+import com.fiap.hackgov.bidding.internal.entities.Requisition;
 import com.fiap.hackgov.bidding.internal.entities.enums.ApprovalSector;
 import com.fiap.hackgov.bidding.internal.entities.enums.ApprovalStatus;
 import com.fiap.hackgov.bidding.internal.entities.enums.ProcessStage;
@@ -12,6 +14,8 @@ import com.fiap.hackgov.bidding.internal.mappers.PaymentDeclarationMapper;
 import com.fiap.hackgov.bidding.internal.repositories.ApprovalRepository;
 import com.fiap.hackgov.bidding.internal.repositories.CommitmentRepository;
 import com.fiap.hackgov.bidding.internal.repositories.PaymentDeclarationRepository;
+import com.fiap.hackgov.bidding.internal.repositories.RequisitionRepository;
+import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.cityhall_management.internal.repositories.EmployeeRepository;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
@@ -33,6 +37,7 @@ public class PaymentDeclarationService {
     private final CommitmentRepository commitmentRepository;
     private final EmployeeRepository employeeRepository;
     private final ApprovalRepository approvalRepository;
+    private final RequisitionRepository requisitionRepository;
     private final PaymentDeclarationMapper paymentDeclarationMapper;
     private final RequisitionService requisitionService;
 
@@ -46,10 +51,40 @@ public class PaymentDeclarationService {
 
         declaration = paymentDeclarationRepository.save(declaration);
 
-        registerStage(commitment.getContract(), approvedBy, ProcessStage.DECLARACAO_PAGAMENTO, "Declaração para pagamento registrada");
         approvePaymentDeclarationIfNecessary(commitment, approvedBy, dto);
 
         return declaration;
+    }
+
+    public PaymentDeclaration createForRequisition(
+            UUID requisitionId,
+            CreateRequisitionPaymentDeclarationDTO dto,
+            Employee employee
+    ) {
+        Requisition requisition = requisitionRepository.findById(requisitionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Requisição não encontrada: " + requisitionId));
+
+        validateRequisitionStage(requisition);
+        validateIssuer(requisition, employee);
+
+        paymentDeclarationRepository
+                .findFirstByCommitmentContractLicitationProcessRequisitionIdOrderByCreatedAtDesc(requisitionId)
+                .ifPresent(existing -> {
+                    throw new BusinessException("A requisição já possui uma declaração para pagamento");
+                });
+
+        Commitment commitment = commitmentRepository
+                .findFirstByContractLicitationProcessRequisitionIdOrderByCreatedAtDesc(requisitionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Empenho não encontrado para a requisição: " + requisitionId));
+
+        PaymentDeclaration declaration = new PaymentDeclaration();
+        declaration.setCommitment(commitment);
+        declaration.setApprovedBy(employee);
+        declaration.setType(dto.type());
+        declaration.setDescription(dto.description());
+        declaration.setSecretaryApproved(false);
+
+        return paymentDeclarationRepository.save(declaration);
     }
 
     @Transactional(readOnly = true)
@@ -69,6 +104,13 @@ public class PaymentDeclarationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Declaração de pagamento não encontrada: " + id));
     }
 
+    @Transactional(readOnly = true)
+    public PaymentDeclaration findByRequisitionId(UUID requisitionId) {
+        return paymentDeclarationRepository
+                .findFirstByCommitmentContractLicitationProcessRequisitionIdOrderByCreatedAtDesc(requisitionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Declaração de pagamento não encontrada para a requisição: " + requisitionId));
+    }
+
     private Commitment findCommitment(UUID id) {
         return commitmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Empenho não encontrado: " + id));
@@ -81,6 +123,18 @@ public class PaymentDeclarationService {
 
     private void registerStage(Contract contract, Employee employee, ProcessStage stage, String observation) {
         requisitionService.sendToNextStage(contract.getLicitationProcess().getRequisition(), stage, employee, observation);
+    }
+
+    private void validateRequisitionStage(Requisition requisition) {
+        if (requisition.getProcessStatus().getStage() != ProcessStage.DECLARACAO_PAGAMENTO) {
+            throw new BusinessException("A declaração só pode ser emitida na etapa de declaração para pagamento");
+        }
+    }
+
+    private void validateIssuer(Requisition requisition, Employee employee) {
+        if (employee == null || !requisition.getResponsible().getId().equals(employee.getId())) {
+            throw new BusinessException("Somente o servidor responsável pela requisição pode emitir a declaração para pagamento");
+        }
     }
 
     private void approvePaymentDeclarationIfNecessary(Commitment commitment, Employee approvedBy, CreatePaymentDeclarationDTO dto) {

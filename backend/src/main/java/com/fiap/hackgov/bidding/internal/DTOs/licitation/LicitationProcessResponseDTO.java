@@ -18,6 +18,16 @@ public record LicitationProcessResponseDTO(
 
         String requisitionNumber,
 
+        UUID responsibleId,
+
+        String responsibleName,
+
+        UUID winnerSupplierId,
+
+        String winnerSupplierName,
+
+        String winnerSupplierCnpj,
+
         LicitationType type,
 
         LicitationStatus status,

@@ -15,6 +15,9 @@ public record CreateLicitationProcessDTO(
         @NotNull(message = "Requisition id is required")
         UUID requisitionId,
 
+        @NotNull(message = "Responsible employee id is required")
+        UUID responsibleId,
+
         @NotNull(message = "Licitation type is required")
         LicitationType type,
 

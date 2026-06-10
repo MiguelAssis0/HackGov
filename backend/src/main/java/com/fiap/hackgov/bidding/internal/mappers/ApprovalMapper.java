@@ -20,6 +20,10 @@ public interface ApprovalMapper {
     Approval toEntity(CreateApprovalDTO dto);
 
     @Mapping(
+            target = "requisitionId",
+            source = "requisition.id"
+    )
+    @Mapping(
             target = "approvedById",
             source = "approvedBy.id"
     )

@@ -3,6 +3,8 @@ package com.fiap.hackgov.bidding.internal.services;
 import com.fiap.hackgov.bidding.internal.DTOs.processHistory.ProcessHistoryDTO;
 import com.fiap.hackgov.bidding.internal.DTOs.processStatus.AdvanceRequisitionStageDTO;
 import com.fiap.hackgov.bidding.internal.DTOs.requisiton.CreateRequisitionDTO;
+import com.fiap.hackgov.bidding.internal.DTOs.requisiton.AssignProcurementResponsibleDTO;
+import com.fiap.hackgov.bidding.internal.DTOs.requisiton.RequisitionResponsibleDTO;
 import com.fiap.hackgov.bidding.internal.DTOs.requisiton.RequisitionResponseDTO;
 import com.fiap.hackgov.bidding.internal.entities.*;
 import com.fiap.hackgov.bidding.internal.entities.enums.AnalysisResult;
@@ -10,6 +12,7 @@ import com.fiap.hackgov.bidding.internal.entities.enums.ApprovalSector;
 import com.fiap.hackgov.bidding.internal.entities.enums.ApprovalStatus;
 import com.fiap.hackgov.bidding.internal.entities.enums.HistoryEventType;
 import com.fiap.hackgov.bidding.internal.entities.enums.ProcessStage;
+import com.fiap.hackgov.bidding.internal.entities.enums.RequestStatus;
 import com.fiap.hackgov.bidding.internal.mappers.ETPMapper;
 import com.fiap.hackgov.bidding.internal.mappers.ProcessHistoryMapper;
 import com.fiap.hackgov.bidding.internal.mappers.RequisitionMapper;
@@ -19,6 +22,8 @@ import com.fiap.hackgov.bidding.internal.repositories.ProcessHistoryRepository;
 import com.fiap.hackgov.bidding.internal.repositories.ProcessStatusRepository;
 import com.fiap.hackgov.bidding.internal.repositories.RequisitionRepository;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
+import com.fiap.hackgov.cityhall_management.internal.entities.Sector;
+import com.fiap.hackgov.cityhall_management.internal.repositories.EmployeeRepository;
 import com.fiap.hackgov.cityhall_management.internal.repositories.SectorRepository;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
@@ -45,6 +50,7 @@ public class RequisitionService {
     private final ProcessStatusRepository processStatusRepository;
     private final ProcessHistoryRepository processHistoryRepository;
     private final SectorRepository sectorRepository;
+    private final EmployeeRepository employeeRepository;
     private final ApprovalRepository approvalRepository;
     private final AnalysisRepository analysisRepository;
     private final ProcessHistoryService processHistoryService;
@@ -73,9 +79,22 @@ public class RequisitionService {
     @Transactional
     public RequisitionResponseDTO create(Employee responsible, CreateRequisitionDTO dto) {
 
+        if (responsible == null) {
+            throw new BusinessException("Usuário autenticado não identificado");
+        }
+
         Requisition requisition = requisitionMapper.toEntity(dto);
 
-        requisition.setSector(sectorRepository.findById(dto.sectorId()).orElseThrow(() -> new ResourceNotFoundException("Sector not found: " + dto.sectorId())));
+        Sector sector = sectorRepository.findById(dto.sectorId())
+                .orElseThrow(() -> new BusinessException("O setor selecionado não existe mais. Atualize a página e selecione novamente."));
+
+        if (responsible.getCityHallId() == null
+                || sector.getCityHall() == null
+                || !responsible.getCityHallId().getId().equals(sector.getCityHall().getId())) {
+            throw new BusinessException("O setor selecionado não pertence à prefeitura do usuário");
+        }
+
+        requisition.setSector(sector);
 
         requisition.setResponsible(responsible);
 
@@ -112,6 +131,57 @@ public class RequisitionService {
         return requisitionMapper.toDTO(requisition);
     }
 
+    @Transactional(readOnly = true)
+    public List<RequisitionResponsibleDTO> findProcurementEmployees(UUID requisitionId) {
+
+        Requisition requisition = findEntityById(requisitionId);
+
+        UUID cityHallId = requisition.getSector().getCityHall().getId();
+
+        return employeeRepository.findActiveProcurementEmployees(cityHallId)
+                .stream()
+                .map(requisitionMapper::mapResponsible)
+                .toList();
+    }
+
+    public RequisitionResponseDTO assignProcurementResponsible(
+            UUID requisitionId,
+            AssignProcurementResponsibleDTO dto,
+            Employee assignedBy
+    ) {
+
+        Requisition requisition = findEntityById(requisitionId);
+
+        if (requisition.getProcessStatus().getStage() != ProcessStage.RECEBIMENTO_COMPRAS) {
+            throw new BusinessException("Procurement responsible can only be assigned during procurement receipt");
+        }
+
+        Employee procurementResponsible = employeeRepository.findByIdWithDetails(dto.employeeId())
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found: " + dto.employeeId()));
+
+        validateProcurementResponsible(requisition, procurementResponsible);
+
+        requisition.setProcurementResponsible(procurementResponsible);
+        requisitionRepository.save(requisition);
+
+        String observation = "Responsável de compras definido: " + procurementResponsible.getFullName();
+
+        processHistoryService.createProcessHistory(
+                requisition,
+                assignedBy,
+                observation,
+                ProcessStage.RECEBIMENTO_COMPRAS,
+                HistoryEventType.COMMENT_ADDED
+        );
+
+        sendToNextStage(requisition, ProcessStage.ANALISE_REQUISICAO, assignedBy, observation);
+
+        requisition.getProcessStatus().setResponsibleId(procurementResponsible.getId());
+        processStatusRepository.save(requisition.getProcessStatus());
+
+        return requisitionMapper.toDTO(requisition);
+    }
+
     void sendToNextStage(Requisition requisition, ProcessStage nextStage, Employee employee, String observation) {
 
         ProcessStatus processStatus = requisition.getProcessStatus();
@@ -138,6 +208,23 @@ public class RequisitionService {
         processHistoryService.createProcessHistory(requisition, employee, observation, ProcessStage.REQUISICAO_CADASTRADA, HistoryEventType.STAGE_SENT);
 
         createAnalysisIfNecessary(requisition, ProcessStage.REQUISICAO_CADASTRADA);
+    }
+
+    void finishWorkflow(Requisition requisition, Employee employee, boolean approved) {
+        ProcessStatus processStatus = requisition.getProcessStatus();
+        LocalDateTime finishedAt = LocalDateTime.now();
+
+        processStatus.setResponsibleId(employee.getId());
+        processStatus.setObservation(
+                approved
+                        ? "Processo concluído com prestação de contas homologada"
+                        : "Processo encerrado com prestação de contas reprovada"
+        );
+        processStatus.setFinishedAt(finishedAt);
+        processStatusRepository.save(processStatus);
+
+        requisition.setRequestStatus(approved ? RequestStatus.APROVADA : RequestStatus.REPROVADA);
+        requisitionRepository.save(requisition);
     }
 
     @Transactional(readOnly = true)
@@ -168,6 +255,28 @@ public class RequisitionService {
         }
 
         return String.format("REQ-%s-%06d", year, nextNumber);
+    }
+
+    private Requisition findEntityById(UUID id) {
+        return requisitionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Requisition not found: " + id));
+    }
+
+    private void validateProcurementResponsible(Requisition requisition, Employee employee) {
+
+        if (employee.getCityHallId() == null
+                || !employee.getCityHallId().getId().equals(requisition.getSector().getCityHall().getId())) {
+            throw new BusinessException("Procurement responsible must belong to the requisition city hall");
+        }
+
+        if (employee.getSectorId() == null
+                || !employee.getSectorId().getName().toLowerCase().contains("compras")) {
+            throw new BusinessException("Procurement responsible must belong to the procurement sector");
+        }
+
+        if (!employee.getStatus()) {
+            throw new BusinessException("Procurement responsible must be active");
+        }
     }
 
     private void validateStageTransition(Requisition requisition, ProcessStage currentStage, ProcessStage nextStage) {

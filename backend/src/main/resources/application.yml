@@ -1,6 +1,6 @@
 spring:
   jpa:
-    show-sql: true
+    show-sql: false
   application:
     name: HackGov
   mail:
@@ -58,7 +58,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
@@ -74,23 +74,11 @@ spring:
     livereload:
       enabled: true
 
-  mail:
-    host: ${MAIL_HOST:smtp.gmail.com}
-    port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME:test@gmail.com}
-    password: ${MAIL_PASSWORD:testpassword}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-
 logging:
   level:
     org:
       hibernate:
-        SQL: DEBUG
+        SQL: INFO
       type:
         descriptor:
           sql:

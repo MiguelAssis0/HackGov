@@ -1,6 +1,7 @@
 package com.fiap.hackgov.bidding.internal.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fiap.hackgov.bidding.internal.entities.enums.AcquisitionType;
 import com.fiap.hackgov.bidding.internal.entities.enums.RequestStatus;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.cityhall_management.internal.entities.Sector;
@@ -38,11 +39,18 @@ public class Requisition {
     @JoinColumn(name = "responsible_id")
     private Employee responsible;
 
+    @ManyToOne
+    @JoinColumn(name = "procurement_responsible_id")
+    private Employee procurementResponsible;
+
     private String technicalDescription;
 
     private String justification;
 
     private String budgetAllocation;
+
+    @Enumerated(EnumType.STRING)
+    private AcquisitionType type;
 
     @Column(nullable = false)
     private boolean requiresEtp;

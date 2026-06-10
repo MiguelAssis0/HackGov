@@ -28,12 +28,11 @@ public class ContractPaymentMock {
     private final ExecutionOrderRepository executionOrderRepository;
     private final CommitmentRepository commitmentRepository;
     private final PaymentDeclarationRepository paymentDeclarationRepository;
-    private final PaymentRepository paymentRepository;
 
     public void load(MockContext ctx) {
 
         Requisition requisition = new Requisition();
-        requisition.setRegisterNumber("REQ-2026-000004");
+        requisition.setRegisterNumber("REQ-2026-000007");
         requisition.setSector(ctx.financeiroSectorSP);
         requisition.setResponsible(ctx.roberto);
         requisition.setTechnicalDescription("Contratação de serviços de conciliação bancária e relatórios financeiros");
@@ -47,7 +46,7 @@ public class ContractPaymentMock {
         status.setRequisition(requisition);
         status.setStage(ProcessStage.EXECUCAO_PAGAMENTO);
         status.setResponsibleId(ctx.roberto.getId());
-        status.setObservation("Pagamento executado e aguardando prestação de contas");
+        status.setObservation("Declaração aprovada e aguardando execução do pagamento");
         processStatusRepository.save(status);
         requisition.setProcessStatus(status);
 
@@ -77,6 +76,7 @@ public class ContractPaymentMock {
         LicitationProcess licitationProcess = new LicitationProcess();
         licitationProcess.setProcessNumber("LIC-2026-000003");
         licitationProcess.setRequisition(requisition);
+        licitationProcess.setResponsible(ctx.maria);
         licitationProcess.setType(LicitationType.PREGAO_ELETRONICO);
         licitationProcess.setStatus(LicitationStatus.FINISHED);
         licitationProcess.setEstimatedValue(new BigDecimal("98000.00"));
@@ -153,17 +153,7 @@ public class ContractPaymentMock {
         createPaymentApproval(requisition, ctx.admin);
         createProcessHistory(requisition, ctx.admin, ProcessStage.DECLARACAO_PAGAMENTO, HistoryEventType.APPROVED, "Declaração de pagamento aprovada pelo secretário");
 
-        Payment payment = new Payment();
-        payment.setDeclaration(declaration);
-        payment.setValue(new BigDecimal("30833.33"));
-        payment.setTreasuryApproved(true);
-        payment.setTreasuryResponsible(ctx.roberto);
-        payment.setTreasurySector(ctx.financeiroSectorSP);
-        payment.setApprovedBy(ctx.roberto);
-        payment.setPaidAt(LocalDate.now().minusDays(3));
-        payment = paymentRepository.save(payment);
-
-        createProcessHistory(requisition, ctx.roberto, ProcessStage.EXECUCAO_PAGAMENTO, HistoryEventType.STAGE_SENT, "Pagamento executado da primeira parcela do contrato");
+        createProcessHistory(requisition, ctx.admin, ProcessStage.EXECUCAO_PAGAMENTO, HistoryEventType.STAGE_SENT, "Declaração aprovada e encaminhada para execução do pagamento");
 
         ctx.requisitionInPaymentStage = requisition;
         ctx.paymentStageSupplier = supplier;
@@ -172,7 +162,7 @@ public class ContractPaymentMock {
         ctx.paymentStageExecutionOrder = executionOrder;
         ctx.paymentStageCommitment = commitment;
         ctx.paymentStageDeclaration = declaration;
-        ctx.paymentStagePayment = payment;
+        ctx.paymentStagePayment = null;
     }
 
     private void createPaymentApproval(Requisition requisition, Employee employee) {

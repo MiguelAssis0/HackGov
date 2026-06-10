@@ -46,4 +46,35 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
             @Param("employeeId") UUID employeeId
     );
 
+    @EntityGraph(attributePaths = {"sectorId"})
+    @Query("""
+            SELECT e
+            FROM Employee e
+            WHERE e.cityHallId.id = :cityHallId
+              AND LOWER(e.sectorId.name) LIKE '%compras%'
+              AND e.status = true
+            ORDER BY e.firstName, e.lastName
+            """)
+    List<Employee> findActiveProcurementEmployees(@Param("cityHallId") UUID cityHallId);
+
+    @EntityGraph(attributePaths = {"sectorId", "occupationId"})
+    @Query("""
+            SELECT DISTINCT e
+            FROM Employee e
+            JOIN e.occupationId.permissions relation
+            WHERE e.cityHallId.id = :cityHallId
+              AND relation.pk.permission.resource = 'approval.accountability'
+              AND (
+                    LOWER(e.sectorId.name) LIKE '%prest%'
+                    OR LOWER(e.sectorId.name) LIKE '%conta%'
+                    OR LOWER(e.sectorId.name) LIKE '%control%'
+                    OR LOWER(e.sectorId.name) LIKE '%finance%'
+                    OR LOWER(e.sectorId.name) LIKE '%fazenda%'
+                    OR LOWER(e.sectorId.name) LIKE '%tesour%'
+              )
+              AND e.status = true
+            ORDER BY e.firstName, e.lastName
+            """)
+    List<Employee> findActiveAccountabilityEmployees(@Param("cityHallId") UUID cityHallId);
+
 }

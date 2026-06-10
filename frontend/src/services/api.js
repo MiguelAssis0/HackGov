@@ -43,6 +43,7 @@ async function requestFrom(baseUrl, path, options = {}) {
   if (!response.ok) {
     const message =
       data?.message ||
+      data?.detail ||
       data?.error ||
       `Erro ${response.status}`;
     const error = new Error(message);
@@ -181,15 +182,6 @@ export const api = {
   deleteTask: (id) =>
     request(`/tasks/${id}`, {
       method: "DELETE",
-    }),
-
-  // REQUISITIONS
-  getRequisitions: () => request("/requisitions"),
-
-  createRequisition: (payload) =>
-    request("/requisitions", {
-      method: "POST",
-      body: JSON.stringify(payload),
     }),
 
   // AI (integrado no mesmo client)

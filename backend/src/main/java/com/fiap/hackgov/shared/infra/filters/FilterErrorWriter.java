@@ -1,12 +1,14 @@
 package com.fiap.hackgov.shared.infra.filters;
 
-import com.fiap.hackgov.shared.infra.exceptions.controllers.StandardError;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import tools.jackson.databind.ObjectMapper;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.net.URI;
 import java.time.Instant;
 
 @Component
@@ -18,20 +20,23 @@ public class FilterErrorWriter {
         this.objectMapper = objectMapper;
     }
 
-    public void write(HttpServletResponse response, HttpServletRequest request,
-                      int status, String error, String message) throws IOException {
+    public void write(
+            HttpServletResponse response,
+            HttpServletRequest request,
+            HttpStatus status,
+            String title,
+            String detail
+    ) throws IOException {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, detail);
 
-        StandardError standardError = new StandardError(
-                Instant.now(),
-                status,
-                error,
-                message,
-                request.getRequestURI()
-        );
+        problem.setTitle(title);
+        problem.setInstance(URI.create(request.getRequestURI()));
+        problem.setProperty("timestamp", Instant.now());
 
-        response.setStatus(status);
-        response.setContentType("application/json");
+        response.setStatus(status.value());
+        response.setContentType("application/problem+json");
         response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(objectMapper.writeValueAsString(standardError));
+
+        response.getWriter().write(objectMapper.writeValueAsString(problem));
     }
 }

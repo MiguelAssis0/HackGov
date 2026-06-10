@@ -6,6 +6,7 @@ import com.fiap.hackgov.bidding.internal.entities.ProcessHistory;
 import com.fiap.hackgov.bidding.internal.entities.ProcessStatus;
 import com.fiap.hackgov.bidding.internal.entities.Requisition;
 import com.fiap.hackgov.bidding.internal.entities.enums.AnalysisResult;
+import com.fiap.hackgov.bidding.internal.entities.enums.AcquisitionType;
 import com.fiap.hackgov.bidding.internal.entities.enums.ApprovalSector;
 import com.fiap.hackgov.bidding.internal.entities.enums.ApprovalStatus;
 import com.fiap.hackgov.bidding.internal.entities.enums.HistoryEventType;
@@ -52,6 +53,7 @@ public class RequisitionMock {
         pendingApproval.setJustification("Equipamentos atuais apresentam baixa performance");
 
         pendingApproval.setBudgetAllocation("4.4.90.52.00");
+        pendingApproval.setType(AcquisitionType.BEM_MOVEL);
 
         pendingApproval = requisitionRepository.save(pendingApproval);
 
@@ -87,12 +89,14 @@ public class RequisitionMock {
         pendingAnalysis.setSector(ctx.comprasSectorSP);
 
         pendingAnalysis.setResponsible(ctx.ana);
+        pendingAnalysis.setProcurementResponsible(ctx.ana);
 
         pendingAnalysis.setTechnicalDescription("Aquisição de insumos para atendimento municipal");
 
         pendingAnalysis.setJustification("Reposição de materiais essenciais para continuidade do atendimento");
 
         pendingAnalysis.setBudgetAllocation("3.3.90.30.00");
+        pendingAnalysis.setType(AcquisitionType.BEM_MOVEL);
 
         pendingAnalysis = requisitionRepository.save(pendingAnalysis);
 
@@ -134,12 +138,14 @@ public class RequisitionMock {
         pendingProcurementApproval.setSector(ctx.comprasSectorSP);
 
         pendingProcurementApproval.setResponsible(ctx.maria);
+        pendingProcurementApproval.setProcurementResponsible(ctx.ana);
 
         pendingProcurementApproval.setTechnicalDescription("Contratação de serviço de limpeza predial");
 
         pendingProcurementApproval.setJustification("Atendimento às unidades com maior circulação pública");
 
         pendingProcurementApproval.setBudgetAllocation("3.3.90.39.00");
+        pendingProcurementApproval.setType(AcquisitionType.SERVICO_PJ);
 
         pendingProcurementApproval = requisitionRepository.save(pendingProcurementApproval);
 
@@ -149,7 +155,7 @@ public class RequisitionMock {
 
         pendingProcurementApprovalStatus.setStage(ProcessStage.HOMOLOGACAO_COMPRAS);
 
-        pendingProcurementApprovalStatus.setResponsibleId(ctx.maria.getId());
+        pendingProcurementApprovalStatus.setResponsibleId(ctx.ana.getId());
 
         pendingProcurementApprovalStatus.setObservation("Aguardando homologação da área de compras");
 
@@ -183,12 +189,14 @@ public class RequisitionMock {
         validatedFlow.setSector(ctx.tiSectorsSP);
 
         validatedFlow.setResponsible(ctx.joao);
+        validatedFlow.setProcurementResponsible(ctx.maria);
 
         validatedFlow.setTechnicalDescription("Renovação de certificados digitais institucionais");
 
         validatedFlow.setJustification("Manter serviços digitais assinados e juridicamente válidos");
 
         validatedFlow.setBudgetAllocation("3.3.90.40.00");
+        validatedFlow.setType(AcquisitionType.SERVICO_PJ);
 
         validatedFlow = requisitionRepository.save(validatedFlow);
 
@@ -234,12 +242,14 @@ public class RequisitionMock {
         licitationRequisition.setSector(ctx.comprasSectorSP);
 
         licitationRequisition.setResponsible(ctx.maria);
+        licitationRequisition.setProcurementResponsible(ctx.maria);
 
         licitationRequisition.setTechnicalDescription("Contratação de empresa para manutenção predial");
 
         licitationRequisition.setJustification("Necessidade de manutenção preventiva dos prédios públicos");
 
         licitationRequisition.setBudgetAllocation("3.3.90.39.00");
+        licitationRequisition.setType(AcquisitionType.SERVICO_PJ);
 
         licitationRequisition = requisitionRepository.save(licitationRequisition);
 
@@ -283,12 +293,14 @@ public class RequisitionMock {
         completedLicitationRequisition.setSector(ctx.financeiroSectorSP);
 
         completedLicitationRequisition.setResponsible(ctx.joao);
+        completedLicitationRequisition.setProcurementResponsible(ctx.maria);
 
         completedLicitationRequisition.setTechnicalDescription("Contratação de licença e suporte para plataforma de gestão tributária");
 
         completedLicitationRequisition.setJustification("Modernização do atendimento e melhoria do controle fiscal");
 
         completedLicitationRequisition.setBudgetAllocation("3.3.90.40.00");
+        completedLicitationRequisition.setType(AcquisitionType.SERVICO_PJ);
 
         completedLicitationRequisition = requisitionRepository.save(completedLicitationRequisition);
 

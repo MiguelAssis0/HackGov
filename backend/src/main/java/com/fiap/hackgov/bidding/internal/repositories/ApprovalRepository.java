@@ -13,5 +13,7 @@ import java.util.UUID;
 public interface ApprovalRepository extends JpaRepository<Approval, UUID> {
     Page<Approval> findByApprovalStatus(ApprovalStatus status, Pageable pageable);
 
+    Optional<Approval> findFirstByRequisitionIdAndApprovalStatusOrderByCreatedAtDesc(UUID requisitionId, ApprovalStatus status);
+
     Optional<Approval> findFirstByRequisitionIdAndApprovalSectorOrderByCreatedAtDesc(UUID requisitionId, ApprovalSector approvalSector);
 }

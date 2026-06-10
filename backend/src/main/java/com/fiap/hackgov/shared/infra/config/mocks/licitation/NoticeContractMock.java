@@ -63,6 +63,7 @@ public class NoticeContractMock {
         LicitationProcess finishedProcess = new LicitationProcess();
         finishedProcess.setProcessNumber("LIC-2026-000002");
         finishedProcess.setRequisition(ctx.requisitionFinishedLicitation);
+        finishedProcess.setResponsible(ctx.maria);
         finishedProcess.setType(LicitationType.CONCORRENCIA);
         finishedProcess.setStatus(LicitationStatus.FINISHED);
         finishedProcess.setEstimatedValue(new BigDecimal("420000.00"));

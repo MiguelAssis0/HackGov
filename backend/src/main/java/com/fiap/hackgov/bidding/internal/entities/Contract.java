@@ -46,13 +46,13 @@ public class Contract {
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal totalValue;
 
-    @Column(nullable = false)
+    @Column
     private LocalDate signedAt;
 
-    @Column(nullable = false)
+    @Column
     private LocalDate startDate;
 
-    @Column(nullable = false)
+    @Column
     private LocalDate endDate;
 
     @ManyToOne(fetch = FetchType.LAZY)

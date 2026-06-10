@@ -1,10 +1,12 @@
 package com.fiap.hackgov.bidding.internal.controllers;
 
 import com.fiap.hackgov.bidding.internal.DTOs.executionOrder.CreateExecutionOrderDTO;
+import com.fiap.hackgov.bidding.internal.DTOs.executionOrder.CreateRequisitionExecutionOrderDTO;
 import com.fiap.hackgov.bidding.internal.DTOs.executionOrder.ExecutionOrderResponseDTO;
 import com.fiap.hackgov.bidding.internal.entities.ExecutionOrder;
 import com.fiap.hackgov.bidding.internal.mappers.ExecutionOrderMapper;
 import com.fiap.hackgov.bidding.internal.services.ExecutionOrderService;
+import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.shared.infra.pagination.PageResponseDTO;
 import com.fiap.hackgov.shared.infra.pagination.PaginationMapper;
 import jakarta.validation.Valid;
@@ -15,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -34,6 +37,16 @@ public class ExecutionOrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(executionOrderMapper.toDTO(executionOrder));
     }
 
+    @PostMapping("/requisition/{requisitionId}")
+    public ResponseEntity<ExecutionOrderResponseDTO> createForRequisition(
+            @PathVariable UUID requisitionId,
+            @Valid @RequestBody CreateRequisitionExecutionOrderDTO dto,
+            @AuthenticationPrincipal Employee employee
+    ) {
+        ExecutionOrder executionOrder = executionOrderService.createForRequisition(requisitionId, dto, employee);
+        return ResponseEntity.status(HttpStatus.CREATED).body(executionOrderMapper.toDTO(executionOrder));
+    }
+
     @GetMapping
     public ResponseEntity<PageResponseDTO<ExecutionOrderResponseDTO>> findAll(@PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<ExecutionOrderResponseDTO> dtoPage = executionOrderService.findAll(pageable).map(executionOrderMapper::toDTO);
@@ -43,6 +56,11 @@ public class ExecutionOrderController {
     @GetMapping("/{id}")
     public ResponseEntity<ExecutionOrderResponseDTO> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(executionOrderMapper.toDTO(executionOrderService.findById(id)));
+    }
+
+    @GetMapping("/requisition/{requisitionId}")
+    public ResponseEntity<ExecutionOrderResponseDTO> findByRequisitionId(@PathVariable UUID requisitionId) {
+        return ResponseEntity.ok(executionOrderMapper.toDTO(executionOrderService.findByRequisitionId(requisitionId)));
     }
 
     @GetMapping("/contract/{contractId}")

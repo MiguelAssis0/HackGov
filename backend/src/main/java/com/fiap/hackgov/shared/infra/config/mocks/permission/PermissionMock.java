@@ -33,7 +33,24 @@ public class PermissionMock {
 
         Permissions permUpdate = createPermission("SECTOR", Actions.UPDATE);
 
-        permissionsRepository.saveAll(List.of(permRead, permCreate, permDelete, permUpdate));
+        Permissions approveSecretary = createPermission("approval.secretary", Actions.UPDATE);
+
+        Permissions approveProcurement = createPermission("approval.procurement", Actions.UPDATE);
+
+        Permissions approvePayment = createPermission("approval.payment", Actions.UPDATE);
+
+        Permissions approveAccountability = createPermission("approval.accountability", Actions.UPDATE);
+
+        permissionsRepository.saveAll(List.of(
+                permRead,
+                permCreate,
+                permDelete,
+                permUpdate,
+                approveSecretary,
+                approveProcurement,
+                approvePayment,
+                approveAccountability
+        ));
 
         // -------------------------
         // Occupation Permissions
@@ -46,6 +63,10 @@ public class PermissionMock {
                 createRelation(permCreate, ctx.administradorMunicipal),
                 createRelation(permDelete, ctx.administradorMunicipal),
                 createRelation(permUpdate, ctx.administradorMunicipal),
+                createRelation(approveSecretary, ctx.administradorMunicipal),
+                createRelation(approveProcurement, ctx.administradorMunicipal),
+                createRelation(approvePayment, ctx.administradorMunicipal),
+                createRelation(approveAccountability, ctx.administradorMunicipal),
 
                 // Analista
                 createRelation(permRead, ctx.analista),
@@ -70,10 +91,13 @@ public class PermissionMock {
                 createRelation(permRead, ctx.pregoeiro),
                 createRelation(permCreate, ctx.pregoeiro),
                 createRelation(permUpdate, ctx.pregoeiro),
+                createRelation(approveProcurement, ctx.pregoeiro),
 
                 // Analista financeiro
                 createRelation(permRead, ctx.analistaFinanceiro),
                 createRelation(permUpdate, ctx.analistaFinanceiro),
+                createRelation(approvePayment, ctx.analistaFinanceiro),
+                createRelation(approveAccountability, ctx.analistaFinanceiro),
 
                 // Gestor de contratos
                 createRelation(permRead, ctx.gestorContratos),

@@ -13,5 +13,7 @@ import java.util.UUID;
 public interface AnalysisRepository extends JpaRepository<Analysis, UUID> {
     Page<Analysis> findByResult(AnalysisResult result, Pageable pageable);
 
+    Optional<Analysis> findFirstByRequisitionIdAndResultOrderByCreatedAtDesc(UUID requisitionId, AnalysisResult result);
+
     Optional<Analysis> findFirstByRequisitionIdAndStageOrderByCreatedAtDesc(UUID requisitionId, ProcessStage stage);
 }
