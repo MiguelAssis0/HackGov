@@ -1,9 +1,9 @@
 package com.fiap.hackgov.shared.infra.filters;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fiap.hackgov.shared.infra.exceptions.controllers.StandardError;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import tools.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
