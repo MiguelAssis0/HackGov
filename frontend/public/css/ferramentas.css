@@ -1,0 +1,291 @@
+.eyebrow {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--azul);
+}
+
+.eyebrow.dark { color: var(--azul); }
+
+.ferramentas-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 1rem;
+    align-items: start;
+}
+
+.ferramentas-nav {
+    background: var(--branco);
+    border: var(--border1-5);
+    border-radius: 16px;
+    overflow: hidden;
+    position: sticky;
+    top: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+}
+
+.ferramentas-nav-header {
+    padding: 1rem 1rem 0.75rem;
+    border-bottom: var(--border1);
+}
+
+.ferr-busca-wrap { position: relative; }
+
+.ferr-busca-wrap i {
+    position: absolute;
+    left: 0.7rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    pointer-events: none;
+}
+
+.ferr-busca {
+    width: 100%;
+    background: var(--cinza-claro);
+    border: var(--border1-5);
+    border-radius: 8px;
+    padding: 0.4rem 0.75rem 0.4rem 2rem;
+    font-size: 0.82rem;
+    color: var(--azul-escuro);
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.ferr-busca:focus {
+    border-color: var(--azul);
+    background: var(--branco);
+}
+
+.ferr-busca::placeholder { color: var(--text-muted); }
+
+.ferr-categoria-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    padding: 0.75rem 1rem 0.3rem;
+}
+
+.ferr-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    border: none;
+    border-left: 3px solid transparent;
+    background: none;
+    width: 100%;
+    text-align: left;
+    transition: all 0.15s;
+}
+
+.ferr-item:hover { background: var(--cinza-claro); }
+
+.ferr-item.active {
+    background: var(--azul-claro);
+    border-left-color: var(--azul);
+}
+
+.ferr-item-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    background: var(--cinza-claro);
+    color: var(--text-muted);
+    transition: all 0.15s;
+}
+
+.ferr-item.active .ferr-item-icon {
+    background: var(--azul);
+    color: #fff;
+}
+
+.ferr-item:hover:not(.active) .ferr-item-icon {
+    background: var(--azul-claro);
+    color: var(--azul);
+}
+
+.ferr-item-nome {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--azul-escuro);
+    flex: 1;
+    line-height: 1.3;
+}
+
+.ferr-item.active .ferr-item-nome {
+    color: var(--azul);
+    font-weight: 600;
+}
+
+.ferr-badge {
+    font-size: 0.62rem;
+    font-weight: 700;
+    padding: 0.1rem 0.4rem;
+    border-radius: 50px;
+    flex-shrink: 0;
+}
+
+.ferr-badge.em-breve {
+    background: var(--cinza-claro);
+    color: var(--text-muted);
+}
+
+.ferr-badge.obrigatoria {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.ferramentas-conteudo {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.ferr-painel-header {
+    background: var(--branco);
+    border: var(--border1-5);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+}
+
+.ferr-painel-header h4 {
+    font-size: 1.25rem;
+    color: var(--azul-escuro);
+}
+
+.ferr-painel-header p {
+    font-size: 0.85rem;
+}
+
+.ferr-grade {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.ferr-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 16px;
+    gap: 0.5rem;
+    min-height: 152px;
+    padding: 1.35rem 0.75rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    border: var(--border1-5);
+    background: var(--branco);
+    transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+    position: relative;
+}
+
+.ferr-card:hover {
+    background: var(--cinza-claro);
+    border-color: var(--border1-5-hover);
+}
+
+.ferr-card.disabled {
+    opacity: 0.55;
+    cursor: default;
+}
+
+.ferr-card.ferr-card-selected {
+    background: #eef5ff;
+    outline: 2px solid var(--azul);
+    outline-offset: -2px;
+}
+
+.ferr-card-tag {
+    position: absolute;
+    top: 0.55rem;
+    right: 0.55rem;
+    font-size: 0.62rem;
+    font-weight: 700;
+    padding: 0.12rem 0.45rem;
+    border-radius: 50px;
+}
+
+.ferr-card-tag.ativo { background: #dcfce7; color: #16a34a; }
+.ferr-card-tag.inativo { background: var(--cinza-claro); color: var(--text-muted); }
+.ferr-card-tag.obrigatoria { background: #dbeafe; color: #1d4ed8; }
+
+.ferr-card-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+}
+
+.ferr-card-nome {
+    min-height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--azul-escuro);
+    line-height: 1.3;
+}
+
+.ferr-card-toggle { margin-top: auto; }
+
+.ferr-card-toggle .form-check-input {
+    cursor: pointer;
+    width: 2em;
+    height: 1em;
+}
+
+.ferr-permissoes-wrap {
+    background: var(--branco);
+    border: var(--border1-5);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.ferr-permissoes-header {
+    padding: 1rem 1.5rem;
+    border-bottom: var(--border1);
+}
+
+.ferr-permissoes-header h5 {
+    font-size: 1rem;
+    color: var(--azul-escuro);
+}
+
+.ferr-permissoes-body {
+    padding: 1.25rem 1.5rem;
+    border-bottom: var(--border1);
+}
+
+@media (max-width: 1200px) {
+    .ferr-grade { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+@media (max-width: 991px) {
+    .ferramentas-layout { grid-template-columns: 1fr; }
+    .ferramentas-nav {
+        position: static;
+        max-height: none;
+    }
+    .ferr-grade { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 576px) {
+    .ferr-grade { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+

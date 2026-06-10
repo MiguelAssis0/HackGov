@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: hackgov-postgres
+    environment:
+      POSTGRES_USER: hackgov_user
+      POSTGRES_PASSWORD: hackgov_password
+      POSTGRES_DB: hackgov_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hackgov_user -d hackgov_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hackgov-network
+
+  # Backend (Spring Boot)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: hackgov-backend
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hackgov_db
+      SPRING_DATASOURCE_USERNAME: hackgov_user
+      SPRING_DATASOURCE_PASSWORD: hackgov_password
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      SPRING_EMAIL_HOST: ${SPRING_EMAIL_HOST:-smtp.gmail.com}
+      SPRING_EMAIL_PORT: ${SPRING_EMAIL_PORT:-587}
+      SPRING_EMAIL: ${SPRING_EMAIL:-your-email@gmail.com}
+      SPRING_EMAIL_PASSWORD: ${SPRING_EMAIL_PASSWORD:-your-password}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      PASSWORD_EXPIRE_HOURS: ${PASSWORD_EXPIRE_HOURS:-24}
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - hackgov-network
+    restart: unless-stopped
+
+  # Frontend (React + Vite)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: hackgov-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    environment:
+      VITE_API_URL: http://backend:8080
+    networks:
+      - hackgov-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  hackgov-network:
+    driver: bridge
+
+

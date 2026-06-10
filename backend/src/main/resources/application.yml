@@ -1,0 +1,86 @@
+spring:
+  jpa:
+    show-sql: false
+  application:
+    name: HackGov
+  mail:
+    host: ${SPRING_EMAIL_HOST:smtp.gmail.com}
+    port: ${SPRING_EMAIL_PORT:587}
+    username: ${SPRING_EMAIL:smtp@gmail.com}
+    password: ${SPRING_EMAIL_PASSWORD:password}
+    expiration_hours: ${PASSWORD_EXPIRE_HOURS:24}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+server:
+  error:
+    include-stacktrace: never
+
+api:
+  security:
+    skip-paths:
+      - /h2-console
+      - /swagger-ui.html
+      - /v3/api-docs
+      - /swagger-ui/**
+    token:
+      secret: ${JWT_SECRET:my-secret}
+      refresh-secret: ${JWT_REFRESH_SECRET:my-refresh-secret}
+      expiration: ${JWT_TIME:2}
+    gemini:
+      api-key: ${GOOGLE_API_KEY}
+
+logging:
+  level:
+    root: INFO
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: INFO
+      type:
+        descriptor:
+          sql:
+            BasicBinder: TRACE
+    root: INFO

@@ -1,0 +1,54 @@
+<configuration>
+    <property name="APP_NAME" value="hackgov"/>
+
+    <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+
+            <providers>
+
+                <timestamp>
+                    <fieldName>timestamp</fieldName>
+                </timestamp>
+
+                <logLevel>
+                    <fieldName>level</fieldName>
+                </logLevel>
+
+                <loggerName>
+                    <fieldName>logger</fieldName>
+                </loggerName>
+
+                <threadName>
+                    <fieldName>thread</fieldName>
+                </threadName>
+
+                <message>
+                    <fieldName>message</fieldName>
+                </message>
+
+                <mdc/>
+
+                <stackTrace>
+                    <fieldName>stacktrace</fieldName>
+                </stackTrace>
+
+                <globalCustomFields>
+                    {
+                    "app": "${APP_NAME}"
+                    }
+                </globalCustomFields>
+
+            </providers>
+        </encoder>
+    </appender>
+
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.hibernate" level="WARN"/>
+
+    <logger name="com.fiap.hackgov" level="INFO"/>
+
+    <root level="INFO">
+        <appender-ref ref="JSON"/>
+    </root>
+
+</configuration>

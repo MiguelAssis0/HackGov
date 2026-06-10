@@ -1,0 +1,73 @@
+.contato-hero {
+    padding: 5rem 0 4rem;
+}
+
+.contato-info-card {
+    background: var(--branco);
+    border: var(--border1-5);
+    border-radius: 14px;
+    padding: 1.1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.2s;
+}
+
+.contato-info-card:hover {
+    border-color: var(--border1-5-hover);
+    box-shadow: 0 4px 16px rgba(11, 31, 58, 0.07);
+    transform: translateX(4px);
+}
+
+.contato-info-icon {
+    width: 42px;
+    height: 42px;
+    background: var(--azul-claro);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    color: var(--azul);
+    flex-shrink: 0;
+}
+
+.contato-info-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    margin-bottom: 0.2rem;
+}
+
+.contato-info-valor {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--azul-escuro);
+}
+
+.contato-faq-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.83rem;
+    color: var(--azul-escuro);
+    text-decoration: none;
+    padding: 0.3rem 0;
+    transition: all 0.15s;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.contato-faq-link:last-child {
+    border-bottom: none;
+}
+
+.contato-faq-link:hover {
+    color: var(--azul);
+    padding-left: 4px;
+}
+
+.form-control-custom textarea {
+    border-radius: 10px;
+}
