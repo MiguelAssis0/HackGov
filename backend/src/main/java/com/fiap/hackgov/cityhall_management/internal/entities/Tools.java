@@ -19,7 +19,7 @@ import java.util.UUID;
 public class Tools {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     private String name;
 

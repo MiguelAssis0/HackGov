@@ -39,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -126,7 +127,9 @@ public class RequisitionService {
 
         Requisition requisition = requisitionRepository.findById(requisitionId).orElseThrow(() -> new ResourceNotFoundException("Requisition not found: " + requisitionId));
 
-        sendToNextStage(requisition, dto.nextStage(), employee, dto.observation());
+        Employee stageResponsible = validateContractStageResponsible(requisition, dto.nextStage(), employee);
+
+        sendToNextStage(requisition, dto.nextStage(), stageResponsible, dto.observation());
 
         return requisitionMapper.toDTO(requisition);
     }
@@ -277,6 +280,42 @@ public class RequisitionService {
         if (!employee.getStatus()) {
             throw new BusinessException("Procurement responsible must be active");
         }
+    }
+
+    private Employee validateContractStageResponsible(
+            Requisition requisition,
+            ProcessStage nextStage,
+            Employee authenticatedEmployee
+    ) {
+        if (requisition.getProcessStatus().getStage() != ProcessStage.SETOR_CONTRATOS
+                || nextStage != ProcessStage.INICIO_SERVICOS) {
+            return authenticatedEmployee;
+        }
+
+        if (authenticatedEmployee == null) {
+            throw new BusinessException("Usuário autenticado não identificado");
+        }
+
+        Employee employee = employeeRepository.findByIdWithDetails(authenticatedEmployee.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found: " + authenticatedEmployee.getId()));
+
+        if (!Boolean.TRUE.equals(employee.getStatus())) {
+            throw new BusinessException("Somente um servidor ativo do setor de Contratos pode aprovar esta etapa");
+        }
+
+        if (employee.getSectorId() == null
+                || employee.getSectorId().getName() == null
+                || !employee.getSectorId().getName().toLowerCase(Locale.ROOT).contains("contrat")) {
+            throw new BusinessException("Somente um servidor do setor de Contratos pode aprovar esta etapa");
+        }
+
+        UUID requisitionCityHallId = requisition.getSector().getCityHall().getId();
+        if (employee.getCityHallId() == null
+                || !employee.getCityHallId().getId().equals(requisitionCityHallId)) {
+            throw new BusinessException("O servidor do setor de Contratos deve pertencer à prefeitura da requisição");
+        }
+
+        return employee;
     }
 
     private void validateStageTransition(Requisition requisition, ProcessStage currentStage, ProcessStage nextStage) {

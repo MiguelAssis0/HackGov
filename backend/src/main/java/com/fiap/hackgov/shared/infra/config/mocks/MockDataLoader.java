@@ -1,5 +1,6 @@
 package com.fiap.hackgov.shared.infra.config.mocks;
 
+import com.fiap.hackgov.cityhall_management.internal.repositories.CityHallRepository;
 import com.fiap.hackgov.shared.infra.config.mocks.chat.ChatMock;
 import com.fiap.hackgov.shared.infra.config.mocks.cityhall.CityHallMock;
 import com.fiap.hackgov.shared.infra.config.mocks.employee.EmployeeMock;
@@ -15,6 +16,7 @@ import com.fiap.hackgov.shared.infra.config.mocks.task.BoardMock;
 import com.fiap.hackgov.shared.infra.config.mocks.task.TaskMock;
 import com.fiap.hackgov.shared.infra.config.mocks.util.MockContext;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -22,7 +24,11 @@ import org.springframework.stereotype.Component;
 @Component
 @Profile("dev")
 @RequiredArgsConstructor
+@Slf4j
 public class MockDataLoader implements CommandLineRunner {
+    private static final String SEED_CITY_HALL_CNPJ = "46.395.000/0001-39";
+
+    private final CityHallRepository cityHallRepository;
     private final StateMock stateMock;
     private final CityHallMock cityHallMock;
     private final OccupationMock occupationMock;
@@ -39,6 +45,11 @@ public class MockDataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        if (cityHallRepository.findByCnpj(SEED_CITY_HALL_CNPJ).isPresent()) {
+            log.info("Mocks já carregados; carga inicial ignorada.");
+            return;
+        }
+
         MockContext ctx = new MockContext();
         stateMock.load(ctx);
         cityHallMock.load(ctx);
@@ -53,6 +64,6 @@ public class MockDataLoader implements CommandLineRunner {
         licitationMock.load(ctx);
         noticeContractMock.load(ctx);
         contractPaymentMock.load(ctx);
-        System.out.println("Mocks carregados!");
+        log.info("Mocks carregados!");
     }
 }

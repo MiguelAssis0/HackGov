@@ -349,6 +349,7 @@ function ProcessDetails({
   licitationSaving,
   licitationResultProcessing,
   licitationError,
+  canApproveContractStage,
   contractStageAdvancing,
   contractStageError,
   executionOrder,
@@ -481,6 +482,7 @@ function ProcessDetails({
               licitationSaving={licitationSaving}
               licitationResultProcessing={licitationResultProcessing}
               licitationError={licitationError}
+              canApproveContractStage={canApproveContractStage}
               contractStageAdvancing={contractStageAdvancing}
               contractStageError={contractStageError}
               executionOrder={executionOrder}
@@ -557,6 +559,7 @@ function StagePanel({
   licitationSaving,
   licitationResultProcessing,
   licitationError,
+  canApproveContractStage,
   contractStageAdvancing,
   contractStageError,
   executionOrder,
@@ -683,6 +686,7 @@ function StagePanel({
         <ContractStageAdvance
           advancing={contractStageAdvancing}
           error={contractStageError}
+          allowed={canApproveContractStage}
           onAdvance={onAdvanceContractStage}
         />
       )}
@@ -1328,7 +1332,7 @@ function WinnerField({
   );
 }
 
-function ContractStageAdvance({ advancing, error, onAdvance }) {
+function ContractStageAdvance({ advancing, error, allowed, onAdvance }) {
   return (
     <div className="process-actions">
       <div className="secao-titulo mb-2">
@@ -1336,17 +1340,22 @@ function ContractStageAdvance({ advancing, error, onAdvance }) {
         Setor de Contratos
       </div>
       <p className="text-muted small mb-3">
-        Confirme o encaminhamento do processo para o início dos serviços.
+        A aprovação e o encaminhamento para o início dos serviços devem ser realizados pelo setor de Contratos.
       </p>
       <button
         className="process-action-button process-action-success"
         type="button"
-        disabled={advancing}
+        disabled={advancing || !allowed}
         onClick={onAdvance}
       >
         <i className={`bi ${advancing ? "bi-arrow-repeat" : "bi-arrow-right-circle"}`}></i>
-        {advancing ? "Avançando..." : "Avançar para Início dos Serviços"}
+        {advancing ? "Aprovando..." : "Aprovar e Avançar para Início dos Serviços"}
       </button>
+      {!allowed && (
+        <div className="alert alert-warning py-2 mt-3 mb-0 small">
+          Somente um servidor ativo do setor de Contratos pode aprovar esta etapa.
+        </div>
+      )}
       {error && <div className="alert alert-danger py-2 mt-3 mb-0 small">{error}</div>}
     </div>
   );
@@ -2361,6 +2370,7 @@ export default function ProcessesPage() {
   const [procurementAssignmentLoading, setProcurementAssignmentLoading] = useState(false);
   const [procurementAssignmentError, setProcurementAssignmentError] = useState("");
   const [authenticatedEmployeeId, setAuthenticatedEmployeeId] = useState(null);
+  const [authenticatedEmployeeSector, setAuthenticatedEmployeeSector] = useState("");
   const [licitationProcess, setLicitationProcess] = useState(null);
   const [licitationHistory, setLicitationHistory] = useState([]);
   const [licitationHistoryLoading, setLicitationHistoryLoading] = useState(false);
@@ -2445,6 +2455,7 @@ export default function ProcessesPage() {
 
         setSectors(sectorsResult.status === "fulfilled" ? pageItems(sectorsResult.value) : []);
         setAuthenticatedEmployeeId(employeeResult.status === "fulfilled" ? employeeResult.value?.id || null : null);
+        setAuthenticatedEmployeeSector(employeeResult.status === "fulfilled" ? employeeResult.value?.sector || "" : "");
       });
 
     return () => {
@@ -2463,6 +2474,9 @@ export default function ProcessesPage() {
       && licitationProcess?.responsibleId
       && String(authenticatedEmployeeId) === String(licitationProcess.responsibleId),
   );
+  const canApproveContractStage = authenticatedEmployeeSector
+    .toLocaleLowerCase("pt-BR")
+    .includes("contrat");
   const canIssueExecutionOrder = Boolean(
     authenticatedEmployeeId
       && activeRequisition?.responsible?.id
@@ -3087,6 +3101,7 @@ export default function ProcessesPage() {
                   licitationSaving={licitationSaving}
                   licitationResultProcessing={licitationResultProcessing}
                   licitationError={licitationError}
+                  canApproveContractStage={canApproveContractStage}
                   contractStageAdvancing={contractStageAdvancing}
                   contractStageError={contractStageError}
                   executionOrder={executionOrder}
