@@ -24,6 +24,20 @@
 
 O projeto cobre desde cadastro e governança municipal até requisições, aprovações, tarefas, mensagens e apoio com IA.
 
+## Documentação
+
+- Fase 1 - https://docs.google.com/document/d/1VyVmYJme32fxz1gj0j8UciZEK1h3tnn6EnchARqw0m8/edit?usp=sharing
+- Fase 2 - https://docs.google.com/document/d/1a4SZjF-kROwfuIelkwPM8N8aXTQZkGIqoVtdb5gFEG0/edit?usp=sharing
+- Fase 3 - https://docs.google.com/document/d/1R0T0LqrMhG-JAuAYGsOdOuhcqgFUhftO9G5RfKHnr2A/edit?usp=sharing
+- Fase 4 - https://docs.google.com/document/d/1jjb1ibS3TBDOjyjgHxo70r9XnZEhO4RS6bPrJGww_Eg/edit?usp=sharing
+- Fase 5 -
+- Fase 6 -
+- Fase 7 -
+
+- Enterprise Challenge 1 - https://docs.google.com/document/d/18eNyBX4_g2aRiT7AfrPjtZAP0o9axsrrneLe3h1PiPU/edit?usp=sharing
+- Enterprise Challenge 2 - https://docs.google.com/document/d/1ThQgIluIs597GAoAbnY5IuSneuIsbG-hWDb3u2Iqlhw/edit?usp=sharing
+- Enterprise Challenge 3 - https://docs.google.com/document/d/1V1A9BkeTjiZtBLCIWJ_6Sk7FzUFPsMRL7MAx6cl51ZY/edit?usp=sharing
+
 ## Recursos
 
 - Autenticação com login, cadastro, JWT e 2FA.
