@@ -36,7 +36,6 @@ O projeto cobre desde cadastro e governança municipal até requisições, aprov
 
 - Enterprise Challenge 1 - https://docs.google.com/document/d/18eNyBX4_g2aRiT7AfrPjtZAP0o9axsrrneLe3h1PiPU/edit?usp=sharing
 - Enterprise Challenge 2 - https://docs.google.com/document/d/1ThQgIluIs597GAoAbnY5IuSneuIsbG-hWDb3u2Iqlhw/edit?usp=sharing
-- Enterprise Challenge 3 - https://docs.google.com/document/d/1V1A9BkeTjiZtBLCIWJ_6Sk7FzUFPsMRL7MAx6cl51ZY/edit?usp=sharing
 
 ## Recursos
 
