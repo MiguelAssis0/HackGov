@@ -188,6 +188,17 @@
     border: 1px solid rgba(22, 163, 74, 0.45);
     border-radius: 10px;
     background: #dcfce7;
+    margin-bottom: 0.65rem;
+}
+
+.device-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.device-info h4,
+.device-detail {
+    overflow-wrap: anywhere;
 }
 
 .device-card > i {
@@ -211,6 +222,22 @@
     font-size: 0.72rem;
     font-style: normal;
     font-weight: 500;
+}
+
+.device-revoke-btn {
+    flex: 0 0 auto;
+    padding: 0.4rem 0.75rem;
+    border: 1px solid #dc2626;
+    border-radius: 7px;
+    background: var(--branco);
+    color: #dc2626;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.device-revoke-btn:hover {
+    background: #fee2e2;
 }
 
 .font-segmented {

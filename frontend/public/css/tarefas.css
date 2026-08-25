@@ -562,3 +562,23 @@ button:disabled {
         align-items: stretch;
     }
 }
+.tarefa-title-button { background: transparent; border: 0; color: inherit; padding: 0; text-align: left; width: 100%; }
+.tarefa-title-button:hover h4 { color: var(--azul); }
+.tarefa-badges { display: flex; flex-wrap: wrap; gap: .35rem; margin-bottom: .7rem; }
+.tarefa-badges span { background: var(--cinza-100); border-radius: 999px; font-size: .65rem; font-weight: 800; padding: .2rem .45rem; }
+.task-detail-modal { max-height: 92vh; max-width: 980px; overflow: auto; }
+.task-detail-grid { display: grid; gap: 1.5rem; grid-template-columns: minmax(0, 1.5fr) minmax(260px, .8fr); }
+.task-detail-grid h4 { font-size: .95rem; font-weight: 800; }
+.task-detail-list { display: grid; gap: .55rem; }
+.task-check-item { align-items: center; border: 1px solid var(--borda); border-radius: .5rem; display: grid; gap: .6rem; grid-template-columns: auto 1fr auto; padding: .55rem .7rem; }
+.task-check-item:has(input:checked) span { text-decoration: line-through; opacity: .65; }
+.task-comment { background: var(--cinza-50); border-radius: .6rem; padding: .7rem; }
+.task-comment p { margin: .25rem 0; }
+.task-comment small, .task-time-row span { color: var(--texto-muted); font-size: .72rem; }
+.task-time-summary { background: #eef6ff; border-radius: .7rem; display: flex; flex-direction: column; margin-bottom: .7rem; padding: 1rem; text-align: center; }
+.task-time-summary strong { color: var(--azul); font-size: 1.5rem; }
+.task-manual-time { display: grid; gap: .35rem; }
+.task-time-row { display: flex; justify-content: space-between; }
+.task-attachment { align-items: center; background: transparent; border: 1px solid var(--borda); border-radius: .5rem; display: grid; gap: .4rem; grid-template-columns: auto 1fr auto; padding: .55rem; text-align: left; }
+.task-attachment small { color: var(--texto-muted); }
+@media (max-width: 767px) { .task-detail-grid { grid-template-columns: 1fr; } }

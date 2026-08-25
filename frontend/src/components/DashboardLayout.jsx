@@ -23,6 +23,9 @@ const dashboardStyles = [
   "/css/tarefas.css",
   "/css/perfil.css",
   "/css/gestao.css",
+  "/css/agenda.css",
+  "/css/caixa-entrada.css",
+  "/css/documentos.css",
 ];
 
 const demoUser = {
@@ -226,14 +229,26 @@ export function DashboardLayout({ children, styles = [] }) {
           >
             <i className="bi bi-check2-square"></i> Tarefas
           </Link>
-          <a className="nav-item" href="#">
+          <Link
+            className={`nav-item ${isActive("/agenda") ? "active" : ""}`}
+            to="/agenda"
+          >
+            <i className="bi bi-calendar3"></i> Agenda
+          </Link>
+          <Link className={`nav-item ${isActive("/caixa-entrada") ? "active" : ""}`} to="/caixa-entrada">
             <i className="bi bi-inbox-fill"></i> Caixa de Entrada
-          </a>
+          </Link>
+          <Link className={`nav-item ${isActive("/documentos") ? "active" : ""}`} to="/documentos">
+            <i className="bi bi-folder2-open"></i> Documentos
+          </Link>
           <Link
             className={`nav-item ${isActive("/funcionarios") ? "active" : ""}`}
             to="/funcionarios"
           >
             <i className="bi bi-people-fill"></i> Funcionários
+          </Link>
+          <Link className={`nav-item ${isActive("/auditoria") ? "active" : ""}`} to="/auditoria">
+            <i className="bi bi-shield-check"></i> Auditoria
           </Link>
           <Link
             className={`nav-item ${isActive("/gestao") ? "active" : ""}`}

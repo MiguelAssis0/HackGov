@@ -24,6 +24,8 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "requisitions")
+@org.hibernate.annotations.Filter(name="cityHallFilter",condition=BiddingScopeConditions.REQ_CITY)
+@org.hibernate.annotations.Filter(name="sectorFilter",condition=BiddingScopeConditions.REQ_SECTOR)
 public class Requisition {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

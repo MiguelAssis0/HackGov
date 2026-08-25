@@ -26,12 +26,16 @@ services:
       dockerfile: Dockerfile
     container_name: hackgov-backend
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      # Nao reutilize SPRING_PROFILES_ACTIVE do ambiente local: o perfil dev
+      # desativa o Flyway e usa H2, enquanto este servico sempre usa PostgreSQL.
+      SPRING_PROFILES_ACTIVE: ${HACKGOV_DOCKER_SPRING_PROFILE:-prod}
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hackgov_db
       SPRING_DATASOURCE_USERNAME: hackgov_user
       SPRING_DATASOURCE_PASSWORD: hackgov_password
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_FLYWAY_ENABLED: "true"
+      HACKGOV_MOCK_DATA_ENABLED: ${HACKGOV_DOCKER_MOCK_DATA_ENABLED:-true}
       SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
       SPRING_EMAIL_HOST: ${SPRING_EMAIL_HOST:-smtp.gmail.com}
       SPRING_EMAIL_PORT: ${SPRING_EMAIL_PORT:-587}
@@ -71,5 +75,3 @@ volumes:
 networks:
   hackgov-network:
     driver: bridge
-
-

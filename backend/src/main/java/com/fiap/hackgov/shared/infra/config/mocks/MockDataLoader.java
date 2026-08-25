@@ -17,12 +17,12 @@ import com.fiap.hackgov.shared.infra.config.mocks.task.TaskMock;
 import com.fiap.hackgov.shared.infra.config.mocks.util.MockContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
-@Profile("dev")
+@ConditionalOnProperty(prefix = "hackgov.mock-data", name = "enabled", havingValue = "true")
 @RequiredArgsConstructor
 @Slf4j
 public class MockDataLoader implements CommandLineRunner {

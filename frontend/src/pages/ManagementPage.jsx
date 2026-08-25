@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "../components/DashboardLayout.jsx";
 import { FieldLabel, PageHeader } from "../components/DashboardShared.jsx";
-import { getStoredUser, getUserType } from "../services/api.js";
+import { api, getStoredUser, getUserType } from "../services/api.js";
 import {
-  slugify,
   useCityHallName,
-  useSectorPerformance,
+  slugify,
 } from "../services/mockupService.js";
 
 const monthLabels = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun"];
@@ -110,8 +109,16 @@ export default function ManagementPage() {
   const user = getStoredUser() || {};
   const userType = getUserType(user);
   const showAllSectors = canViewAllSectors(userType);
-  const sectorPerformance = useSectorPerformance();
+  const [sectorPerformance, setSectorPerformance] = useState([]);
+  const [loadError, setLoadError] = useState("");
   const [selectedSectorId, setSelectedSectorId] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    api.getSectorPerformance().then((response) => { if (active) { setSectorPerformance(response); setLoadError(""); } })
+      .catch((error) => { if (active) setLoadError(error.message); });
+    return () => { active = false; };
+  }, []);
 
   const visibleSectors = useMemo(() => {
     if (showAllSectors) return sectorPerformance;
@@ -144,6 +151,7 @@ export default function ManagementPage() {
         <main className="dashboard">
           <div className="container">
             <PageHeader eyebrow={cityHallName} title={"Gest\u00e3o"} />
+            {loadError && <div className="auth-message danger mb-3">{loadError}</div>}
             <section className="panel gestao-empty">
               <i className="bi bi-graph-up-arrow"></i>
               <p>Nenhum setor dispon&iacute;vel para gerar indicadores.</p>

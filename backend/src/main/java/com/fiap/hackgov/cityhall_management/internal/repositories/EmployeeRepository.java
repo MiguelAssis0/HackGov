@@ -14,6 +14,8 @@ import java.util.UUID;
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
 
+    long countByCityHallId_IdAndSectorId_Id(UUID cityHallId, UUID sectorId);
+
     @EntityGraph(attributePaths = {
             "occupationId",
             "occupationId.permissions",
@@ -32,6 +34,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
     Optional<Employee> findByIdWithDetails(@Param("id") UUID id);
 
     Optional<Employee> findByEmail(String email);
+    Optional<Employee> findByCpf(String cpf);
 
     @EntityGraph(attributePaths = {"occupationId", "sectorId"})
     @Query("""

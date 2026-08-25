@@ -43,7 +43,7 @@ public class AuthController {
             HttpServletRequest httpRequest) {
 
         String clientIp = getClientIp(httpRequest);
-        LoginResponseDTO response = authService.login(loginRequest, clientIp);
+        LoginResponseDTO response = authService.login(loginRequest, clientIp, httpRequest.getHeader("User-Agent"));
         return ResponseEntity.ok(response);
     }
 
@@ -67,7 +67,7 @@ public class AuthController {
             HttpServletRequest httpRequest) {
 
         String clientIp = getClientIp(httpRequest);
-        return ResponseEntity.ok(authService.verifyTwoFactor(twoFactorRequest, clientIp));
+        return ResponseEntity.ok(authService.verifyTwoFactor(twoFactorRequest, clientIp, httpRequest.getHeader("User-Agent")));
     }
 
     @Operation(summary = "Logout", description = "Invalidate current access token")

@@ -1,6 +1,8 @@
 package com.fiap.hackgov.shared.infra.config;
 
 import com.fiap.hackgov.auth.internal.services.UserDetailsServiceImpl;
+import com.fiap.hackgov.auth.internal.entities.User;
+import com.fiap.hackgov.auth.internal.services.UserSessionService;
 import com.fiap.hackgov.shared.infra.services.TokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.Message;
@@ -20,6 +22,8 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
     private final TokenService tokenService;
 
     private final UserDetailsServiceImpl userDetailsService;
+
+    private final UserSessionService userSessionService;
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -41,6 +45,8 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
                 String email = tokenService.getSubject(token);
 
                 UserDetails user = userDetailsService.loadUserByUsername(email);
+
+                userSessionService.validateAndTouch(tokenService.getSessionId(token), (User) user);
 
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
 

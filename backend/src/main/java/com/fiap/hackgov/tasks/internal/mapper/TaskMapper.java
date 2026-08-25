@@ -13,9 +13,22 @@ public interface TaskMapper {
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "responsibles", ignore = true)
+    @Mapping(target = "completedAt", ignore = true)
     Task toEntity(CreateTaskDTO dto);
 
-    @Mapping(target = "responsibleId", source = "responsible.id")
-    @Mapping(target = "boardId", source = "board.id")
-    TaskResponseDTO toDTO(Task task);
+    default TaskResponseDTO toDTO(Task task) {
+        var board = task.getBoard();
+        var sector = board == null ? null : board.getSector();
+        var responsibleIds = task.getResponsibles().stream().map(employee -> employee.getId())
+                .collect(java.util.stream.Collectors.toCollection(java.util.LinkedHashSet::new));
+        if (task.getResponsible() != null) responsibleIds.add(task.getResponsible().getId());
+        return new TaskResponseDTO(
+                task.getId(), task.getTitle(), task.getDescription(),
+                task.getResponsible() == null ? null : task.getResponsible().getId(), responsibleIds,
+                board == null ? null : board.getId(), sector == null ? null : sector.getId(), sector == null ? null : sector.getName(),
+                task.getStartDate(), task.getEndDate(), task.getStatus(), task.getPriority(), task.getBusinessPoints(),
+                task.getProtocol(), task.getExpectedResult(), task.getCompletedAt(), task.getCreatedAt(), task.getUpdatedAt()
+        );
+    }
 }

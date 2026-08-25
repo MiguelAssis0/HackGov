@@ -2,6 +2,7 @@ package com.fiap.hackgov.shared.infra.filters;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.fiap.hackgov.auth.internal.services.UserDetailsServiceImpl;
+import com.fiap.hackgov.auth.internal.services.UserSessionService;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.cityhall_management.internal.repositories.EmployeeRepository;
 import com.fiap.hackgov.shared.infra.exceptions.TokenInvalidException;
@@ -33,6 +34,7 @@ public class JwtAuthenticationFilter extends BaseSecurityFilter {
     private final ObjectMapper objectMapper;
     private final FilterErrorWriter filterErrorWriter;
     private final EmployeeRepository employeeRepository;
+    private final UserSessionService sessionService;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
@@ -55,6 +57,7 @@ public class JwtAuthenticationFilter extends BaseSecurityFilter {
                 var userLogin = tokenService.getSubject(token);
 
                 Employee employee = (Employee) userDetailsService.loadUserByUsername(userLogin);
+                sessionService.validateAndTouch(tokenService.getSessionId(token), employee);
 
                 var auth = new UsernamePasswordAuthenticationToken(employee, null, employee.getAuthorities());
 

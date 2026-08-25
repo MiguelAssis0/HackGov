@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Filter;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -15,6 +16,8 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "licitation_histories")
+@Filter(name = "cityHallFilter", condition = BiddingScopeConditions.LIC_CITY)
+@Filter(name = "sectorFilter", condition = BiddingScopeConditions.LIC_SECTOR)
 public class LicitationHistory {
 
     @Id

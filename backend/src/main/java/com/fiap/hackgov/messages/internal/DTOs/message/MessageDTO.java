@@ -17,7 +17,12 @@ public record MessageDTO(
 
         String content,
 
-        LocalDateTime sentAt
+        LocalDateTime sentAt,
+
+        UUID attachmentId,
+        String attachmentName,
+        String attachmentContentType,
+        Long attachmentSize
 
 ) {
 }

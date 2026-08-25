@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Filter;
 
 import java.util.UUID;
 
@@ -14,6 +15,8 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "etps")
+@Filter(name = "cityHallFilter", condition = BiddingScopeConditions.REQ_CHILD_CITY)
+@Filter(name = "sectorFilter", condition = BiddingScopeConditions.REQ_CHILD_SECTOR)
 public class ETP {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

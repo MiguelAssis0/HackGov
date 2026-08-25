@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -56,6 +57,11 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ProblemDetail> handleUnauthorizedException(UnauthorizedException e, HttpServletRequest request) {
         return handleException("Unauthorized", HttpStatus.UNAUTHORIZED, e, request);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ProblemDetail> handleAccessDeniedException(AccessDeniedException e, HttpServletRequest request) {
+        return handleException("Forbidden", HttpStatus.FORBIDDEN, e, request);
     }
 
     @ExceptionHandler(BlockedException.class)

@@ -13,10 +13,10 @@ function getToken() {
  * Cliente HTTP único da aplicação
  */
 async function requestFrom(baseUrl, path, options = {}) {
-  const headers = {
-    "Content-Type": "application/json",
-    ...(options.headers || {}),
-  };
+  const headers = { ...(options.headers || {}) };
+  if (!(options.body instanceof FormData) && !headers["Content-Type"]) {
+    headers["Content-Type"] = "application/json";
+  }
 
   const token = getToken();
   if (token) {
@@ -30,6 +30,15 @@ async function requestFrom(baseUrl, path, options = {}) {
 
   // 204 No Content
   if (response.status === 204) return null;
+
+  if (options.responseType === "blob") {
+    if (!response.ok) {
+      const error = new Error(`Erro ${response.status}`);
+      error.status = response.status;
+      throw error;
+    }
+    return response.blob();
+  }
 
   const text = await response.text();
 
@@ -91,6 +100,8 @@ export const api = {
   getEmployees: () => request("/employee?size=100&sort=firstName,asc"),
 
   getEmployeeDetails: () => request("/employee/details"),
+  getSessions: () => request("/sessions"),
+  revokeSession: (id) => request(`/sessions/${id}`, { method: "DELETE" }),
 
   // MESSAGES
   getChats: () => request("/chats"),
@@ -116,6 +127,19 @@ export const api = {
     request("/messages", {
       method: "POST",
       body: JSON.stringify({ chatId, content }),
+    }),
+
+  sendMessageAttachment: (chatId, content, file) => {
+    const formData = new FormData();
+    formData.append("chatId", chatId);
+    formData.append("content", content || "");
+    formData.append("file", file);
+    return request("/messages/attachment", { method: "POST", body: formData });
+  },
+
+  downloadMessageAttachment: (chatId, attachmentId) =>
+    request(`/messages/chats/${chatId}/attachments/${attachmentId}`, {
+      responseType: "blob",
     }),
 
   getOccupations: () => request("/occupations?size=100&sort=name,asc"),
@@ -183,6 +207,142 @@ export const api = {
     request(`/tasks/${id}`, {
       method: "DELETE",
     }),
+  getTaskRequests: () => request("/task-requests"),
+  createTaskRequest: (payload) => request("/task-requests", { method: "POST", body: JSON.stringify(payload) }),
+  acceptTaskRequest: (id, feedback = "") => request(`/task-requests/${id}/accept`, { method: "POST", body: JSON.stringify({ feedback }) }),
+  rejectTaskRequest: (id, feedback) => request(`/task-requests/${id}/reject`, { method: "POST", body: JSON.stringify({ feedback }) }),
+
+  // AGENDA
+  getAgendaEvents: (month, taskId = "") =>
+    request(`/agenda/events?month=${encodeURIComponent(month)}${taskId ? `&taskId=${encodeURIComponent(taskId)}` : ""}`),
+
+  getUpcomingAgendaEvents: (limit = 5) =>
+    request(`/agenda/events/upcoming?limit=${limit}`),
+
+  createAgendaEvent: (payload) =>
+    request("/agenda/events", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  updateAgendaEvent: (id, payload) =>
+    request(`/agenda/events/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }),
+
+  deleteAgendaEvent: (id) =>
+    request(`/agenda/events/${id}`, { method: "DELETE" }),
+
+  // CAIXA DE ENTRADA
+  getInbox: ({ page = 0, status = "", type = "", unreadOnly = false, query = "" } = {}) => {
+    const params = new URLSearchParams({ page: String(page), size: "20", sort: "createdAt,desc" });
+    if (status) params.set("status", status);
+    if (type) params.set("type", type);
+    if (unreadOnly) params.set("unreadOnly", "true");
+    if (query) params.set("query", query);
+    return request(`/inbox?${params}`);
+  },
+
+  readInboxEntry: (id) => request(`/inbox/${id}/read`, { method: "PATCH" }),
+  claimInboxEntry: (id) => request(`/inbox/${id}/claim`, { method: "PATCH" }),
+  completeInboxEntry: (id) => request(`/inbox/${id}/complete`, { method: "PATCH" }),
+
+  // DETALHES DA TAREFA
+  getTaskDetails: (taskId) => request(`/tasks/${taskId}/details`),
+  addTaskComment: (taskId, text) => request(`/tasks/${taskId}/comments`, { method: "POST", body: JSON.stringify({ text }) }),
+  updateTaskComment: (taskId, id, text) => request(`/tasks/${taskId}/comments/${id}`, { method: "PUT", body: JSON.stringify({ text }) }),
+  deleteTaskComment: (taskId, id) => request(`/tasks/${taskId}/comments/${id}`, { method: "DELETE" }),
+  addTaskChecklist: (taskId, title) => request(`/tasks/${taskId}/checklist`, { method: "POST", body: JSON.stringify({ title }) }),
+  updateTaskChecklist: (taskId, id, title) => request(`/tasks/${taskId}/checklist/${id}`, { method: "PUT", body: JSON.stringify({ title }) }),
+  toggleTaskChecklist: (taskId, id) => request(`/tasks/${taskId}/checklist/${id}/toggle`, { method: "PATCH" }),
+  deleteTaskChecklist: (taskId, id) => request(`/tasks/${taskId}/checklist/${id}`, { method: "DELETE" }),
+  startTaskTimer: (taskId) => request(`/tasks/${taskId}/timer/start`, { method: "POST" }),
+  pauseTaskTimer: (taskId) => request(`/tasks/${taskId}/timer/pause`, { method: "POST" }),
+  addTaskManualTime: (taskId, payload) => request(`/tasks/${taskId}/time-entries`, { method: "POST", body: JSON.stringify(payload) }),
+  deleteTaskTime: (taskId, id) => request(`/tasks/${taskId}/time-entries/${id}`, { method: "DELETE" }),
+  addTaskAttachment: (taskId, file) => {
+    const body = new FormData();
+    body.append("file", file);
+    return request(`/tasks/${taskId}/attachments`, { method: "POST", body });
+  },
+  downloadTaskAttachment: async (taskId, attachment) => {
+    const response = await fetch(`${API_BASE_URL}/tasks/${taskId}/attachments/${attachment.id}`, {
+      headers: { Authorization: `Bearer ${getToken()}` },
+    });
+    if (!response.ok) throw new Error(`Erro ${response.status} ao baixar anexo`);
+    const url = URL.createObjectURL(await response.blob());
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = attachment.originalName || "anexo";
+    anchor.click();
+    URL.revokeObjectURL(url);
+  },
+
+  // CLIENTES MUNICIPAIS
+  getClients: (query = "") => request(`/clients?size=100&sort=fullName,asc&query=${encodeURIComponent(query)}`),
+  getClient: (id) => request(`/clients/${id}`),
+  createClient: (payload) => request("/clients", { method: "POST", body: JSON.stringify(payload) }),
+  updateClient: (id, payload) => request(`/clients/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
+  addClientService: (id, payload) => request(`/clients/${id}/services`, { method: "POST", body: JSON.stringify(payload) }),
+
+  // PATRULHA AGRICOLA
+  getAgricultureCatalog: () => request("/agriculture/catalog"),
+  addAgricultureCatalog: (kind, payload) => request(`/agriculture/catalog/${kind}`, { method: "POST", body: JSON.stringify(payload) }),
+  getAgricultureServices: (query = "") => request(`/agriculture/services?size=100&query=${encodeURIComponent(query)}`),
+  createAgricultureService: (payload) => request("/agriculture/services", { method: "POST", body: JSON.stringify(payload) }),
+  updateAgricultureService: (id, payload) => request(`/agriculture/services/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
+  updateAgricultureControl: (id, payload) => request(`/agriculture/services/${id}/control`, { method: "PUT", body: JSON.stringify(payload) }),
+  uploadAgricultureProof: (id, file) => { const body = new FormData(); body.append("file", file); return request(`/agriculture/services/${id}/proof`, { method: "POST", body }); },
+
+  // DOCUMENTOS
+  getDocuments: ({ query = "", type = "" } = {}) => request(`/documents?query=${encodeURIComponent(query)}&type=${encodeURIComponent(type)}`),
+  uploadDocument: (payload) => {
+    const body = new FormData();
+    body.append("title", payload.title); body.append("documentType", payload.documentType);
+    body.append("description", payload.description || ""); body.append("visibility", payload.visibility);
+    body.append("file", payload.file);
+    return request("/documents", { method: "POST", body });
+  },
+  createGeneratedDocument: (payload) => request("/documents/generated", { method: "POST", body: JSON.stringify(payload) }),
+  signDocumentHomologation: (id) => request(`/documents/${id}/sign-homologation`, { method: "POST" }),
+  deleteDocument: (id) => request(`/documents/${id}`, { method: "DELETE" }),
+  downloadDocument: async (document) => {
+    const response = await fetch(`${API_BASE_URL}/documents/${document.id}/download`, { headers: { Authorization: `Bearer ${getToken()}` } });
+    if (!response.ok) throw new Error(`Erro ${response.status} ao baixar documento`);
+    const url = URL.createObjectURL(await response.blob()); const anchor = window.document.createElement("a");
+    anchor.href = url; anchor.download = document.originalName || "documento"; anchor.click(); URL.revokeObjectURL(url);
+  },
+  getRequisitionDocuments: (requisitionId) => request(`/requisitions/${requisitionId}/documents`),
+  uploadRequisitionDocument: (requisitionId, payload) => {
+    const body = new FormData();
+    body.append("title", payload.title);
+    body.append("documentType", payload.documentType || "PROCESS");
+    body.append("description", payload.description || "");
+    body.append("file", payload.file);
+    return request(`/requisitions/${requisitionId}/documents`, { method: "POST", body });
+  },
+
+  // AUDITORIA
+  getAuditEvents: (query = "") => request(`/audit?query=${encodeURIComponent(query)}`),
+  verifyAuditChain: () => request("/audit/verify"),
+
+  // GESTAO
+  getSectorPerformance: () => request("/management/sector-performance"),
+
+  // FERRAMENTAS E FAVORITOS
+  getTools: () => request("/tools"),
+  updateTool: (slug, payload) => request(`/tools/${slug}`, { method: "PATCH", body: JSON.stringify(payload) }),
+  toggleToolFavorite: (slug) => request(`/tools/${slug}/favorite`, { method: "POST" }),
+  getToolPermissions: () => request("/tool-permissions"),
+  createToolPermission: (payload) => request("/tool-permissions", { method: "POST", body: JSON.stringify(payload) }),
+  deleteToolPermission: (id) => request(`/tool-permissions/${id}`, { method: "DELETE" }),
+
+  // IMPORTACAO DE PLANILHAS
+  previewImport: (target, file) => { const body = new FormData(); body.append("target", target); body.append("file", file); return request("/imports/preview", { method: "POST", body }); },
+  validateImport: (id, payload) => request(`/imports/${id}/validate`, { method: "POST", body: JSON.stringify(payload) }),
+  executeImport: (id) => request(`/imports/${id}/execute`, { method: "POST" }),
+  getImportHistory: () => request("/imports/history"),
 
   // AI (integrado no mesmo client)
   requestAI: (message) =>

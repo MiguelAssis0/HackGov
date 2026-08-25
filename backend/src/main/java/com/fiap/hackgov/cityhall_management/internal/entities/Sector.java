@@ -36,6 +36,12 @@ public class Sector implements Serializable {
     @Column(nullable = false)
     private String name;
 
+    @Column(length = 1000)
+    private String description = "";
+
+    @Column(nullable = false)
+    private boolean active = true;
+
     @ManyToOne
     @JoinColumn(name = "cityHall_id")
     private CityHall cityHall;

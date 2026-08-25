@@ -12,5 +12,9 @@ public interface MessageMapper {
     @Mapping(source = "sender.id", target = "senderId")
     @Mapping(source = "sender.fullName", target = "senderName")
     @Mapping(source = "sender.avatarPath", target = "senderAvatar")
+    @Mapping(source = "attachment.id", target = "attachmentId")
+    @Mapping(source = "attachment.originalName", target = "attachmentName")
+    @Mapping(source = "attachment.contentType", target = "attachmentContentType")
+    @Mapping(source = "attachment.sizeBytes", target = "attachmentSize")
     MessageDTO toDTO(Message message);
 }

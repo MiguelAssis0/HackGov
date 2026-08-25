@@ -1,0 +1,46 @@
+import { useEffect, useState } from "react";
+import { DashboardLayout } from "../components/DashboardLayout.jsx";
+import { PageHeader } from "../components/DashboardShared.jsx";
+import { api } from "../services/api.js";
+
+const emptyService = { protocol: "", status: "PENDING", clientId: "", scheduledDate: "", serviceTypeId: "", requestedHours: "", address: "", paymentDate: "", funderId: "", paymentProofTypeId: "", funderAmount: "", donation: false, donationOrigin: "" };
+
+export default function AgriculturePage() {
+  const [catalog, setCatalog] = useState({ serviceTypes: [], paymentTypes: [], machinery: [], drivers: [] });
+  const [clients, setClients] = useState([]);
+  const [services, setServices] = useState([]);
+  const [form, setForm] = useState(emptyService);
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState(null);
+  const [control, setControl] = useState({ machineryId: "", tractorDriverId: "", initialHourMeter: "", finalHourMeter: "" });
+  const [message, setMessage] = useState(null);
+
+  async function load() {
+    try {
+      const [catalogPayload, clientsPayload, servicesPayload] = await Promise.all([api.getAgricultureCatalog(), api.getClients(), api.getAgricultureServices()]);
+      setCatalog(catalogPayload); setClients(clientsPayload?.content || []); setServices(servicesPayload?.content || []);
+    } catch (error) { setMessage({ type: "error", text: error.message }); }
+  }
+  useEffect(() => { load(); }, []);
+
+  async function submit(event) {
+    event.preventDefault();
+    const payload = { ...form, requestedHours: Number(form.requestedHours), funderAmount: form.funderAmount ? Number(form.funderAmount) : null, paymentDate: form.paymentDate || null, paymentProofTypeId: form.paymentProofTypeId || null, donationOrigin: form.donationOrigin || null };
+    try { const next = await api.createAgricultureService(payload); setOpen(false); setSelected(next); setMessage({ type: "success", text: "Servico cadastrado e controle operacional criado." }); await load(); }
+    catch (error) { setMessage({ type: "error", text: error.message }); }
+  }
+
+  function selectService(item) { setSelected(item); setControl({ machineryId: item.control?.machineryId || "", tractorDriverId: item.control?.tractorDriverId || "", initialHourMeter: item.control?.initialHourMeter ?? "", finalHourMeter: item.control?.finalHourMeter ?? "" }); }
+  async function saveControl(event) { event.preventDefault(); try { await api.updateAgricultureControl(selected.id, { machineryId: control.machineryId || null, tractorDriverId: control.tractorDriverId || null, initialHourMeter: control.initialHourMeter === "" ? null : Number(control.initialHourMeter), finalHourMeter: control.finalHourMeter === "" ? null : Number(control.finalHourMeter) }); await load(); const fresh=(await api.getAgricultureServices()).content.find((item)=>item.id===selected.id); selectService(fresh); } catch(error){setMessage({type:"error",text:error.message});} }
+
+  return <DashboardLayout styles={["/css/agriculture.css"]}><main className="dashboard"><div className="container">
+    <PageHeader eyebrow="Agricultura e Desenvolvimento Rural" title="Patrulha Agricola" action={<button className="btn btn-primary" onClick={() => { setForm({ ...emptyService, clientId: clients[0]?.id || "", serviceTypeId: catalog.serviceTypes[0]?.id || "" }); setOpen(true); }}><i className="bi bi-plus-lg"></i> Novo servico</button>} />
+    {message && <div className={`auth-message ${message.type} mb-3`}>{message.text}</div>}
+    <div className="agri-stats"><article><span>Solicitacoes</span><strong>{services.length}</strong></article><article><span>Pendentes</span><strong>{services.filter((item)=>item.status==="PENDING").length}</strong></article><article><span>Horas solicitadas</span><strong>{services.reduce((sum,item)=>sum+Number(item.requestedHours||0),0).toFixed(1)}</strong></article><article><span>Valor previsto</span><strong>{services.reduce((sum,item)=>sum+Number(item.amount||0),0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</strong></article></div>
+    <section className="agri-shell"><div className="agri-table"><table className="table align-middle"><thead><tr><th>Protocolo</th><th>Cliente</th><th>Data</th><th>Status</th><th>Horas</th></tr></thead><tbody>{services.map((item)=><tr key={item.id} className={selected?.id===item.id?"table-active":""} onClick={()=>selectService(item)}><td>{item.protocol}</td><td>{item.clientName}</td><td>{new Date(`${item.scheduledDate}T12:00:00`).toLocaleDateString("pt-BR")}</td><td>{item.status}</td><td>{item.requestedHours}</td></tr>)}</tbody></table></div>
+      <aside className="agri-control">{selected?<><p className="eyebrow dark mb-1">Controle operacional</p><h3>{selected.protocol}</h3><p>{selected.serviceTypeName} para {selected.clientName}</p><div className="client-data-grid"><div><span>Solicitado</span><strong>{selected.requestedHours}h</strong></div><div><span>Realizado</span><strong>{selected.control?.performedHours ?? "-"}h</strong></div><div><span>Saldo</span><strong>{selected.control?.remainingHours ?? selected.requestedHours}h</strong></div><div><span>Situacao</span><strong>{selected.control?.hoursStatus || "WAITING"}</strong></div></div><form className="row g-2 mt-3" onSubmit={saveControl}><div className="col-12"><label className="field-label">Maquinario</label><select className="field-input" value={control.machineryId} onChange={(e)=>setControl({...control,machineryId:e.target.value})}><option value="">Selecione</option>{catalog.machinery.map((item)=><option key={item.id} value={item.id}>{item.name}</option>)}</select></div><div className="col-12"><label className="field-label">Tratorista</label><select className="field-input" value={control.tractorDriverId} onChange={(e)=>setControl({...control,tractorDriverId:e.target.value})}><option value="">Selecione</option>{catalog.drivers.map((item)=><option key={item.id} value={item.id}>{item.name}</option>)}</select></div><div className="col-6"><label className="field-label">Horimetro inicial</label><input className="field-input" type="number" step=".01" value={control.initialHourMeter} onChange={(e)=>setControl({...control,initialHourMeter:e.target.value})}/></div><div className="col-6"><label className="field-label">Horimetro final</label><input className="field-input" type="number" step=".01" value={control.finalHourMeter} onChange={(e)=>setControl({...control,finalHourMeter:e.target.value})}/></div><div className="col-12"><button className="btn btn-primary w-100">Salvar controle</button></div></form><label className="btn btn-outline-primary w-100 mt-2">Enviar comprovante<input hidden type="file" onChange={async(e)=>{const file=e.target.files?.[0];if(file){await api.uploadAgricultureProof(selected.id,file);await load();}e.target.value="";}}/></label></>:<div className="empty-state">Selecione um servico.</div>}</aside>
+    </section>
+  </div></main>
+  {open&&<div className="react-modal-backdrop"><div className="react-modal-card client-modal"><div className="task-modal-header"><h3>Novo servico</h3><button className="btn-acao" onClick={()=>setOpen(false)}><i className="bi bi-x-lg"></i></button></div><form className="row g-3" onSubmit={submit}><div className="col-md-6"><label className="field-label">Cliente *</label><select className="field-input" required value={form.clientId} onChange={(e)=>setForm({...form,clientId:e.target.value})}>{clients.map((item)=><option key={item.id} value={item.id}>{item.fullName}</option>)}</select></div><div className="col-md-6"><label className="field-label">Tipo de servico *</label><select className="field-input" required value={form.serviceTypeId} onChange={(e)=>setForm({...form,serviceTypeId:e.target.value})}>{catalog.serviceTypes.filter((item)=>item.active).map((item)=><option key={item.id} value={item.id}>{item.name} - {Number(item.hourlyValue).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}/h</option>)}</select></div><div className="col-md-6"><label className="field-label">Data agendada *</label><input className="field-input" type="date" required value={form.scheduledDate} onChange={(e)=>setForm({...form,scheduledDate:e.target.value})}/></div><div className="col-md-6"><label className="field-label">Horas *</label><input className="field-input" type="number" min=".01" step=".01" required value={form.requestedHours} onChange={(e)=>setForm({...form,requestedHours:e.target.value})}/></div><div className="col-12"><label className="field-label">Endereco *</label><input className="field-input" required value={form.address} onChange={(e)=>setForm({...form,address:e.target.value})}/></div><div className="col-12"><label className="form-check"><input className="form-check-input" type="checkbox" checked={form.donation} onChange={(e)=>setForm({...form,donation:e.target.checked})}/> Doacao</label></div>{form.donation&&<div className="col-12"><label className="field-label">Origem da doacao *</label><input className="field-input" required value={form.donationOrigin} onChange={(e)=>setForm({...form,donationOrigin:e.target.value})}/></div>}<div className="col-12 text-end"><button className="btn btn-primary">Cadastrar servico</button></div></form></div></div>}
+  </DashboardLayout>;
+}

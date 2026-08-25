@@ -20,6 +20,8 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "licitation_processes")
+@org.hibernate.annotations.Filter(name="cityHallFilter",condition=BiddingScopeConditions.REQ_CHILD_CITY)
+@org.hibernate.annotations.Filter(name="sectorFilter",condition=BiddingScopeConditions.REQ_CHILD_SECTOR)
 public class LicitationProcess {
 
     @Id

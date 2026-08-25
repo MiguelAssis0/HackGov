@@ -288,4 +288,4 @@
 @media (max-width: 576px) {
     .ferr-grade { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
-
+.ferr-card{position:relative}.ferr-favorite{position:absolute;right:.75rem;bottom:.7rem;border:0;background:transparent;color:#e6a700;font-size:1rem;z-index:2}

@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import jakarta.annotation.PostConstruct;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -46,7 +47,16 @@ public class AuthService {
     @Autowired
     private AuditLog auditLog;
 
+    @Autowired
+    private UserSessionService userSessionService;
+
     private static final Logger log = LoggerFactory.getLogger(AuthService.class);
+    private String dummyPasswordHash;
+
+    @PostConstruct
+    void initializeDummyPasswordHash() {
+        dummyPasswordHash = passwordEncoder.encode("hackgov-invalid-login-dummy-password");
+    }
 
     public void logout(String token) {
         if (token == null) {
@@ -56,6 +66,7 @@ public class AuthService {
 
 
         LocalDateTime expiration = tokenService.getExpirationAsLocalDateTime(token);
+        userSessionService.revokeCurrent(token);
 
         auditLog.with(log).event("logout").level(AuditLog.Level.INFO).log();
 
@@ -80,22 +91,22 @@ public class AuthService {
 
         auditLog.with(log).event("refresh_token_success").email(email).level(AuditLog.Level.INFO).log();
 
-        String newAccessToken = tokenService.generateToken(user);
-        String newRefreshToken = tokenService.generateRefreshToken(user);
+        var issued = userSessionService.rotate(request.refreshToken(), user);
+        String newAccessToken = issued.accessToken();
+        String newRefreshToken = issued.refreshToken();
 
         return new RefreshTokenResponseDTO(newAccessToken, newRefreshToken);
     }
 
-    public LoginResponseDTO login(LoginRequestDTO loginRequest, String clientIp) {
+    public LoginResponseDTO login(LoginRequestDTO loginRequest, String clientIp, String userAgent) {
         auditLog.with(log).event("login_attempt").email(loginRequest.email()).level(AuditLog.Level.INFO).log();
 
         loginAttemptService.checkBlocked(clientIp);
 
         Optional<User> userOpt = userRepository.findByEmail(loginRequest.email());
 
-        String dummyHash = "$argon2id$v=19$m=16384,t=2,p=1$abc$def";
-        String passwordHash = userOpt.map(User::getPassword).orElse(dummyHash);
-        boolean passwordMatches = passwordEncoder.matches(loginRequest.password(), passwordHash);
+        String passwordHash = userOpt.map(User::getPassword).orElse(dummyPasswordHash);
+        boolean passwordMatches = safelyMatches(loginRequest.password(), passwordHash);
 
         if (userOpt.isEmpty() || !passwordMatches) {
             auditLog.with(log)
@@ -131,15 +142,25 @@ public class AuthService {
         user.setLastLogin(LocalDateTime.now());
         userRepository.save(user);
 
-        String accessToken = tokenService.generateToken(user);
-        String refreshToken = tokenService.generateRefreshToken(user);
+        var issued = userSessionService.issue(user, clientIp, userAgent);
+        String accessToken = issued.accessToken();
+        String refreshToken = issued.refreshToken();
 
         auditLog.with(log).event("login_success").email(user.getEmail()).level(AuditLog.Level.INFO).log();
 
         return new LoginResponseDTO(accessToken, refreshToken, false);
     }
 
-    public TwoFactorResponseDTO verifyTwoFactor(TwoFactorRequestDTO twoFactorRequest, String clientIp) {
+    private boolean safelyMatches(String rawPassword, String encodedPassword) {
+        try {
+            return encodedPassword != null && passwordEncoder.matches(rawPassword, encodedPassword);
+        } catch (IllegalArgumentException | IllegalStateException exception) {
+            log.warn("Ignoring invalid stored password hash during login");
+            return false;
+        }
+    }
+
+    public TwoFactorResponseDTO verifyTwoFactor(TwoFactorRequestDTO twoFactorRequest, String clientIp, String userAgent) {
         loginAttemptService.checkTwoFactorBlocked(clientIp);
         Optional<User> userOpt = userRepository.findByEmail(twoFactorRequest.email());
 
@@ -170,8 +191,9 @@ public class AuthService {
         user.setLastLogin(LocalDateTime.now());
         userRepository.save(user);
 
-        String accessToken = tokenService.generateToken(user);
-        String refreshToken = tokenService.generateRefreshToken(user);
+        var issued = userSessionService.issue(user, clientIp, userAgent);
+        String accessToken = issued.accessToken();
+        String refreshToken = issued.refreshToken();
 
         auditLog.with(log).event("2fa_verify_success").email(twoFactorRequest.email()).level(AuditLog.Level.INFO).log();
 

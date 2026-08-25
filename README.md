@@ -157,6 +157,21 @@ O script:
 - sobe o frontend React
 - aguarda o backend ficar pronto antes de liberar a interface
 
+### Execução com Docker
+
+Na raiz do projeto:
+
+```bash
+docker compose up --build
+```
+
+O Compose usa o perfil `prod`, PostgreSQL e Flyway, independentemente do
+`SPRING_PROFILES_ACTIVE=dev` usado pela execução local. Para sobrescrever
+explicitamente apenas o perfil do container, use
+`HACKGOV_DOCKER_SPRING_PROFILE`. Os dados demonstrativos são carregados uma
+única vez por padrão; defina `HACKGOV_DOCKER_MOCK_DATA_ENABLED=false` para
+desativá-los.
+
 ### Execução manual
 
 Backend:

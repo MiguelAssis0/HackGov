@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.io.Serial;
@@ -23,7 +22,6 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "cityhalls")
-@Filter(name = "cityHallFilter", condition = "city_hall_id = :cityHallId")
 public class CityHall implements Serializable {
 
     @Serial

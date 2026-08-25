@@ -1,4 +1,9 @@
 spring:
+  flyway:
+    enabled: ${SPRING_FLYWAY_ENABLED:true}
+    baseline-on-migrate: true
+    baseline-version: 0
+    locations: classpath:db/migration
   jpa:
     show-sql: false
   application:
@@ -55,6 +60,9 @@ spring:
     username: sa
     password: ""
 
+  flyway:
+    enabled: false
+
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -74,6 +82,10 @@ spring:
     livereload:
       enabled: true
 
+hackgov:
+  mock-data:
+    enabled: true
+
 logging:
   level:
     org:
@@ -84,3 +96,18 @@ logging:
           sql:
             BasicBinder: TRACE
     root: INFO
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate

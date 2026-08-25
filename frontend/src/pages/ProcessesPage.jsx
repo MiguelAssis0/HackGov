@@ -427,6 +427,8 @@ function ProcessDetails({
         </div>
       </div>
 
+      <ProcessDocuments requisitionId={requisition.id} />
+
       <div className="processo-card delay-1">
         <div className="stepper-wrap">
           <div className="stepper-nav">
@@ -526,6 +528,79 @@ function ProcessDetails({
         </div>
       </div>
     </>
+  );
+}
+
+function ProcessDocuments({ requisitionId }) {
+  const [documents, setDocuments] = useState([]);
+  const [file, setFile] = useState(null);
+  const [title, setTitle] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    api.getRequisitionDocuments(requisitionId)
+      .then((items) => active && setDocuments(Array.isArray(items) ? items : []))
+      .catch((requestError) => active && setError(requestError.message || "Falha ao carregar documentos."))
+      .finally(() => active && setLoading(false));
+    return () => { active = false; };
+  }, [requisitionId]);
+
+  async function upload(event) {
+    event.preventDefault();
+    if (!file || !title.trim()) return;
+    setSaving(true);
+    setError("");
+    try {
+      const created = await api.uploadRequisitionDocument(requisitionId, {
+        title: title.trim(), documentType: "PROCESS", file,
+      });
+      setDocuments((current) => [created, ...current]);
+      setTitle("");
+      setFile(null);
+      event.currentTarget.reset();
+    } catch (requestError) {
+      setError(requestError.message || "Falha ao enviar documento.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <section className="processo-card delay-1 p-3 mb-3" aria-label="Documentos preparatórios">
+      <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+        <h4 className="h6 mb-0"><i className="bi bi-folder2-open me-2"></i>Documentos preparatórios</h4>
+        <span className="text-muted small">{documents.length} arquivo(s)</span>
+      </div>
+      {error && <div className="alert alert-danger py-2">{error}</div>}
+      <form className="d-flex flex-wrap gap-2 align-items-end" onSubmit={upload}>
+        <label className="form-label flex-grow-1 mb-0">
+          <span className="small">Título</span>
+          <input className="form-control form-control-sm" maxLength="180" value={title}
+            onChange={(event) => setTitle(event.target.value)} placeholder="Ex.: Termo de referência" />
+        </label>
+        <label className="form-label flex-grow-1 mb-0">
+          <span className="small">Arquivo (máx. 15 MB)</span>
+          <input className="form-control form-control-sm" type="file"
+            onChange={(event) => setFile(event.target.files?.[0] || null)} />
+        </label>
+        <button className="btn btn-primary btn-sm" disabled={saving || !file || !title.trim()}>
+          <i className="bi bi-cloud-arrow-up me-1"></i>{saving ? "Enviando..." : "Anexar"}
+        </button>
+      </form>
+      <div className="d-flex flex-wrap gap-2 mt-3">
+        {loading ? <span className="text-muted small">Carregando...</span> : documents.map((document) => (
+          <button className="btn btn-outline-secondary btn-sm" type="button" key={document.id}
+            onClick={() => api.downloadDocument(document)} title={document.originalName}>
+            <i className="bi bi-paperclip me-1"></i>{document.title}
+          </button>
+        ))}
+        {!loading && !documents.length && <span className="text-muted small">Nenhum documento anexado.</span>}
+      </div>
+    </section>
   );
 }
 

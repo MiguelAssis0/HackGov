@@ -45,6 +45,7 @@ export const mockupTools = [
     description: "Importe bases externas para acelerar a configuracao inicial.",
     mandatory: false,
     enabled: false,
+    route: "/importacao",
   },
   {
     id: "cargos",
@@ -87,6 +88,16 @@ export const mockupTools = [
     route: "/tarefas",
   },
   {
+    id: "agenda",
+    name: "Agenda",
+    category: "Gestao",
+    icon: "bi-calendar3",
+    description: "Eventos municipais, compromissos e prazos de tarefas.",
+    mandatory: true,
+    enabled: true,
+    route: "/agenda",
+  },
+  {
     id: "compras-licitacoes",
     name: "Compras e Licita\u00e7\u00f5es",
     category: "Processos",
@@ -104,6 +115,7 @@ export const mockupTools = [
     description: "Centralize entradas, avisos e encaminhamentos dos setores.",
     mandatory: true,
     enabled: true,
+    route: "/caixa-entrada",
   },
   {
     id: "controle-acesso",
@@ -124,6 +136,36 @@ export const mockupTools = [
     mandatory: true,
     enabled: true,
     route: "/funcionarios",
+  },
+  {
+    id: "clientes-gerais",
+    name: "Clientes Gerais",
+    category: "Usuarios",
+    icon: "bi-person-vcard-fill",
+    description: "Cadastro municipal e historico de atendimentos dos cidadaos.",
+    mandatory: false,
+    enabled: true,
+    route: "/clientes",
+  },
+  {
+    id: "documentos",
+    name: "Documentos",
+    category: "Dados",
+    icon: "bi-folder2-open",
+    description: "Arquivos, documentos gerados, compartilhamentos e assinatura de homologacao.",
+    mandatory: true,
+    enabled: true,
+    route: "/documentos",
+  },
+  {
+    id: "patrulha-agricola",
+    name: "Patrulha Agricola",
+    category: "Processos",
+    icon: "bi-truck-front-fill",
+    description: "Solicitacoes, pagamentos e controle operacional da patrulha.",
+    mandatory: false,
+    enabled: true,
+    route: "/patrulha-agricola",
   },
 ];
 
@@ -677,37 +719,23 @@ export function useStates() {
 }
 
 export function useToolsState() {
-  const [overrides, setOverrides] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem(mockupStorageKeys.toolsState)) || {};
-    } catch {
-      return {};
-    }
-  });
-
-  const tools = useMemo(
-    () =>
-      mockupTools.map((tool) => ({
-        ...tool,
-        enabled: tool.mandatory ? true : (overrides[tool.id] ?? tool.enabled),
-      })),
-    [overrides],
-  );
-
-  function toggleTool(toolId, enabled) {
-    setOverrides((current) => {
-      const next = { ...current, [toolId]: enabled };
-      localStorage.setItem(mockupStorageKeys.toolsState, JSON.stringify(next));
-      return next;
-    });
+  const [tools, setTools] = useState(mockupTools);
+  useEffect(() => { let active = true; api.getTools().then((items) => { if (active && items?.length) setTools(items); }).catch(() => {}); return () => { active = false; }; }, []);
+  async function toggleTool(toolId, enabled) {
+    const current = tools.find((tool) => tool.id === toolId); if (!current || current.mandatory) return;
+    setTools((items) => items.map((tool) => tool.id === toolId ? { ...tool, enabled } : tool));
+    try { const saved = await api.updateTool(toolId, { enabled, restricted: current.restricted || false }); setTools((items) => items.map((tool) => tool.id === toolId ? saved : tool)); }
+    catch { setTools((items) => items.map((tool) => tool.id === toolId ? current : tool)); }
   }
-
-  return { tools, toggleTool };
+  async function toggleFavorite(toolId) {
+    const result = await api.toggleToolFavorite(toolId); setTools((items) => items.map((tool) => tool.id === toolId ? { ...tool, favorite: result.favorite } : tool));
+  }
+  return { tools, toggleTool, toggleFavorite };
 }
 
 export function useAvailableTools() {
   const { tools } = useToolsState();
-  return tools.filter((tool) => tool.mandatory || tool.enabled);
+  return tools.filter((tool) => tool.mandatory || tool.enabled).sort((a, b) => Number(Boolean(b.favorite)) - Number(Boolean(a.favorite)));
 }
 
 export function useJobs() {

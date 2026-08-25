@@ -9,12 +9,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Filter;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
 @Table(name = "notice_impugnations")
+@Filter(name = "cityHallFilter", condition = BiddingScopeConditions.NOTICE_CITY)
+@Filter(name = "sectorFilter", condition = BiddingScopeConditions.NOTICE_SECTOR)
 @Getter
 @Setter
 @NoArgsConstructor

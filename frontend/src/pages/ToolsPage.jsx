@@ -28,7 +28,7 @@ export default function ToolsPage() {
   const { navigate } = useRouter();
   const cityHallName = useCityHallName();
   const canConfigure = canManageCityTools();
-  const { tools, toggleTool } = useToolsState();
+  const { tools, toggleTool, toggleFavorite } = useToolsState();
   const [search, setSearch] = useState("");
   const [activeTool, setActiveTool] = useState("all");
 
@@ -140,6 +140,7 @@ export default function ToolsPage() {
                         }}
                       >
                         <span className={`ferr-card-tag ${status.className}`}>{status.label}</span>
+                        <button className="ferr-favorite" type="button" title={tool.favorite ? "Remover dos favoritos" : "Adicionar aos favoritos"} onClick={(event) => { event.stopPropagation(); toggleFavorite(tool.id); }}><i className={`bi ${tool.favorite ? "bi-star-fill" : "bi-star"}`}></i></button>
 
                         <div className="ferr-card-icon" style={{ background: color.bg, color: color.fg }}>
                           <i className={`bi ${tool.icon}`}></i>

@@ -17,6 +17,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "payments")
+@org.hibernate.annotations.Filter(name="cityHallFilter",condition=BiddingScopeConditions.DECLARATION_CITY)
+@org.hibernate.annotations.Filter(name="sectorFilter",condition=BiddingScopeConditions.DECLARATION_SECTOR)
 @Getter
 @Setter
 @NoArgsConstructor

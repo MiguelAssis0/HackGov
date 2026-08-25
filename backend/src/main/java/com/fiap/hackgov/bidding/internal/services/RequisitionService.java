@@ -29,6 +29,7 @@ import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
 import com.fiap.hackgov.shared.infra.pagination.PageResponseDTO;
 import com.fiap.hackgov.shared.infra.pagination.PaginationMapper;
+import com.fiap.hackgov.inbox.internal.services.InboxService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -55,6 +56,7 @@ public class RequisitionService {
     private final ApprovalRepository approvalRepository;
     private final AnalysisRepository analysisRepository;
     private final ProcessHistoryService processHistoryService;
+    private final InboxService inboxService;
 
     private final ProcessHistoryMapper processHistoryMapper;
     private final PaginationMapper paginationMapper;
@@ -200,6 +202,8 @@ public class RequisitionService {
         createApprovalIfNecessary(requisition, nextStage);
 
         createAnalysisIfNecessary(requisition, nextStage);
+
+        inboxService.notifyBiddingStage(requisition, nextStage, employee);
     }
 
     void returnToInitialStage(Requisition requisition, Employee employee, String observation) {

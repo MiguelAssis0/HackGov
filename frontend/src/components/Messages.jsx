@@ -86,6 +86,7 @@ export default function Messages({
 }) {
   const stylesReady = usePageStyles(styles, "widget");
   const messagesEndRef = useRef(null);
+  const attachmentInputRef = useRef(null);
   const socketClientRef = useRef(null);
   const socketSubscriptionRef = useRef(null);
   const [search, setSearch] = useState("");
@@ -95,6 +96,7 @@ export default function Messages({
   const [selectedChat, setSelectedChat] = useState(null);
   const [messages, setMessages] = useState([]);
   const [messageText, setMessageText] = useState("");
+  const [attachmentFile, setAttachmentFile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [creatingChatId, setCreatingChatId] = useState(null);
@@ -155,6 +157,7 @@ export default function Messages({
       setSelectedChat(null);
       setMessages([]);
       setMessageText("");
+      setAttachmentFile(null);
       setGroupFormOpen(false);
       setGroupTitle("");
       setGroupParticipantIds([]);
@@ -336,7 +339,7 @@ export default function Messages({
   async function handleSend(event) {
     event.preventDefault();
     const content = messageText.trim();
-    if (!content || !selectedChat || sending) return;
+    if ((!content && !attachmentFile) || !selectedChat || sending) return;
 
     setSending(true);
     setError("");
@@ -344,7 +347,14 @@ export default function Messages({
     try {
       const client = socketClientRef.current;
 
-      if (client?.connected) {
+      if (attachmentFile) {
+        const sentMessage = await api.sendMessageAttachment(
+          selectedChat.id,
+          content,
+          attachmentFile,
+        );
+        setMessages((current) => mergeMessages(current, [sentMessage]));
+      } else if (client?.connected) {
         sendChatMessage(client, selectedChat.id, content);
       } else {
         const sentMessage = await api.sendMessage(selectedChat.id, content);
@@ -352,6 +362,8 @@ export default function Messages({
       }
 
       setMessageText("");
+      setAttachmentFile(null);
+      if (attachmentInputRef.current) attachmentInputRef.current.value = "";
     } catch (requestError) {
       setError(requestError.message || "Não foi possível enviar a mensagem.");
     } finally {
@@ -621,7 +633,37 @@ export default function Messages({
                             {!mine && selectedChat.type === "GROUP" && (
                               <strong className="msg-bubble-sender">{message.senderName}</strong>
                             )}
-                            <span>{message.content}</span>
+                            {message.content && <span>{message.content}</span>}
+                            {message.attachmentId && (
+                              <button
+                                type="button"
+                                className="msg-attachment"
+                                onClick={async () => {
+                                  try {
+                                    const blob = await api.downloadMessageAttachment(
+                                      selectedChat.id,
+                                      message.attachmentId,
+                                    );
+                                    const url = URL.createObjectURL(blob);
+                                    const anchor = document.createElement("a");
+                                    anchor.href = url;
+                                    anchor.download = message.attachmentName || "anexo";
+                                    anchor.click();
+                                    URL.revokeObjectURL(url);
+                                  } catch (requestError) {
+                                    setError(requestError.message || "Não foi possível baixar o anexo.");
+                                  }
+                                }}
+                              >
+                                <i className="bi bi-paperclip"></i>
+                                <span>{message.attachmentName}</span>
+                                <small>
+                                  {message.attachmentSize
+                                    ? `${Math.ceil(message.attachmentSize / 1024)} KB`
+                                    : "Arquivo"}
+                                </small>
+                              </button>
+                            )}
                             <time>{formatTime(message.sentAt)}</time>
                           </div>
                         </div>
@@ -634,6 +676,22 @@ export default function Messages({
                 </div>
 
                 <form className="msg-compose" onSubmit={handleSend}>
+                  <input
+                    ref={attachmentInputRef}
+                    className="msg-attachment-input"
+                    type="file"
+                    aria-label="Selecionar anexo"
+                    onChange={(event) => setAttachmentFile(event.target.files?.[0] || null)}
+                  />
+                  <button
+                    type="button"
+                    className={attachmentFile ? "is-selected" : ""}
+                    disabled={sending}
+                    title={attachmentFile ? attachmentFile.name : "Anexar arquivo"}
+                    onClick={() => attachmentInputRef.current?.click()}
+                  >
+                    <i className="bi bi-paperclip"></i>
+                  </button>
                   <textarea
                     rows="1"
                     maxLength="2000"
@@ -648,7 +706,11 @@ export default function Messages({
                       }
                     }}
                   />
-                  <button type="submit" disabled={sending || !messageText.trim()} title="Enviar mensagem">
+                  <button
+                    type="submit"
+                    disabled={sending || (!messageText.trim() && !attachmentFile)}
+                    title="Enviar mensagem"
+                  >
                     <i className={`bi ${sending ? "bi-hourglass-split" : "bi-send-fill"}`}></i>
                   </button>
                 </form>

@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Filter;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -20,6 +21,8 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "process_histories")
+@Filter(name = "cityHallFilter", condition = BiddingScopeConditions.REQ_CHILD_CITY)
+@Filter(name = "sectorFilter", condition = BiddingScopeConditions.REQ_CHILD_SECTOR)
 public class ProcessHistory {
 
     @Id

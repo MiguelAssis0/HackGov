@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "../components/DashboardLayout.jsx";
 import { api } from "../services/api.js";
+import { TaskDetailPanel } from "../components/TaskDetailPanel.jsx";
 
 const emptyForm = {
   title: "",
@@ -9,6 +10,11 @@ const emptyForm = {
   responsibleId: "",
   startDate: "",
   endDate: "",
+  status: "TODO",
+  priority: "NORMAL",
+  businessPoints: 0,
+  protocol: "",
+  expectedResult: "",
 };
 
 function pageItems(payload) {
@@ -67,6 +73,13 @@ function taskSectorKey(task) {
 }
 
 function taskStatus(task) {
+  const persisted = {
+    TODO: { key: "planejada", label: "A fazer", icon: "bi-circle" },
+    IN_PROGRESS: { key: "andamento", label: "Em andamento", icon: "bi-play-circle-fill" },
+    IN_REVIEW: { key: "revisao", label: "Em revisao", icon: "bi-eye-fill" },
+    COMPLETED: { key: "concluida", label: "Concluida", icon: "bi-check-circle-fill" },
+  }[task.status];
+  if (persisted) return persisted;
   const now = new Date();
   const start = task.startDate ? new Date(task.startDate) : null;
   const end = task.endDate ? new Date(task.endDate) : null;
@@ -303,6 +316,30 @@ function TaskModal({ open, editingTask, boards, employees, form, saving, onClose
                 onChange={(event) => onChange("endDate", event.target.value)}
               />
             </div>
+            <div className="col-12 col-md-4">
+              <label className="field-label" htmlFor="taskStatus">Status</label>
+              <select id="taskStatus" className="field-input" value={form.status} onChange={(event) => onChange("status", event.target.value)}>
+                <option value="TODO">A fazer</option><option value="IN_PROGRESS">Em andamento</option><option value="IN_REVIEW">Em revisao</option><option value="COMPLETED">Concluida</option>
+              </select>
+            </div>
+            <div className="col-12 col-md-4">
+              <label className="field-label" htmlFor="taskPriority">Prioridade</label>
+              <select id="taskPriority" className="field-input" value={form.priority} onChange={(event) => onChange("priority", event.target.value)}>
+                <option value="LOW">Baixa</option><option value="NORMAL">Normal</option><option value="HIGH">Alta</option><option value="URGENT">Urgente</option>
+              </select>
+            </div>
+            <div className="col-12 col-md-4">
+              <label className="field-label" htmlFor="taskPoints">Valor publico</label>
+              <input id="taskPoints" className="field-input" type="number" min="0" max="100" value={form.businessPoints} onChange={(event) => onChange("businessPoints", Number(event.target.value))} />
+            </div>
+            <div className="col-12 col-md-5">
+              <label className="field-label" htmlFor="taskProtocol">Protocolo</label>
+              <input id="taskProtocol" className="field-input" maxLength="60" value={form.protocol} onChange={(event) => onChange("protocol", event.target.value)} />
+            </div>
+            <div className="col-12 col-md-7">
+              <label className="field-label" htmlFor="taskExpected">Resultado esperado</label>
+              <input id="taskExpected" className="field-input" maxLength="5000" value={form.expectedResult} onChange={(event) => onChange("expectedResult", event.target.value)} />
+            </div>
           </div>
 
           {!canSubmit && (
@@ -342,6 +379,9 @@ export default function TasksPage() {
   const [editingTask, setEditingTask] = useState(null);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [detailTask, setDetailTask] = useState(null);
+  const [requestOpen, setRequestOpen] = useState(false);
+  const [requestForm, setRequestForm] = useState({ destinationSectorId: "", title: "", description: "", priority: "NORMAL", deadline: "" });
 
   useEffect(() => {
     let mounted = true;
@@ -431,7 +471,7 @@ export default function TasksPage() {
         acc[taskStatus(task).key] += 1;
         return acc;
       },
-      { andamento: 0, planejada: 0, atrasada: 0 },
+      { andamento: 0, planejada: 0, atrasada: 0, revisao: 0, concluida: 0 },
     );
 
     return [
@@ -465,6 +505,11 @@ export default function TasksPage() {
       responsibleId: taskResponsibleKey(task) || "",
       startDate: toDatetimeLocal(task.startDate),
       endDate: toDatetimeLocal(task.endDate),
+      status: task.status || "TODO",
+      priority: task.priority || "NORMAL",
+      businessPoints: task.businessPoints || 0,
+      protocol: task.protocol || "",
+      expectedResult: task.expectedResult || "",
     });
     setModalOpen(true);
   }
@@ -495,6 +540,12 @@ export default function TasksPage() {
           boardId: form.boardId,
           startDate: normalizeLocalDate(form.startDate),
           endDate: normalizeLocalDate(form.endDate),
+          status: form.status,
+          priority: form.priority,
+          businessPoints: form.businessPoints,
+          protocol: form.protocol,
+          expectedResult: form.expectedResult,
+          responsibleIds: [form.responsibleId],
         });
 
         setTasks((current) =>
@@ -512,6 +563,12 @@ export default function TasksPage() {
           board: { id: form.boardId },
           startDate: normalizeLocalDate(form.startDate),
           endDate: normalizeLocalDate(form.endDate),
+          status: form.status,
+          priority: form.priority,
+          businessPoints: form.businessPoints,
+          protocol: form.protocol,
+          expectedResult: form.expectedResult,
+          responsibleIds: [form.responsibleId],
         });
 
         setTasks((current) => [hydrateTasks([createdTask], allBoards, employees)[0], ...current]);
@@ -542,6 +599,15 @@ export default function TasksPage() {
     }
   }
 
+  async function submitRequest(event) {
+    event.preventDefault();
+    try {
+      await api.createTaskRequest({ ...requestForm, deadline: requestForm.deadline || null });
+      setRequestOpen(false); setRequestForm({ destinationSectorId: "", title: "", description: "", priority: "NORMAL", deadline: "" });
+      setMessage({ type: "success", text: "Demanda enviada ao setor e registrada na caixa de entrada." });
+    } catch (error) { setMessage({ type: "error", text: error.message }); }
+  }
+
   return (
     <DashboardLayout styles={["/css/tarefas.css"]}>
       <div className="dashboard tarefas-page">
@@ -554,10 +620,10 @@ export default function TasksPage() {
                 Distribua demandas entre setores, acompanhe prazos e altere responsaveis em um unico quadro.
               </p>
             </div>
-            <button type="button" className="btn-primary d-flex align-items-center gap-2" onClick={openNewTask}>
+            <div className="d-flex gap-2 flex-wrap"><button type="button" className="btn btn-outline-primary" onClick={() => setRequestOpen(true)}><i className="bi bi-send"></i> Solicitar a outro setor</button><button type="button" className="btn-primary d-flex align-items-center gap-2" onClick={openNewTask}>
               <i className="bi bi-plus-circle-fill"></i>
               Nova tarefa
-            </button>
+            </button></div>
           </div>
 
           {message && (
@@ -618,6 +684,8 @@ export default function TasksPage() {
                     <option value="andamento">Em andamento</option>
                     <option value="planejada">Planejada</option>
                     <option value="atrasada">Atrasada</option>
+                    <option value="revisao">Em revisao</option>
+                    <option value="concluida">Concluida</option>
                   </select>
                 </div>
 
@@ -672,8 +740,10 @@ export default function TasksPage() {
                                       </div>
                                     </div>
 
-                                    <h4>{task.title}</h4>
+                                    <button type="button" className="tarefa-title-button" onClick={() => setDetailTask(task)}><h4>{task.title}</h4></button>
                                     <p>{task.description}</p>
+
+                                    <div className="tarefa-badges"><span>{task.priority || "NORMAL"}</span><span>{task.businessPoints || 0} pts</span>{task.protocol && <span>{task.protocol}</span>}</div>
 
                                     <div className="tarefa-meta-grid">
                                       <div>
@@ -789,6 +859,8 @@ export default function TasksPage() {
         onChange={updateForm}
         onSubmit={submitTask}
       />
+      {requestOpen && <div className="react-modal-backdrop" role="dialog" aria-modal="true"><div className="react-modal-card task-modal-card"><div className="task-modal-header"><div><p className="section-label mb-1">Fluxo entre setores</p><h4>Solicitar demanda</h4></div><button className="btn-acao" onClick={() => setRequestOpen(false)}><i className="bi bi-x-lg"></i></button></div><form className="row g-3" onSubmit={submitRequest}><div className="col-12"><label className="field-label">Setor de destino</label><select className="field-input" required value={requestForm.destinationSectorId} onChange={(event) => setRequestForm({ ...requestForm, destinationSectorId: event.target.value })}><option value="">Selecione</option>{allSectors.map((sector) => <option key={sector.id} value={sector.id}>{sectorName(sector)}</option>)}</select></div><div className="col-12"><label className="field-label">Titulo</label><input className="field-input" required maxLength="160" value={requestForm.title} onChange={(event) => setRequestForm({ ...requestForm, title: event.target.value })} /></div><div className="col-12"><label className="field-label">Descricao</label><textarea className="field-input" rows="4" maxLength="5000" value={requestForm.description} onChange={(event) => setRequestForm({ ...requestForm, description: event.target.value })}></textarea></div><div className="col-md-6"><label className="field-label">Prioridade</label><select className="field-input" value={requestForm.priority} onChange={(event) => setRequestForm({ ...requestForm, priority: event.target.value })}><option value="NORMAL">Normal</option><option value="HIGH">Alta</option><option value="URGENT">Urgente</option><option value="LOW">Baixa</option></select></div><div className="col-md-6"><label className="field-label">Prazo</label><input className="field-input" type="date" min={new Date().toISOString().slice(0,10)} value={requestForm.deadline} onChange={(event) => setRequestForm({ ...requestForm, deadline: event.target.value })} /></div><div className="col-12 text-end"><button className="btn btn-primary">Enviar demanda</button></div></form></div></div>}
+      {detailTask && <TaskDetailPanel task={detailTask} onClose={() => setDetailTask(null)} onMessage={setMessage} />}
     </DashboardLayout>
   );
 }

@@ -1,13 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DashboardLayout } from "../components/DashboardLayout.jsx";
 import { Link } from "../components/RouterContext.jsx";
 import { IconButton, PageHeader } from "../components/DashboardShared.jsx";
+import { api } from "../services/api.js";
 import {
-  slugify,
   useAvailableTools,
   useCityHallName,
   useJobs,
-  usePermissions,
   useSectors,
 } from "../services/mockupService.js";
 
@@ -15,36 +14,29 @@ export default function AccessControlPage() {
   const cityHallName = useCityHallName();
   const [sectors] = useSectors();
   const [jobs] = useJobs();
-  const [permissions, setPermissions] = usePermissions();
+  const [permissions, setPermissions] = useState([]);
+  const [message, setMessage] = useState("");
   const availableTools = useAvailableTools();
   const [form, setForm] = useState({
     tool: "",
     sector: "",
     job: "",
-    level: "Visualizar",
+    level: "VIEW",
   });
 
-  function persist(nextPermissions) {
-    setPermissions(nextPermissions);
-  }
+  useEffect(() => { api.getToolPermissions().then(setPermissions).catch((error) => setMessage(error.message)); }, []);
 
-  function addPermission(event) {
+  async function addPermission(event) {
     event.preventDefault();
     if (!form.tool) return;
 
-    const nextPermission = {
-      ...form,
-      id: `${slugify(form.tool)}-${slugify(form.sector || "todos")}-${slugify(form.job || "todos")}-${Date.now()}`,
-      sector: form.sector || "Todos",
-      job: form.job || "Todos",
-    };
-
-    persist([nextPermission, ...permissions]);
-    setForm({ tool: "", sector: "", job: "", level: "Visualizar" });
+    try { const saved = await api.createToolPermission({ toolSlug: form.tool, sectorId: form.sector || null, occupationId: form.job || null, level: form.level, enabled: true }); setPermissions([saved, ...permissions]); setForm({ tool: "", sector: "", job: "", level: "VIEW" }); }
+    catch (error) { setMessage(error.message); }
   }
 
-  function removePermission(id) {
-    persist(permissions.filter((permission) => permission.id !== id));
+  async function removePermission(id) {
+    try { await api.deleteToolPermission(id); setPermissions(permissions.filter((permission) => permission.id !== id)); }
+    catch (error) { setMessage(error.message); }
   }
 
   return (
@@ -60,6 +52,7 @@ export default function AccessControlPage() {
               </Link>
             }
           />
+          {message && <div className="auth-message danger mb-3">{message}</div>}
 
           <div className="ferr-permissoes-wrap">
             <div className="ferr-permissoes-header d-flex align-items-center justify-content-between">
@@ -83,7 +76,7 @@ export default function AccessControlPage() {
                   >
                     <option value="">---------</option>
                     {availableTools.map((tool) => (
-                      <option value={tool.name} key={tool.id}>
+                      <option value={tool.id} key={tool.id}>
                         {tool.name}
                       </option>
                     ))}
@@ -98,7 +91,7 @@ export default function AccessControlPage() {
                   >
                     <option value="">---------</option>
                     {sectors.map((sector) => (
-                      <option value={sector.name} key={sector.id}>
+                      <option value={sector.id} key={sector.id}>
                         {sector.name}
                       </option>
                     ))}
@@ -113,7 +106,7 @@ export default function AccessControlPage() {
                   >
                     <option value="">---------</option>
                     {jobs.map((job) => (
-                      <option value={job.name} key={job.id}>
+                      <option value={job.id} key={job.id}>
                         {job.name}
                       </option>
                     ))}
@@ -126,9 +119,9 @@ export default function AccessControlPage() {
                     value={form.level}
                     onChange={(event) => setForm((current) => ({ ...current, level: event.target.value }))}
                   >
-                    <option>Visualizar</option>
-                    <option>Editar</option>
-                    <option>Gerenciar</option>
+                    <option value="VIEW">Visualizar</option>
+                    <option value="MANAGE">Editar</option>
+                    <option value="ADMIN">Gerenciar</option>
                   </select>
                 </div>
                 <div className="col-12 col-md-auto">
@@ -155,9 +148,9 @@ export default function AccessControlPage() {
                 <tbody>
                   {permissions.map((permission) => (
                     <tr key={permission.id}>
-                      <td>{permission.tool}</td>
-                      <td>{permission.sector || "Todos"}</td>
-                      <td>{permission.job || "Todos"}</td>
+                      <td>{availableTools.find((tool) => tool.id === permission.toolSlug)?.name || permission.toolSlug}</td>
+                      <td>{permission.sectorName || "Todos"}</td>
+                      <td>{permission.occupationName || "Todos"}</td>
                       <td>
                         <span className="badge text-bg-light">{permission.level}</span>
                       </td>

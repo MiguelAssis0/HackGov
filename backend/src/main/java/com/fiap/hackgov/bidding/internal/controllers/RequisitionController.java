@@ -9,6 +9,8 @@ import com.fiap.hackgov.bidding.internal.DTOs.requisiton.RequisitionResponseDTO;
 import com.fiap.hackgov.bidding.internal.services.RequisitionService;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.shared.infra.pagination.PageResponseDTO;
+import com.fiap.hackgov.documents.internal.DTOs.DocumentDTOs.Response;
+import com.fiap.hackgov.documents.internal.services.MunicipalDocumentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +18,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +32,9 @@ public class RequisitionController {
 
     @Autowired
     private RequisitionService requisitionService;
+
+    @Autowired
+    private MunicipalDocumentService documentService;
 
     @GetMapping
     public PageResponseDTO<RequisitionResponseDTO> findAll(@PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -55,6 +62,24 @@ public class RequisitionController {
         RequisitionResponseDTO requisition = requisitionService.create(employee, dto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(requisition);
+    }
+
+    @GetMapping("/{id}/documents")
+    public List<Response> documents(@PathVariable UUID id, @AuthenticationPrincipal Employee employee) {
+        requisitionService.findById(id);
+        return documentService.listForProcess(id, employee);
+    }
+
+    @PostMapping(value = "/{id}/documents", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Response> uploadDocument(@PathVariable UUID id,
+                                                   @RequestParam String title,
+                                                   @RequestParam(defaultValue = "PROCESS") String documentType,
+                                                   @RequestParam(defaultValue = "") String description,
+                                                   @RequestPart MultipartFile file,
+                                                   @AuthenticationPrincipal Employee employee) {
+        requisitionService.findById(id);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(documentService.uploadForProcess(id, title, documentType, description, file, employee));
     }
 
     @PatchMapping("/{id}/advance-stage")

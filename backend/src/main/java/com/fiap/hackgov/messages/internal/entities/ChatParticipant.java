@@ -20,7 +20,7 @@ import java.util.UUID;
                 @UniqueConstraint(columnNames = {"chat_id", "employee_id"})
         }
 )
-@Filter(name = "cityHallFilter", condition = "city_hall_id = :cityHallId")
+@Filter(name = "cityHallFilter", condition = "chat_id in (select c.id from chats c where c.city_hall_id = :cityHallId)")
 public class ChatParticipant {
 
     @Id

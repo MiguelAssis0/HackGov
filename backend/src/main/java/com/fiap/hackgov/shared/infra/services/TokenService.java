@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
+import java.util.UUID;
 
 @Service
 public class TokenService {
@@ -25,22 +26,22 @@ public class TokenService {
 
     private static final String ISSUER = "HackGov";
 
-    private static final int ACCESS_TOKEN_MINUTES = 44640;
+    private static final int ACCESS_TOKEN_MINUTES = 30;
 
     private static final int REFRESH_TOKEN_DAYS = 7;
 
-    public String generateToken(User user) {
+    public String generateToken(User user, UUID sessionId) {
 
         LocalDateTime expiration = LocalDateTime.now().plusMinutes(ACCESS_TOKEN_MINUTES);
 
-        return JWT.create().withIssuer(ISSUER).withSubject(user.getEmail()).withClaim("role", "ROLE_" + user.getRole().name()).withClaim("type", "access").withExpiresAt(expiration.toInstant(ZoneOffset.of("-03:00"))).sign(accessAlgorithm());
+        return JWT.create().withIssuer(ISSUER).withSubject(user.getEmail()).withClaim("role", "ROLE_" + user.getRole().name()).withClaim("type", "access").withClaim("sid",sessionId.toString()).withJWTId(UUID.randomUUID().toString()).withExpiresAt(expiration.toInstant(ZoneOffset.of("-03:00"))).sign(accessAlgorithm());
     }
 
-    public String generateRefreshToken(User user) {
+    public String generateRefreshToken(User user, UUID sessionId) {
 
         LocalDateTime expiration = LocalDateTime.now().plusDays(REFRESH_TOKEN_DAYS);
 
-        return JWT.create().withIssuer(ISSUER).withSubject(user.getEmail()).withClaim("type", "refresh").withExpiresAt(expiration.toInstant(ZoneOffset.of("-03:00"))).sign(refreshAlgorithm());
+        return JWT.create().withIssuer(ISSUER).withSubject(user.getEmail()).withClaim("type", "refresh").withClaim("sid",sessionId.toString()).withJWTId(UUID.randomUUID().toString()).withExpiresAt(expiration.toInstant(ZoneOffset.of("-03:00"))).sign(refreshAlgorithm());
     }
 
     public String getSubject(String token) {
@@ -52,6 +53,9 @@ public class TokenService {
 
         return verifyRefreshToken(refreshToken).getSubject();
     }
+
+    public UUID getSessionId(String token) { return UUID.fromString(verifyAccessToken(token).getClaim("sid").asString()); }
+    public UUID getSessionIdFromRefreshToken(String token) { return UUID.fromString(verifyRefreshToken(token).getClaim("sid").asString()); }
 
     public Date getExpiration(String token) {
 

@@ -18,7 +18,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Table(name = "messages")
-@Filter(name = "cityHallFilter", condition = "city_hall_id = :cityHallId")
+@Filter(name = "cityHallFilter", condition = "chat_id in (select c.id from chats c where c.city_hall_id = :cityHallId)")
 public class Message {
 
     @Id
@@ -38,4 +38,7 @@ public class Message {
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime sentAt;
+
+    @OneToOne(mappedBy="message",cascade=CascadeType.ALL,orphanRemoval=true)
+    private MessageAttachment attachment;
 }

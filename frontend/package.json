@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
-    "preview": "vite preview --host 0.0.0.0"
+    "preview": "vite preview --host 0.0.0.0",
+    "validate:visual": "node scripts/visual-validation.mjs"
   },
   "dependencies": {
     "@stomp/stompjs": "^7.3.0",
@@ -18,6 +19,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.0.0",
+    "selenium-webdriver": "^4.46.0",
     "vite": "^7.0.0"
   }
 }

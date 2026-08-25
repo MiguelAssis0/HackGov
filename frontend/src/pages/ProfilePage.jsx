@@ -182,6 +182,7 @@ export default function ProfilePage() {
   const [loadError, setLoadError] = useState("");
   const [openSection, setOpenSection] = useState("settings");
   const [editOpen, setEditOpen] = useState(false);
+  const [sessions, setSessions] = useState([]);
   const [settings, setSettings] = useState(() => {
     try {
       return (
@@ -206,11 +207,12 @@ export default function ProfilePage() {
       setLoadError("");
 
       try {
-        const response = await api.getEmployeeDetails();
+        const [response, sessionItems] = await Promise.all([api.getEmployeeDetails(), api.getSessions()]);
         if (!mounted) return;
 
         const nextProfile = mapProfile(response);
         setProfile(nextProfile);
+        setSessions(sessionItems);
         setSettings((current) => {
           const next = {
             ...current,
@@ -237,16 +239,11 @@ export default function ProfilePage() {
     };
   }, []);
 
-  const userAgent = useMemo(() => navigator.userAgent.slice(0, 82), []);
-  const lastAccess = useMemo(() => {
-    return new Intl.DateTimeFormat("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(new Date());
-  }, []);
+  async function revokeSession(id) {
+    if (!window.confirm("Remover este dispositivo e encerrar a sessao?")) return;
+    try { await api.revokeSession(id); setSessions((items) => items.map((item) => item.id === id ? { ...item, active: false, revokedAt: new Date().toISOString() } : item)); }
+    catch (error) { setLoadError(error.message); }
+  }
 
   function saveSettings(nextSettings = settings) {
     localStorage.setItem("hackgov.profileSettings", JSON.stringify(nextSettings));
@@ -404,15 +401,12 @@ export default function ProfilePage() {
                   </button>
 
                   <h4 className="mb-2 mt-4">Dispositivos conectados</h4>
-                  <div className="device-card">
-                    <i className="bi bi-laptop"></i>
-                    <div>
-                      <h4 className="mb-1">Dispositivo atual</h4>
-                      <span>{userAgent}</span>
-                      <small>Último acesso: {lastAccess}</small>
-                    </div>
-                    <em>Ativo</em>
-                  </div>
+                  {sessions.map((session) => <div className={`device-card ${session.current ? "device-current" : ""}`} key={session.id}>
+                    <i className={`bi ${session.deviceType === "mobile" ? "bi-phone" : session.deviceType === "tablet" ? "bi-tablet" : "bi-laptop"}`}></i>
+                    <div className="device-info"><h4 className="mb-1">{session.browser}{session.operatingSystem ? ` — ${session.operatingSystem}` : ""} {session.current && <span className="device-badge-atual">Atual</span>}</h4><span className="device-detail">{session.userAgent}</span><small>{session.ipAddress && `IP: ${session.ipAddress} · `}Ultimo acesso: {session.lastActivity ? new Date(session.lastActivity).toLocaleString("pt-BR") : "-"}</small></div>
+                    {session.active ? session.current ? <em>Ativo</em> : <button type="button" className="device-revoke-btn" onClick={() => revokeSession(session.id)}>Remover</button> : <em>Encerrada</em>}
+                  </div>)}
+                  {sessions.length === 0 && <div className="empty-state">Nenhuma sessao ativa encontrada.</div>}
                 </form>
               </Accordion>
 

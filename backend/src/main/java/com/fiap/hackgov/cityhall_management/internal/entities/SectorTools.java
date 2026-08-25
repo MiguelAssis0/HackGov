@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-@Filter(name = "cityHallFilter", condition = "city_hall_id = :cityHallId")
+@Filter(name = "cityHallFilter", condition = "sector_id in (select s.id from sectors s where s.city_hall_id = :cityHallId)")
 @Filter(name = "sectorFilter", condition = "sector_id = :sectorId")
 public class SectorTools implements Serializable {
     @Serial

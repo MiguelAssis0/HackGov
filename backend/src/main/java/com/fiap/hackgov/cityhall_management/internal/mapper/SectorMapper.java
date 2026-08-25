@@ -12,6 +12,8 @@ public interface SectorMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "occupationId", ignore = true)
     @Mapping(target = "sectorTools", ignore = true)
+    @Mapping(target = "description", ignore = true)
+    @Mapping(target = "active", constant = "true")
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     Sector toEntity(CreateSectorDTO createSectorDTO);

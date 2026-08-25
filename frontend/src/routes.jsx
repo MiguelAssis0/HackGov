@@ -16,6 +16,13 @@ const EmployeesPage = lazy(() => import("./pages/EmployeesPage.jsx"));
 const ManagementPage = lazy(() => import("./pages/ManagementPage.jsx"));
 const AccessControlPage = lazy(() => import("./pages/AccessControlPage.jsx"));
 const CityHallFormPage = lazy(() => import("./pages/CityHallFormPage.jsx"));
+const AgendaPage = lazy(() => import("./pages/AgendaPage.jsx"));
+const InboxPage = lazy(() => import("./pages/InboxPage.jsx"));
+const ClientsPage = lazy(() => import("./pages/ClientsPage.jsx"));
+const AgriculturePage = lazy(() => import("./pages/AgriculturePage.jsx"));
+const DocumentsPage = lazy(() => import("./pages/DocumentsPage.jsx"));
+const AuditPage = lazy(() => import("./pages/AuditPage.jsx"));
+const SpreadsheetImportPage = lazy(() => import("./pages/SpreadsheetImportPage.jsx"));
 
 const routes = [
   { path: "/", element: <HomePage /> },
@@ -26,6 +33,13 @@ const routes = [
   { path: "/ferramentas", element: <ToolsPage /> },
   { path: "/processos", element: <ProcessesPage /> },
   { path: "/tarefas", element: <TasksPage /> },
+  { path: "/agenda", element: <AgendaPage /> },
+  { path: "/caixa-entrada", element: <InboxPage /> },
+  { path: "/clientes", element: <ClientsPage /> },
+  { path: "/patrulha-agricola", element: <AgriculturePage /> },
+  { path: "/documentos", element: <DocumentsPage /> },
+  { path: "/auditoria", element: <AuditPage /> },
+  { path: "/importacao", element: <SpreadsheetImportPage /> },
   { path: "/perfil", element: <ProfilePage /> },
   { path: "/setores", element: <SectorsPage /> },
   { path: "/cargos", element: <JobsPage /> },

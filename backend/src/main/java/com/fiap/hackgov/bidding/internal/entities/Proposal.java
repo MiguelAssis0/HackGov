@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.Filter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -16,6 +17,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "proposals")
+@Filter(name = "cityHallFilter", condition = BiddingScopeConditions.LIC_CITY)
+@Filter(name = "sectorFilter", condition = BiddingScopeConditions.LIC_SECTOR)
 @Getter
 @Setter
 @NoArgsConstructor
