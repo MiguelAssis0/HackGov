@@ -7,7 +7,9 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "validate:visual": "node scripts/visual-validation.mjs"
+    "validate:visual": "node scripts/visual-validation.mjs",
+    "validate:dashboard": "node scripts/dashboard-visual-validation.mjs",
+    "validate:tools": "node scripts/tools-visual-validation.mjs"
   },
   "dependencies": {
     "@stomp/stompjs": "^7.3.0",

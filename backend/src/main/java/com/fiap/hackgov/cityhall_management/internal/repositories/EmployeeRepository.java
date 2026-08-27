@@ -16,6 +16,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
 
     long countByCityHallId_IdAndSectorId_Id(UUID cityHallId, UUID sectorId);
 
+    long countByCityHallId_Id(UUID cityHallId);
+
     @EntityGraph(attributePaths = {
             "occupationId",
             "occupationId.permissions",
@@ -27,6 +29,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
 
     @EntityGraph(attributePaths = {
             "cityHallId",
+            "cityHallId.state",
             "sectorId",
             "occupationId"
     })

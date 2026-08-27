@@ -1,365 +1,162 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { DashboardLayout } from "../components/DashboardLayout.jsx";
 import { Link } from "../components/RouterContext.jsx";
-import { api, getSelectedCityHall, getStoredUser, getUserDisplayName } from "../services/api.js";
-import { toolColors, useAvailableTools } from "../services/mockupService.js";
+import { api } from "../services/api.js";
 
-function pageItems(payload) {
-  if (Array.isArray(payload)) return payload;
-  return payload?.content || payload?.items || [];
-}
+const WEEK_DAYS = ["D", "S", "T", "Q", "Q", "S", "S"];
 
-function resolveCityHallName(user) {
-  const selectedCityHall = getSelectedCityHall();
-  if (selectedCityHall?.name) return selectedCityHall.name;
-
-  const cityHall = user?.cityHall;
-  if (cityHall?.name) return cityHall.name;
-  if (typeof cityHall === "string" && cityHall.trim()) return cityHall;
-  if (typeof user?.prefeitura === "string" && user.prefeitura.trim()) return user.prefeitura;
-  if (user?.prefeitura?.name) return user.prefeitura.name;
-
-  return "Prefeitura vinculada";
-}
-
-function taskStatus(task) {
-  const now = new Date();
-  const start = task.startDate ? new Date(task.startDate) : null;
-  const end = task.endDate ? new Date(task.endDate) : null;
-
-  if (end && end < now) return "vermelho";
-  if (start && start > now) return "amarelo";
-  return "primary";
-}
-
-function taskMeta(task) {
-  if (!task?.endDate) return "Sem prazo definido";
-
-  const date = new Date(task.endDate);
-  if (Number.isNaN(date.getTime())) return "Prazo indisponivel";
-
-  const formatted = new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "long",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
-
-  return `Ate ${formatted}`;
-}
-
-function buildCalendarDays(viewDate, tasks) {
-  const year = viewDate.getFullYear();
-  const month = viewDate.getMonth();
-  const firstDay = new Date(year, month, 1);
-  const start = new Date(firstDay);
-  start.setDate(firstDay.getDate() - firstDay.getDay());
-
-  const today = new Date();
-  const deadlineKeys = new Set(
-    tasks
-      .map((task) => {
-        if (!task?.endDate) return null;
-        const date = new Date(task.endDate);
-        if (Number.isNaN(date.getTime())) return null;
-        return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-      })
-      .filter(Boolean),
-  );
-
-  return Array.from({ length: 35 }, (_, index) => {
-    const date = new Date(start);
-    date.setDate(start.getDate() + index);
-
-    const classes = [];
-    if (date.getMonth() !== month) classes.push("outro-mes");
-    if (
-      date.getFullYear() === today.getFullYear() &&
-      date.getMonth() === today.getMonth() &&
-      date.getDate() === today.getDate()
-    ) {
-      classes.push("hoje");
-    }
-    if (deadlineKeys.has(`${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`)) {
-      classes.push("has-event");
-    }
-
-    return [String(date.getDate()), classes.join(" ").trim()];
-  });
+function localDate(value, options) {
+  if (!value) return "";
+  const [year, month, day] = value.split("-").map(Number);
+  return new Intl.DateTimeFormat("pt-BR", options).format(new Date(year, month - 1, day));
 }
 
 function StatCard({ icon, label, value }) {
-  return (
-    <article className="dashboard-stat-card">
-      <i className={`bi ${icon}`}></i>
-      <span>{label}</span>
-      <strong>{value}</strong>
-    </article>
-  );
-}
-
-function ToolCard({ tool, color }) {
-  const content = (
-    <>
-      <div className="dashboard-tool-icon" style={{ color: color.fg }}>
-        <i className={`bi ${tool.icon}`}></i>
-      </div>
-      <div>
-        <h4>{tool.name}</h4>
-        <p>{tool.description}</p>
-      </div>
-    </>
-  );
-
-  return tool.route ? (
-    <Link to={tool.route} className="dashboard-tool-card">
-      {content}
-    </Link>
-  ) : (
-    <div className="dashboard-tool-card">{content}</div>
-  );
+  return <article className="stat-card"><i className={`bi ${icon}`}></i><span>{label}</span><strong>{value}</strong></article>;
 }
 
 export default function DashboardPage() {
-  const user = getStoredUser() || { nome: "Usuario" };
-  const displayName = getUserDisplayName(user);
-  const cityHallName = resolveCityHallName(user);
-  const dashboardTools = useAvailableTools();
-  const [employees, setEmployees] = useState([]);
-  const [occupations, setOccupations] = useState([]);
-  const [sectors, setSectors] = useState([]);
-  const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [dashboard, setDashboard] = useState(null);
   const [message, setMessage] = useState(null);
-  const [monthDate, setMonthDate] = useState(() => new Date());
+  const [removingFavorite, setRemovingFavorite] = useState("");
 
   useEffect(() => {
-    let mounted = true;
-
-    async function loadDashboard() {
-      setLoading(true);
-      setMessage(null);
-
-      const [employeesResult, occupationsResult, sectorsResult, tasksResult] = await Promise.allSettled([
-        api.getEmployees(),
-        api.getOccupations(),
-        api.getSectors(),
-        api.getTasks(),
-      ]);
-
-      if (!mounted) return;
-
-      const nextEmployees = employeesResult.status === "fulfilled" ? pageItems(employeesResult.value) : [];
-      const nextOccupations = occupationsResult.status === "fulfilled" ? pageItems(occupationsResult.value) : [];
-      const nextSectors = sectorsResult.status === "fulfilled" ? pageItems(sectorsResult.value) : [];
-      const nextTasks = tasksResult.status === "fulfilled" ? pageItems(tasksResult.value) : [];
-      const failures = [];
-
-      if (employeesResult.status === "rejected") failures.push("funcionarios");
-      if (occupationsResult.status === "rejected") failures.push("cargos");
-      if (sectorsResult.status === "rejected") failures.push("setores");
-      if (tasksResult.status === "rejected") failures.push("tarefas");
-
-      setEmployees(nextEmployees);
-      setOccupations(nextOccupations);
-      setSectors(nextSectors);
-      setTasks(nextTasks);
-      setLoading(false);
-
-      if (failures.length > 0) {
-        setMessage({
-          type: "warning",
-          text: `Nao foi possivel carregar ${failures.join(", ")} no backend. O dashboard exibira apenas os dados disponiveis.`,
-        });
-      }
-    }
-
-    loadDashboard();
-    return () => {
-      mounted = false;
-    };
+    let active = true;
+    api.getDashboard().then((response) => { if (active) setDashboard(response); })
+      .catch((error) => { if (active) setMessage({ type: "error", text: error.message || "Não foi possível carregar o dashboard." }); });
+    return () => { active = false; };
   }, []);
 
-  const monthLabel = useMemo(
-    () =>
-      new Intl.DateTimeFormat("pt-BR", {
-        month: "long",
-        year: "numeric",
-      }).format(monthDate),
-    [monthDate],
-  );
+  async function removeFavorite(slug) {
+    setRemovingFavorite(slug);
+    setMessage(null);
+    try {
+      const result = await api.toggleToolFavorite(slug);
+      if (!result?.favorite) {
+        setDashboard((current) => ({
+          ...current,
+          favorites: current.favorites.filter((favorite) => favorite.slug !== slug),
+          stats: { ...current.stats, favorites: Math.max(0, current.stats.favorites - 1) },
+        }));
+        setMessage({ type: "success", text: "Favorito removido." });
+      }
+    } catch (error) {
+      setMessage({ type: "error", text: error.message || "Não foi possível remover o favorito." });
+    } finally {
+      setRemovingFavorite("");
+    }
+  }
 
-  const stats = useMemo(
-    () => [
-      { icon: "bi-people-fill", label: "Funcionarios", value: employees.length },
-      { icon: "bi-diagram-3-fill", label: "Setores", value: sectors.length },
-      { icon: "bi-person-badge-fill", label: "Cargos", value: occupations.length },
-      { icon: "bi-grid-1x2-fill", label: "Ferramentas disponiveis", value: dashboardTools.length },
-    ],
-    [employees.length, sectors.length, occupations.length, dashboardTools.length],
-  );
-
-  const calendarDays = useMemo(() => buildCalendarDays(monthDate, tasks), [monthDate, tasks]);
-
-  const taskPreview = useMemo(
-    () =>
-      tasks
-        .filter((task) => task?.title)
-        .sort((a, b) => {
-          const aTime = a?.endDate ? new Date(a.endDate).getTime() : Number.MAX_SAFE_INTEGER;
-          const bTime = b?.endDate ? new Date(b.endDate).getTime() : Number.MAX_SAFE_INTEGER;
-          return aTime - bTime;
-        })
-        .slice(0, 3)
-        .map((task) => ({
-          id: task.id,
-          name: task.title,
-          color: taskStatus(task),
-          meta: taskMeta(task),
-        })),
-    [tasks],
-  );
+  const stats = dashboard ? [
+    ["bi-people-fill", "Funcionários", dashboard.stats.employees],
+    ["bi-diagram-3-fill", "Setores", dashboard.stats.sectors],
+    ["bi-person-badge-fill", "Cargos", dashboard.stats.occupations],
+    ["bi-star-fill", "Favoritos", dashboard.stats.favorites],
+  ] : [];
 
   return (
     <DashboardLayout styles={["/css/dashboard.css"]}>
-      <div className="dashboard">
-        <div className="container">
-          {message && (
-            <div className={`auth-message ${message.type} mb-3`}>
-              <i className="bi bi-info-circle-fill"></i>
-              {message.text}
-            </div>
-          )}
+      <div className="dashboard"><div className="container">
+        {message && <div className={`auth-message ${message.type} mb-3`} role="status"><i className={`bi ${message.type === "success" ? "bi-check-circle-fill" : "bi-exclamation-circle-fill"}`}></i>{message.text}</div>}
 
+        {!dashboard ? (
+          <div className="dashboard-loading panel"><i className="bi bi-arrow-repeat"></i><span>Carregando dashboard...</span></div>
+        ) : (
           <div className="row">
             <div className="col-12 col-lg-8 d-flex flex-column gap-3">
-              <section className="dash-hero">
-                <div className="row">
-                  <div className="col-12 col-md-8">
-                    <h2 className="hero-h2">Ola, {displayName}</h2>
-                    <p className="hero-p">Bem-vindo/a a prefeitura digital de {cityHallName}</p>
-
-                    <div className="dash-hero-botoes">
-                      <Link to="/processos" className="btn btn-primary">
-                        <i className="bi bi-diagram-3"></i> Ver processos
-                      </Link>
-                      <Link to="/tarefas" className="btn btn-outline-primary">
-                        <i className="bi bi-plus-lg"></i> Gerenciar Tarefas
-                      </Link>
-                    </div>
-                  </div>
-
-                  <div className="col-4 d-none d-md-flex align-items-center justify-content-end">
-                    <div className="dash-hero-img">
-                      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <polygon points="50,10 90,80 10,80" fill="white" />
-                      </svg>
-                    </div>
+              <section className="dash-hero"><div className="row">
+                <div className="col-12 col-md-8">
+                  <h2 className="hero-h2">Olá, {dashboard.userShortName}</h2>
+                  <p className="hero-p">Bem-vindo/a a prefeitura digital de {dashboard.cityHallName}{dashboard.stateCode ? ` - ${dashboard.stateCode}` : ""}</p>
+                  <div className="dash-hero-botoes">
+                    <Link to="/processos" className="btn btn-primary"><i className="bi bi-diagram-3"></i> Ver processos</Link>
+                    <Link to="/tarefas" className="btn btn-outline-primary"><i className="bi bi-plus"></i> Gerenciar Tarefas</Link>
                   </div>
                 </div>
+                <div className="col-4 d-none d-md-flex align-items-center justify-content-end"><div className="dash-hero-img">
+                  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><polygon points="50,10 90,80 10,80" fill="white" /></svg>
+                </div></div>
+              </div></section>
+
+              <section className="stats-grid mb-0" aria-label="Resumo da prefeitura">
+                {stats.map(([icon, label, value]) => <StatCard icon={icon} label={label} value={value} key={label} />)}
               </section>
 
-              <section className="dashboard-stats-grid" aria-label="Resumo da prefeitura">
-                {stats.map((item) => (
-                  <StatCard {...item} key={item.label} />
-                ))}
-              </section>
-
-              <section className="dashboard-tools-panel">
-                <div className="dashboard-tools-title">
-                  <i className="bi bi-grid-1x2-fill"></i>
-                  <h4 className="mb-0">Ferramentas disponiveis</h4>
+              <section className="panel">
+                <div className="panel-heading">
+                  <h4 className="mb-0"><i className="bi bi-star-fill me-2 text-primary"></i>Favoritos</h4>
+                  <Link to="/ferramentas"><h4 className="primary">Ver todos</h4></Link>
                 </div>
-
-                <div className="dashboard-tools-list">
-                  {dashboardTools.map((tool, index) => (
-                    <ToolCard tool={tool} color={toolColors[index % toolColors.length]} key={tool.id} />
-                  ))}
+                <div className="favorite-grid">
+                  {dashboard.favorites.length ? dashboard.favorites.map((favorite) => (
+                    <article className="favorite-card" key={favorite.slug}>
+                      <Link to={favorite.route} className="favorite-link">
+                        <span className="favorite-icon"><i className={`bi ${favorite.icon}`}></i></span>
+                        <span className="favorite-body"><strong>{favorite.title}</strong><small>{favorite.typeLabel}</small></span>
+                      </Link>
+                      <button type="button" className="favorite-remove" title="Remover favorito" aria-label={`Remover ${favorite.title} dos favoritos`} disabled={removingFavorite === favorite.slug} onClick={() => removeFavorite(favorite.slug)}>
+                        <i className={`bi ${removingFavorite === favorite.slug ? "bi-arrow-repeat" : "bi-star-fill"}`}></i>
+                      </button>
+                    </article>
+                  )) : <div className="empty-state">Você ainda não possui nenhum favorito.</div>}
                 </div>
               </section>
             </div>
 
             <div className="col-12 col-lg-4 mb-5 pb-5 mb-lg-0 pb-lg-0">
               <aside className="d-flex flex-column gap-3 coluna-direita">
-                <div className="card-2">
+                {dashboard.agendaVisible && <section className="card-2 dashboard-agenda">
                   <div className="d-flex justify-content-between align-items-center mb-1">
-                    <h4>
-                      <i className="bi bi-calendar-date-fill primary me-1"></i>
-                      {monthLabel}
-                    </h4>
-                    <div className="cal-nav d-flex">
-                      <button
-                        className="cal-nav-btn"
-                        type="button"
-                        aria-label="Mes anterior"
-                        onClick={() => setMonthDate((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1))}
-                      >
-                        <i className="bi bi-chevron-left"></i>
-                      </button>
-                      <button
-                        className="cal-nav-btn"
-                        type="button"
-                        aria-label="Proximo mes"
-                        onClick={() => setMonthDate((current) => new Date(current.getFullYear(), current.getMonth() + 1, 1))}
-                      >
-                        <i className="bi bi-chevron-right"></i>
-                      </button>
-                    </div>
+                    <h4><i className="bi bi-calendar-date-fill primary me-1"></i>{dashboard.calendar.label}</h4>
+                    <Link className="dashboard-agenda-link" to="/agenda">Abrir agenda</Link>
                   </div>
-
                   <div className="cal-grid">
-                    {["D", "S", "T", "Q", "Q", "S", "S"].map((label, index) => (
-                      <div className="cal-dia-label" key={`${label}-${index}`}>
-                        {label}
-                      </div>
-                    ))}
-                    {calendarDays.map(([day, className], index) => (
-                      <div className={`cal-dia ${className}`.trim()} key={`${day}-${index}`}>
-                        {day}
-                      </div>
-                    ))}
+                    {WEEK_DAYS.map((label, index) => <div className="cal-dia-label" key={`${label}-${index}`}>{label}</div>)}
+                    {dashboard.calendar.days.map((day) => <Link
+                      to={`/agenda?mes=${dashboard.calendar.year}-${String(dashboard.calendar.month).padStart(2, "0")}`}
+                      className={`cal-dia ${day.inMonth ? "" : "outro-mes"} ${day.itemCount ? "has-event" : ""} ${day.today ? "hoje" : ""}`.trim()}
+                      title={day.itemCount ? `${day.itemCount} item(ns) neste dia` : "Sem eventos"}
+                      key={day.date}
+                    >{Number(day.date.slice(-2))}</Link>)}
                   </div>
-                </div>
+                  <div className="dashboard-upcoming-events">
+                    {dashboard.upcomingEvents.length ? dashboard.upcomingEvents.map((event) => <Link to={`/agenda?mes=${event.startDate.slice(0, 7)}`} className="dashboard-event-row" key={event.id}>
+                      <span className="dashboard-event-icon"><i className={`bi ${event.icon}`}></i></span>
+                      <span><strong>{event.title}</strong><small>
+                        {localDate(event.startDate, { day: "2-digit", month: "2-digit" })}
+                        {event.startTime ? ` · ${event.startTime.slice(0, 5)}` : ""}
+                        {event.linkedTask ? " · Tarefa vinculada" : ""}
+                      </small></span>
+                    </Link>) : <div className="dashboard-agenda-empty">Nenhum próximo evento.</div>}
+                  </div>
+                </section>}
 
-                <div className="card-2">
+                <section className="card-2">
                   <div className="d-flex justify-content-between align-items-center mb-1">
-                    <h4>
-                      <i className="bi bi-check-square-fill primary me-1"></i> Suas tarefas
-                    </h4>
-                    <Link to="/tarefas">
-                      <h4 className="primary">Ver todas</h4>
-                    </Link>
+                    <h4><i className="bi bi-check-square-fill primary me-1"></i> Suas tarefas</h4>
+                    <Link to="/tarefas?responsavel=minhas"><h4 className="primary">Ver todas</h4></Link>
                   </div>
-
-                  {loading ? (
-                    <div className="empty-state">
-                      <i className="bi bi-arrow-repeat"></i>
-                      <span>Carregando dashboard...</span>
+                  {dashboard.tasks.length ? dashboard.tasks.map((task) => <Link className={`item-tarefa prazo-${task.deadlineState}`} to={`/tarefas?task=${task.id}`} key={task.id}>
+                    <div className="nome-tarefa">{task.title}</div>
+                    <div className="tarefa-meta">
+                      {task.deadline ? <>
+                        <span className="task-deadline-label"><i className="bi bi-calendar2-event-fill"></i>Prazo de entrega: <strong>{localDate(task.deadline)}</strong></span>
+                        <span className={`task-due-badge badge-${task.deadlineState === "atrasada" ? "overdue" : task.deadlineState === "hoje" ? "today" : task.deadlineState === "proxima" ? "soon" : "on-time"}`}>
+                          <i className={`bi ${task.deadlineState === "atrasada" ? "bi-exclamation-triangle-fill" : task.deadlineState === "hoje" ? "bi-alarm-fill" : task.deadlineState === "proxima" ? "bi-hourglass-split" : "bi-check-circle-fill"}`}></i>{task.deadlineLabel}
+                        </span>
+                      </> : <span className="task-deadline-label"><i className="bi bi-calendar2-minus"></i>{task.deadlineLabel}</span>}
                     </div>
-                  ) : taskPreview.length === 0 ? (
-                    <div className="empty-state">
-                      <i className="bi bi-check2-circle"></i>
-                      <span>Nenhuma tarefa encontrada para exibicao.</span>
+                    <div className="task-context-meta">
+                      <span className="task-state-label"><i className="bi bi-kanban"></i> <strong>{task.statusLabel}</strong></span>
+                      <span>Prioridade: <strong>{task.priorityLabel}</strong></span>
                     </div>
-                  ) : (
-                    taskPreview.map(({ id, name, color, meta }) => (
-                      <div className="item-tarefa" key={id || name}>
-                        <div className="nome-tarefa">{name}</div>
-                        <div className="tarefa-meta">
-                          <span className={color}>
-                            <i className="bi bi-clock-fill"></i>
-                          </span>
-                          {meta}
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
+                  </Link>) : <div className="task-empty-dashboard"><i className="bi bi-check2-circle"></i><span>Nenhuma tarefa atribuída a você.</span></div>}
+                </section>
               </aside>
             </div>
           </div>
-        </div>
-      </div>
+        )}
+      </div></div>
     </DashboardLayout>
   );
 }

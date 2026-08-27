@@ -11,6 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface OccupationRepository extends JpaRepository<Occupation, UUID> {
+    long countBySectorId_CityHall_Id(UUID cityHallId);
     Page<Occupation> findAllBySectorId_CityHall_Id(UUID cityHallId, Pageable pageable);
     Optional<Occupation> findFirstByNameIgnoreCaseAndSectorId_CityHall_Id(String name, UUID cityHallId);
 }

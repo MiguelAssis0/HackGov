@@ -12,6 +12,8 @@ import java.util.UUID;
 @Repository
 public interface SectorRepository extends JpaRepository<Sector, UUID> {
 
+    long countByCityHall_Id(UUID cityHallId);
+
     Page<Sector> findAllByCityHall_Id(UUID cityHallId, Pageable pageable);
 
     Optional<Sector> findByIdAndCityHall_Id(UUID id, UUID cityHallId);

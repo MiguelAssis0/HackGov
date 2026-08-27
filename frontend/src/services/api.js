@@ -84,6 +84,8 @@ async function requestTaskPath(path, options = {}) {
  * API centralizada
  */
 export const api = {
+  getDashboard: () => request("/dashboard"),
+
   // AUTH
   login: (email, password) =>
     request("/auth/login", {
@@ -333,7 +335,12 @@ export const api = {
   // FERRAMENTAS E FAVORITOS
   getTools: () => request("/tools"),
   updateTool: (slug, payload) => request(`/tools/${slug}`, { method: "PATCH", body: JSON.stringify(payload) }),
+  updateToolCategory: (slug, categoryId) => request(`/tools/${slug}/category`, { method: "PATCH", body: JSON.stringify({ categoryId }) }),
   toggleToolFavorite: (slug) => request(`/tools/${slug}/favorite`, { method: "POST" }),
+  getToolCategories: () => request("/tool-categories"),
+  createToolCategory: (payload) => request("/tool-categories", { method: "POST", body: JSON.stringify(payload) }),
+  updateToolCategoryFolder: (id, payload) => request(`/tool-categories/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
+  deleteToolCategory: (id) => request(`/tool-categories/${id}`, { method: "DELETE" }),
   getToolPermissions: () => request("/tool-permissions"),
   createToolPermission: (payload) => request("/tool-permissions", { method: "POST", body: JSON.stringify(payload) }),
   deleteToolPermission: (id) => request(`/tool-permissions/${id}`, { method: "DELETE" }),

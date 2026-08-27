@@ -413,7 +413,12 @@ export default function TasksPage() {
       setBoards(nextBoards);
       setSectors(nextSectors);
       setEmployees(nextEmployees);
-      setTasks(hydrateTasks(nextTasks, nextBoards, nextEmployees));
+      const hydratedTasks = hydrateTasks(nextTasks, nextBoards, nextEmployees);
+      setTasks(hydratedTasks);
+      const requestedTaskId = params.get("task");
+      if (requestedTaskId) {
+        setDetailTask(hydratedTasks.find((task) => String(task.id) === requestedTaskId) || null);
+      }
       setLoading(false);
 
       if (failures.length > 0) {
