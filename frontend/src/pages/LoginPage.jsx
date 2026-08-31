@@ -17,7 +17,7 @@ export default function LoginPage() {
 
     try {
       const response = await api.login(form.email.trim(), form.password);
-      saveSession(response, form.email.trim());
+      await saveSession(response, form.email.trim());
       navigate("/dashboard");
     } catch (error) {
       setMessage({

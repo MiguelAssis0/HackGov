@@ -16,7 +16,9 @@ public final class InboxDTOs {
             UUID destinationEmployeeId, String destinationEmployeeName,
             UUID assignedToId, String assignedToName,
             String toolSlug, String objectType, UUID objectId, String url,
-            String senderName, LocalDateTime readAt, LocalDateTime createdAt, LocalDateTime updatedAt
+            String senderName, String metadata, LocalDateTime readAt, LocalDateTime createdAt, LocalDateTime updatedAt
     ) {
     }
+
+    public record Counts(long minhasNaoLidas, long setorNaoLidas) {}
 }

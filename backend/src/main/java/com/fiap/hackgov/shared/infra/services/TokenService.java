@@ -26,13 +26,14 @@ public class TokenService {
 
     private static final String ISSUER = "HackGov";
 
-    private static final int ACCESS_TOKEN_MINUTES = 30;
+    @org.springframework.beans.factory.annotation.Value("${api.security.token.expiration-minutes:480}")
+    private int accessTokenMinutes = 480;
 
     private static final int REFRESH_TOKEN_DAYS = 7;
 
     public String generateToken(User user, UUID sessionId) {
 
-        LocalDateTime expiration = LocalDateTime.now().plusMinutes(ACCESS_TOKEN_MINUTES);
+        LocalDateTime expiration = LocalDateTime.now().plusMinutes(accessTokenMinutes);
 
         return JWT.create().withIssuer(ISSUER).withSubject(user.getEmail()).withClaim("role", "ROLE_" + user.getRole().name()).withClaim("type", "access").withClaim("sid", sessionId.toString()).withJWTId(UUID.randomUUID().toString()).withExpiresAt(expiration.toInstant(ZoneOffset.of("-03:00"))).sign(accessAlgorithm());
     }

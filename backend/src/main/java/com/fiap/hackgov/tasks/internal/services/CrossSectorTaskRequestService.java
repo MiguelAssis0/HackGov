@@ -1,8 +1,11 @@
 package com.fiap.hackgov.tasks.internal.services;
 
 import com.fiap.hackgov.auth.internal.entities.enums.Roles;
+import com.fiap.hackgov.cityhall_management.internal.entities.CityHall;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.cityhall_management.internal.entities.Sector;
+import com.fiap.hackgov.cityhall_management.internal.repositories.CityHallRepository;
+import com.fiap.hackgov.cityhall_management.internal.repositories.EmployeeRepository;
 import com.fiap.hackgov.cityhall_management.internal.repositories.SectorRepository;
 import com.fiap.hackgov.inbox.internal.services.InboxService;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
@@ -32,19 +35,22 @@ import java.util.UUID;
 public class CrossSectorTaskRequestService {
     private final CrossSectorTaskRequestRepository repository;
     private final SectorRepository sectorRepository;
+    private final CityHallRepository cityHallRepository;
+    private final EmployeeRepository employeeRepository;
     private final BoardRepository boardRepository;
     private final TaskReporitory taskRepository;
     private final InboxService inboxService;
 
     @Transactional
     public Response create(Create dto, Employee employee) {
-        Employee current = require(employee);
+        Employee current = requireManaged(employee);
         Sector origin = sector(current);
-        Sector destination = sectorRepository.findByIdAndCityHall_Id(dto.destinationSectorId(), city(current)).orElseThrow(() -> new BusinessException("Setor de destino invalido"));
+        CityHall cityHall = cityHall(current);
+        Sector destination = sectorRepository.findByIdAndCityHall_Id(dto.destinationSectorId(), cityHall.getId()).orElseThrow(() -> new BusinessException("Setor de destino invalido"));
         if (origin.getId().equals(destination.getId()))
             throw new BusinessException("A demanda precisa ser enviada para outro setor");
         CrossSectorTaskRequest item = new CrossSectorTaskRequest();
-        item.setCityHall(current.getCityHallId());
+        item.setCityHall(cityHall);
         item.setOriginSector(origin);
         item.setDestinationSector(destination);
         item.setTitle(dto.title().trim());
@@ -59,19 +65,22 @@ public class CrossSectorTaskRequestService {
 
     @Transactional(readOnly = true)
     public List<Response> list(Employee employee) {
-        Employee current = require(employee);
-        return repository.findByCityHall_IdOrderByCreatedAtDesc(city(current)).stream().filter(item -> Roles.ADMIN.equals(current.getRole()) || item.getOriginSector().getId().equals(sector(current).getId()) || item.getDestinationSector().getId().equals(sector(current).getId())).map(this::response).toList();
+        Employee current = requireManaged(employee);
+        UUID cityId = cityHall(current).getId();
+        UUID sectorId = current.getSectorId() == null ? null : sector(current).getId();
+        return repository.findByCityHall_IdOrderByCreatedAtDesc(cityId).stream().filter(item -> Roles.ADMIN.equals(current.getRole()) || (sectorId != null && (item.getOriginSector().getId().equals(sectorId) || item.getDestinationSector().getId().equals(sectorId)))).map(this::response).toList();
     }
 
     @Transactional
     public Response accept(UUID id, Answer answer, Employee employee) {
-        Employee current = require(employee);
+        Employee current = requireManaged(employee);
         CrossSectorTaskRequest item = pending(id, current);
         requireDestination(item, current);
-        Board board = boardRepository.findFirstByCityHall_IdAndSector_Id(city(current), item.getDestinationSector().getId()).orElseGet(() -> {
+        CityHall cityHall = cityHall(current);
+        Board board = boardRepository.findFirstByCityHall_IdAndSector_Id(cityHall.getId(), item.getDestinationSector().getId()).orElseGet(() -> {
             Board value = new Board();
             value.setName(item.getDestinationSector().getName());
-            value.setCityHall(current.getCityHallId());
+            value.setCityHall(cityHall);
             value.setSector(item.getDestinationSector());
             return boardRepository.save(value);
         });
@@ -89,20 +98,20 @@ public class CrossSectorTaskRequestService {
         task = taskRepository.save(task);
         item.setGeneratedTask(task);
         finish(item, current, answer.feedback(), CrossSectorTaskRequest.Status.ACCEPTED);
-        inboxService.completeObject(city(current), "cross_sector_task_request", item.getId());
+        inboxService.completeObject(cityHall(current).getId(), "cross_sector_task_request", item.getId());
         inboxService.notifyRequestResult(item, "aceita");
         return response(item);
     }
 
     @Transactional
     public Response reject(UUID id, Answer answer, Employee employee) {
-        Employee current = require(employee);
+        Employee current = requireManaged(employee);
         CrossSectorTaskRequest item = pending(id, current);
         requireDestination(item, current);
         if (answer.feedback() == null || answer.feedback().isBlank())
             throw new BusinessException("Informe o motivo da recusa");
         finish(item, current, answer.feedback(), CrossSectorTaskRequest.Status.REJECTED);
-        inboxService.completeObject(city(current), "cross_sector_task_request", item.getId());
+        inboxService.completeObject(cityHall(current).getId(), "cross_sector_task_request", item.getId());
         inboxService.notifyRequestResult(item, "recusada");
         return response(item);
     }
@@ -133,14 +142,28 @@ public class CrossSectorTaskRequestService {
         return employee;
     }
 
+    // ponytail: AuthenticationPrincipal é detached (lazy proxies) — recarrega para evitar LazyInitializationException
+    private Employee requireManaged(Employee employee) {
+        if (employee == null) throw new UnauthorizedException("E necessario estar autenticado");
+        if (employee.getCityHallId() == null) throw new BusinessException("Usuario sem prefeitura");
+        return employeeRepository.findById(employee.getId()).orElseThrow(() -> new ResourceNotFoundException("Funcionario nao encontrado"));
+    }
+
     private UUID city(Employee employee) {
         if (employee.getCityHallId() == null) throw new BusinessException("Usuario sem prefeitura");
         return employee.getCityHallId().getId();
     }
 
+    private CityHall cityHall(Employee employee) {
+        if (employee.getCityHallId() == null) throw new BusinessException("Usuario sem prefeitura");
+        UUID id = employee.getCityHallId().getId();
+        return cityHallRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Prefeitura nao encontrada"));
+    }
+
     private Sector sector(Employee employee) {
         if (employee.getSectorId() == null) throw new BusinessException("Usuario sem setor");
-        return employee.getSectorId();
+        UUID id = employee.getSectorId().getId();
+        return sectorRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Setor nao encontrado"));
     }
 
     private Response response(CrossSectorTaskRequest item) {

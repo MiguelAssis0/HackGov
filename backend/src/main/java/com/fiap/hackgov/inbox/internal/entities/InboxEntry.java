@@ -76,6 +76,9 @@ public class InboxEntry {
 
     private UUID objectId;
 
+    @Column(columnDefinition = "TEXT")
+    private String metadata = "{}";
+
     @Column(length = 300)
     private String url = "";
 

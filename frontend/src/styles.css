@@ -98,6 +98,57 @@ button {
   box-shadow: var(--shadow);
 }
 
+/* ponytail: modais tarefas 1:1 usam modal-dialog/modal-content dentro do backdrop custom — sem .modal wrapper do Bootstrap o bg fica transparente */
+.react-modal-backdrop .modal-dialog {
+  width: min(760px, 95%);
+  max-width: 95%;
+  margin: 1.2rem;
+  pointer-events: auto;
+}
+
+.react-modal-backdrop .modal-content {
+  background: var(--branco);
+  border: var(--border1-5);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 2rem);
+  overflow: hidden;
+}
+
+.react-modal-backdrop .modal-header,
+.react-modal-backdrop .modal-body,
+.react-modal-backdrop .modal-footer {
+  background: var(--branco);
+}
+
+.react-modal-backdrop .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: var(--border1);
+  flex-shrink: 0;
+}
+
+.react-modal-backdrop .modal-body {
+  padding: 1rem 1.25rem;
+  overflow-y: auto;
+  flex: 1 1 auto;
+}
+
+.react-modal-backdrop .modal-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0.85rem 1.25rem;
+  border-top: var(--border1);
+  flex-shrink: 0;
+}
+
 .modal-open {
   overflow: hidden;
 }

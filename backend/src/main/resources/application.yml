@@ -40,6 +40,7 @@ api:
       secret: ${JWT_SECRET:my-secret}
       refresh-secret: ${JWT_REFRESH_SECRET:my-refresh-secret}
       expiration: ${JWT_TIME:2}
+      expiration-minutes: ${JWT_TIME_MINUTES:480}
     gemini:
       api-key: ${GOOGLE_API_KEY}
 

@@ -1,112 +1,195 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "../components/DashboardLayout.jsx";
-import { PageHeader } from "../components/DashboardShared.jsx";
 import { Link } from "../components/RouterContext.jsx";
-import { api } from "../services/api.js";
+import { api, getStoredUser, getSelectedCityHall } from "../services/api.js";
 
-const statusLabels = { NEW: "Nova", IN_PROGRESS: "Em andamento", COMPLETED: "Concluida", ARCHIVED: "Arquivada" };
+const PAGE_SIZE = 8;
 const typeLabels = { TASK: "Tarefa", DOCUMENT: "Documento", ALERT: "Alerta", REQUEST: "Solicitacao" };
+const statusLabels = { NEW: "Nova", IN_PROGRESS: "Em andamento", COMPLETED: "Concluida", ARCHIVED: "Arquivada" };
+const priorityLabels = { LOW: "Baixa", NORMAL: "Normal", HIGH: "Alta" };
+
+function formatDate(value) {
+  if (!value) return "—";
+  try {
+    const d = new Date(value);
+    return d.toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  } catch { return String(value).slice(0, 16); }
+}
 
 export default function InboxPage() {
-  const [entries, setEntries] = useState([]);
-  const [filters, setFilters] = useState({ status: "", type: "", unreadOnly: false, query: "" });
-  const [selected, setSelected] = useState(null);
-  const [message, setMessage] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const caixa = searchParams.get("caixa") === "setor" ? "setor" : "pessoal";
+  const leitura = ["nao-lidas", "lidas"].includes(searchParams.get("leitura")) ? searchParams.get("leitura") : "";
+  const q = searchParams.get("q") || "";
+  const setor = searchParams.get("setor") || "";
+  const page = Number(searchParams.get("page") || "0");
 
-  async function load() {
+  const [entries, setEntries] = useState([]);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+  const [counts, setCounts] = useState({ minhasNaoLidas: 0, setorNaoLidas: 0 });
+  const [setores, setSetores] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState(null);
+  const [searchInput, setSearchInput] = useState(q);
+
+  const user = getStoredUser();
+  const cityHall = getSelectedCityHall() || { name: user?.prefeitura || user?.cityHall?.name || "Prefeitura" };
+  const canViewAll = ["admin_cidade", "admin_equipe"].includes(user?.tipoUsuario || user?.role);
+
+  const updateParams = (patch) => {
+    const next = new URLSearchParams(searchParams);
+    Object.entries(patch).forEach(([k, v]) => {
+      if (v === "" || v == null) next.delete(k);
+      else next.set(k, String(v));
+    });
+    if ("q" in patch || "caixa" in patch || "leitura" in patch || "setor" in patch) next.delete("page");
+    setSearchParams(next, { replace: true });
+  };
+
+  useEffect(() => setSearchInput(q), [q]);
+
+  const load = useCallback(async () => {
     setLoading(true);
     try {
-      const payload = await api.getInbox(filters);
-      setEntries(payload?.content || []);
+      const payload = await api.getInbox({ page, caixa, leitura, q, setor });
+      const content = payload?.content || [];
+      setEntries(content);
+      setTotalPages(payload?.totalPages || 0);
+      setTotalElements(payload?.totalElements || 0);
+      try {
+        const c = await api.getInboxCounts({ setor, query: q });
+        setCounts(c);
+      } catch { /* ignore counts */ }
       setMessage(null);
     } catch (error) {
       setMessage({ type: "danger", text: error.message });
-    } finally {
-      setLoading(false);
-    }
-  }
+    } finally { setLoading(false); }
+  }, [page, caixa, leitura, q, setor]);
+
+  useEffect(() => { load(); }, [load]);
 
   useEffect(() => {
-    const timer = window.setTimeout(load, filters.query ? 250 : 0);
-    return () => window.clearTimeout(timer);
-  }, [filters]);
+    api.getSectorsInbox().then((data) => {
+      const list = Array.isArray(data) ? data : data?.content || [];
+      setSetores(list.map((s) => ({ id: s.id, nome: s.name || s.nome })));
+    }).catch(() => {});
+  }, []);
 
-  async function openEntry(entry) {
-    try {
-      const next = entry.readAt ? entry : await api.readInboxEntry(entry.id);
-      setSelected(next);
-      setEntries((items) => items.map((item) => item.id === next.id ? next : item));
-    } catch (error) {
-      setMessage({ type: "danger", text: error.message });
-    }
-  }
+  // debounce search
+  useEffect(() => {
+    if (searchInput === q) return;
+    const t = setTimeout(() => updateParams({ q: searchInput.trim() }), searchInput ? 300 : 0);
+    return () => clearTimeout(t);
+  }, [searchInput]); // eslint-disable-line
 
-  async function action(name) {
-    if (!selected) return;
-    try {
-      const next = name === "claim" ? await api.claimInboxEntry(selected.id) : await api.completeInboxEntry(selected.id);
-      setSelected(next);
-      setEntries((items) => items.map((item) => item.id === next.id ? next : item));
-    } catch (error) {
-      setMessage({ type: "danger", text: error.message });
-    }
-  }
-
-  async function answerRequest(accepted) {
-    const feedback = window.prompt(accepted ? "Feedback ao setor solicitante (opcional):" : "Motivo da recusa:", "");
-    if (feedback === null || (!accepted && !feedback.trim())) return;
-    try {
-      if (accepted) await api.acceptTaskRequest(selected.objectId, feedback); else await api.rejectTaskRequest(selected.objectId, feedback);
-      setMessage({ type: "success", text: accepted ? "Demanda aceita e tarefa criada." : "Demanda recusada com feedback." }); setSelected(null); await load();
-    } catch (error) { setMessage({ type: "danger", text: error.message }); }
-  }
+  const qsWithoutPage = () => {
+    const p = new URLSearchParams(searchParams);
+    p.delete("page");
+    return p.toString();
+  };
 
   return (
     <DashboardLayout styles={["/css/caixa-entrada.css"]}>
       <main className="dashboard">
-        <div className="container">
-          <PageHeader eyebrow="Fluxos direcionados ao servidor e ao setor" title="Caixa de Entrada" />
-          {message && <div className={`auth-message ${message.type} mb-3`}>{message.text}</div>}
-          <section className="inbox-shell">
-            <aside className="inbox-filters">
-              <label className="field-label">Buscar</label>
-              <input className="field-input" placeholder="Remetente, assunto ou conteudo" value={filters.query} onChange={(e) => setFilters({ ...filters, query: e.target.value })} />
-              <label className="field-label mt-3">Status</label>
-              <select className="field-input" value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value })}>
-                <option value="">Todos</option>{Object.entries(statusLabels).map(([value, label]) => <option value={value} key={value}>{label}</option>)}
-              </select>
-              <label className="field-label mt-3">Tipo</label>
-              <select className="field-input" value={filters.type} onChange={(e) => setFilters({ ...filters, type: e.target.value })}>
-                <option value="">Todos</option>{Object.entries(typeLabels).map(([value, label]) => <option value={value} key={value}>{label}</option>)}
-              </select>
-              <label className="form-check mt-3"><input type="checkbox" className="form-check-input" checked={filters.unreadOnly} onChange={(e) => setFilters({ ...filters, unreadOnly: e.target.checked })} /> Apenas nao lidas</label>
-            </aside>
-            <div className="inbox-list" aria-busy={loading}>
-              {entries.map((entry) => (
-                <button className={`inbox-row ${entry.readAt ? "" : "unread"} ${selected?.id === entry.id ? "active" : ""}`} key={entry.id} onClick={() => openEntry(entry)}>
-                  <span className={`inbox-priority priority-${entry.priority.toLowerCase()}`}></span>
-                  <div><strong>{entry.title}</strong><small>{entry.senderName || "Sistema"} · {typeLabels[entry.type]}</small></div>
-                  <span className={`inbox-status status-${entry.status.toLowerCase()}`}>{statusLabels[entry.status]}</span>
-                </button>
-              ))}
-              {!loading && entries.length === 0 && <div className="empty-state">Nenhuma entrada encontrada.</div>}
+        <div className="container inbox-page">
+          <div className="inbox-header-card">
+            <div className="d-flex align-items-center justify-content-between flex-wrap gap-3">
+              <div>
+                <p className="text-white-50 small text-uppercase fw-bold mb-1">{cityHall.name}</p>
+                <h2 className="h3 fw-bold mb-0 text-white"><i className="bi bi-inbox-fill me-2"></i>Caixa de Entrada</h2>
+                <p className="text-white-50 mb-0 small mt-1">Acompanhe mensagens pessoais e demandas recebidas pelo setor.</p>
+              </div>
             </div>
-            <article className="inbox-detail">
-              {selected ? <>
-                <p className="eyebrow dark mb-1">{typeLabels[selected.type]}</p>
-                <h3>{selected.title}</h3>
-                <p>{selected.description || "Sem descricao."}</p>
-                <dl><dt>Destino</dt><dd>{selected.destinationEmployeeName || selected.destinationSectorName || "Prefeitura"}</dd><dt>Status</dt><dd>{statusLabels[selected.status]}</dd>{selected.assignedToName && <><dt>Responsavel</dt><dd>{selected.assignedToName}</dd></>}</dl>
-                <div className="d-flex flex-wrap gap-2">
-                  {selected.objectType === "cross_sector_task_request" && selected.status !== "COMPLETED" && <><button className="btn btn-primary" onClick={() => answerRequest(true)}>Aceitar e criar tarefa</button><button className="btn btn-outline-danger" onClick={() => answerRequest(false)}>Recusar</button></>}
-                  {selected.status === "NEW" && !selected.destinationEmployeeId && <button className="btn btn-outline-primary" onClick={() => action("claim")}>Assumir</button>}
-                  {!["COMPLETED", "ARCHIVED"].includes(selected.status) && <button className="btn btn-primary" onClick={() => action("complete")}>Concluir</button>}
-                  {selected.url && <Link className="btn btn-outline-secondary" to={selected.url}>Abrir origem</Link>}
+          </div>
+
+          <div className="row mb-4 align-items-center">
+            <div className="col-12">
+              <div className="inbox-toolbar">
+                <div className="inbox-search-bar">
+                  <i className="bi bi-search"></i>
+                  <input type="search" value={searchInput} onChange={(e) => setSearchInput(e.target.value)} placeholder="Pesquisar por assunto, remetente ou conteúdo..." />
+                  {q && <button className="btn btn-sm btn-link text-secondary" onClick={() => updateParams({ q: "" })} aria-label="Limpar pesquisa"><i className="bi bi-x-circle-fill"></i></button>}
                 </div>
-              </> : <div className="empty-state">Selecione uma entrada para ver os detalhes.</div>}
-            </article>
-          </section>
+                <label className="inbox-sector-filter">
+                  <i className="bi bi-building"></i>
+                  <select value={setor} onChange={(e) => updateParams({ setor: e.target.value })} disabled={!canViewAll}>
+                    <option value="">Todos os setores</option>
+                    {setores.map((s) => <option key={s.id} value={s.id}>{s.nome}</option>)}
+                  </select>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div className="docs-tabs inbox-tabs" role="tablist">
+            <button className={`docs-tab-btn ${caixa === "pessoal" ? "active" : ""}`} onClick={() => updateParams({ caixa: "pessoal" })}>
+              <i className="bi bi-person-fill-lock me-1"></i> Minha Caixa
+              {counts.minhasNaoLidas > 0 && <span className="inbox-tab-badge">{counts.minhasNaoLidas}</span>}
+            </button>
+            <button className={`docs-tab-btn ${caixa === "setor" ? "active" : ""}`} onClick={() => updateParams({ caixa: "setor" })}>
+              <i className="bi bi-building-fill me-1"></i> Caixa do Setor
+              {counts.setorNaoLidas > 0 && <span className="inbox-tab-badge">{counts.setorNaoLidas}</span>}
+            </button>
+          </div>
+
+          <div className="inbox-mailbox">
+            <div className="inbox-mailbox-head">
+              <div>
+                <p className="eyebrow dark mb-0">{caixa === "pessoal" ? "Minha Caixa" : canViewAll ? "Caixas dos Setores" : (user?.setor || "Meu Setor")}</p>
+                <h4>{leitura === "nao-lidas" ? "Não Lidas" : leitura === "lidas" ? "Lidas" : "Todas as mensagens"}</h4>
+              </div>
+              <nav className="inbox-read-tabs" aria-label="Filtro de leitura">
+                <button className={!leitura ? "active" : ""} onClick={() => updateParams({ leitura: "" })}><i className="bi bi-inboxes"></i><span>Todas</span></button>
+                <button className={leitura === "nao-lidas" ? "active" : ""} onClick={() => updateParams({ leitura: "nao-lidas" })}>
+                  <i className="bi bi-envelope"></i><span>Não Lidas</span>
+                  {(caixa === "pessoal" ? counts.minhasNaoLidas : counts.setorNaoLidas) > 0 && <strong>{caixa === "pessoal" ? counts.minhasNaoLidas : counts.setorNaoLidas}</strong>}
+                </button>
+                <button className={leitura === "lidas" ? "active" : ""} onClick={() => updateParams({ leitura: "lidas" })}><i className="bi bi-envelope-open"></i><span>Lidas</span></button>
+              </nav>
+            </div>
+
+            <div className="inbox-message-list">
+              {entries.length > 0 && (
+                <div className="inbox-message-columns" aria-hidden="true">
+                  <span>Assunto</span><span>Remetente</span><span>Destinatário</span><span>Prioridade</span><span>Data e Hora</span>
+                </div>
+              )}
+              {entries.map((entrada) => (
+                <Link
+                  key={entrada.id}
+                  to={`/caixa-entrada/${entrada.id}?next=${encodeURIComponent(`/caixa-entrada?${qsWithoutPage()}`)}`}
+                  className={`inbox-message-item ${!entrada.readAt ? "unread" : ""}`}
+                >
+                  <span className="inbox-message-body">
+                    <span className="inbox-unread-dot" aria-hidden="true"></span>
+                    <span className="inbox-message-copy">
+                      <strong>{entrada.title}</strong>
+                      <small>{entrada.description ? entrada.description.slice(0, 120) : "Sem conteúdo."}</small>
+                    </span>
+                  </span>
+                  <span className="inbox-message-sender">{entrada.senderName || "Sistema"}</span>
+                  <span className="inbox-message-destination">{entrada.destinationEmployeeName || entrada.destinationSectorName || "Prefeitura"}</span>
+                  <span className={`inbox-message-priority priority-${String(entrada.priority || "NORMAL").toLowerCase()}`}>{priorityLabels[entrada.priority] || entrada.priority}</span>
+                  <span className="inbox-message-meta"><time dateTime={entrada.createdAt}>{formatDate(entrada.createdAt)}</time></span>
+                </Link>
+              ))}
+              {!loading && entries.length === 0 && (
+                <div className="inbox-empty"><i className="bi bi-inbox"></i><span>Nenhuma mensagem encontrada.</span></div>
+              )}
+              {loading && <div className="inbox-empty"><span>Carregando...</span></div>}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="inbox-pagination">
+                <button disabled={page <= 0} onClick={() => updateParams({ page: page - 1 })}>Anterior</button>
+                <span>Página {page + 1} de {totalPages} — {totalElements} itens</span>
+                <button disabled={page >= totalPages - 1} onClick={() => updateParams({ page: page + 1 })}>Próxima</button>
+              </div>
+            )}
+            {message && <div className={`auth-message ${message.type === "danger" ? "error" : "success"} m-3`}>{message.text}</div>}
+          </div>
         </div>
       </main>
     </DashboardLayout>

@@ -236,19 +236,33 @@ export const api = {
   deleteAgendaEvent: (id) =>
     request(`/agenda/events/${id}`, { method: "DELETE" }),
 
-  // CAIXA DE ENTRADA
-  getInbox: ({ page = 0, status = "", type = "", unreadOnly = false, query = "" } = {}) => {
-    const params = new URLSearchParams({ page: String(page), size: "20", sort: "createdAt,desc" });
+  // CAIXA DE ENTRADA — Django parity: caixa (pessoal/setor), leitura, q, setor, page 8
+  getInbox: ({ page = 0, status = "", type = "", unreadOnly = false, query = "", caixa = "", leitura = "", setor = "", q = "" } = {}) => {
+    const params = new URLSearchParams({ page: String(page), size: "8", sort: "createdAt,desc" });
     if (status) params.set("status", status);
     if (type) params.set("type", type);
     if (unreadOnly) params.set("unreadOnly", "true");
-    if (query) params.set("query", query);
+    const search = q || query;
+    if (search) params.set("query", search);
+    if (caixa) params.set("caixa", caixa);
+    if (leitura) params.set("leitura", leitura);
+    if (setor) params.set("setor", setor);
     return request(`/inbox?${params}`);
   },
-
+  getInboxCounts: ({ setor = "", query = "" } = {}) => {
+    const params = new URLSearchParams();
+    if (setor) params.set("setor", setor);
+    if (query) params.set("query", query);
+    const qs = params.toString();
+    return request(`/inbox/counts${qs ? `?${qs}` : ""}`);
+  },
+  getInboxEntry: (id) => request(`/inbox/${id}`),
   readInboxEntry: (id) => request(`/inbox/${id}/read`, { method: "PATCH" }),
   claimInboxEntry: (id) => request(`/inbox/${id}/claim`, { method: "PATCH" }),
+  releaseInboxEntry: (id) => request(`/inbox/${id}/release`, { method: "PATCH" }),
   completeInboxEntry: (id) => request(`/inbox/${id}/complete`, { method: "PATCH" }),
+  reopenInboxEntry: (id) => request(`/inbox/${id}/reopen`, { method: "PATCH" }),
+  getSectorsInbox: () => request("/sectors?size=100"),
 
   // DETALHES DA TAREFA
   getTaskDetails: (taskId) => request(`/tasks/${taskId}/details`),
@@ -362,7 +376,7 @@ export const api = {
 /**
  * Salva sessão do usuário
  */
-export function saveSession(loginResponse, email) {
+export async function saveSession(loginResponse, email) {
   const accessToken =
     loginResponse.accessToken || loginResponse.token;
 
@@ -391,20 +405,33 @@ export function saveSession(loginResponse, email) {
     loginResponse.prefeituraNome ||
     (typeof cityHall === "string" ? cityHall : "");
 
+  // ponytail: LoginResponseDTO só tem tokens, id 1 quebra UUID em tarefas (assumir/delegar) — tenta buscar UUID real via /employee/details
+  let realId = loginResponse.id || loginResponse.userId || loginResponse.employeeId || "";
+  let setor = loginResponse.setor || "";
+  let cargo = loginResponse.cargo || role || "Servidor";
+  try {
+    if (accessToken && !realId) {
+      const details = await request("/employee/details").catch(()=>null);
+      const emp = details?.employee || details?.user || details;
+      if (emp?.id) realId = emp.id;
+      if (emp?.sectorName) setor = emp.sectorName;
+      if (emp?.sector) setor = emp.sector;
+      if (emp?.occupationName) cargo = emp.occupationName;
+      else if (emp?.cargo) cargo = emp.cargo;
+    }
+  } catch {}
+
   localStorage.setItem(
     "hackgov.user",
     JSON.stringify({
-      id: loginResponse.id || loginResponse.userId || 1,
+      id: realId || 1,
       nome:
         loginResponse.nome ||
         loginResponse.name ||
         email,
       email: loginResponse.email || email,
-      cargo:
-        loginResponse.cargo ||
-        role ||
-        "Servidor",
-      setor: loginResponse.setor || "",
+      cargo,
+      setor,
       prefeitura: cityHallName,
       cityHall: cityHallName ? { id: cityHallId, name: cityHallName } : cityHall || null,
       cityHallId,

@@ -55,6 +55,7 @@ public class Security {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/ws/**", "/ws-sockjs/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(loggingFilter, UsernamePasswordAuthenticationFilter.class)

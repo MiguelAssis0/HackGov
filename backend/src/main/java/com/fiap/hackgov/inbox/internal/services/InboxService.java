@@ -4,6 +4,7 @@ import com.fiap.hackgov.auth.internal.entities.enums.Roles;
 import com.fiap.hackgov.bidding.internal.entities.Requisition;
 import com.fiap.hackgov.bidding.internal.entities.enums.ProcessStage;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
+import com.fiap.hackgov.inbox.internal.DTOs.InboxDTOs;
 import com.fiap.hackgov.inbox.internal.DTOs.InboxDTOs.Response;
 import com.fiap.hackgov.inbox.internal.entities.InboxEntry;
 import com.fiap.hackgov.inbox.internal.repositories.InboxEntryRepository;
@@ -37,6 +38,56 @@ public class InboxService {
                 .map(this::toResponse);
     }
 
+    // Django-parity: scope pessoal vs setor + leitura + setor filter + PAGE_SIZE 8
+    @Transactional(readOnly = true)
+    public Page<Response> listByScope(String caixa, String leitura, String query, UUID setorId, Pageable pageable, Employee employee) {
+        Employee current = requireEmployee(employee);
+        boolean admin = Roles.ADMIN.equals(current.getRole());
+        String scope = "setor".equals(caixa) ? "setor" : "pessoal";
+        boolean unreadOnly = "nao-lidas".equals(leitura);
+        boolean readOnly = "lidas".equals(leitura);
+        String q = query == null ? "" : query.trim();
+        UUID empSectorId = current.getSectorId() == null ? null : current.getSectorId().getId();
+        UUID filterSectorId = setorId;
+        if (!admin) filterSectorId = empSectorId;
+        Page<InboxEntry> page;
+        if ("setor".equals(scope)) {
+            page = repository.findSetor(cityHallId(current), filterSectorId, empSectorId, admin, unreadOnly, q, pageable);
+        } else {
+            page = repository.findPessoal(cityHallId(current), current.getId(), admin, unreadOnly, q, pageable);
+        }
+        if (readOnly) {
+            // ponytail: filter lidas in memory for simplest parity; add when query handles readOnly
+            page = new org.springframework.data.domain.PageImpl<>(
+                    page.getContent().stream().filter(e -> e.getReadAt() != null).toList(),
+                    pageable, page.getTotalElements());
+        }
+        return page.map(this::toResponse);
+    }
+
+    @Transactional(readOnly = true)
+    public InboxDTOs.Counts counts(String query, UUID setorId, Employee employee) {
+        Employee current = requireEmployee(employee);
+        boolean admin = Roles.ADMIN.equals(current.getRole());
+        UUID empSectorId = current.getSectorId() == null ? null : current.getSectorId().getId();
+        UUID cityId = cityHallId(current);
+        long pessoal = repository.countUnreadPessoal(cityId, current.getId(), admin);
+        UUID filterSector = admin ? setorId : empSectorId;
+        long setor = repository.countUnreadSetor(cityId, empSectorId, filterSector, admin);
+        return new InboxDTOs.Counts(pessoal, setor);
+    }
+
+    @Transactional(readOnly = true)
+    public Response getDetail(UUID id, Employee employee) {
+        Employee current = requireEmployee(employee);
+        InboxEntry entry = visibleEntry(id, current);
+        if (entry.getReadAt() == null) {
+            entry.setReadAt(LocalDateTime.now());
+            entry = repository.save(entry);
+        }
+        return toResponse(entry);
+    }
+
     @Transactional
     public Response read(UUID id, Employee employee) {
         InboxEntry entry = visibleEntry(id, requireEmployee(employee));
@@ -48,14 +99,21 @@ public class InboxService {
     public Response claim(UUID id, Employee employee) {
         Employee current = requireEmployee(employee);
         InboxEntry entry = visibleEntry(id, current);
+        if (isPersonalTask(entry)) throw new BusinessException("Tarefa pessoal nao pode ser assumida");
         if (entry.getDestinationEmployee() != null && !entry.getDestinationEmployee().getId().equals(current.getId())) {
             throw new BusinessException("Uma entrada pessoal nao pode ser assumida por outro funcionario");
         }
-        if (entry.getAssignedTo() != null && !entry.getAssignedTo().getId().equals(current.getId())) {
+        if (entry.getAssignedTo() != null) {
             throw new BusinessException("A entrada ja foi assumida por outro funcionario");
         }
         if (entry.getStatus() == InboxEntry.Status.COMPLETED || entry.getStatus() == InboxEntry.Status.ARCHIVED) {
             throw new BusinessException("Esta entrada nao pode mais ser assumida");
+        }
+        // valida setor
+        if (!Roles.ADMIN.equals(current.getRole()) && entry.getDestinationSector() != null && current.getSectorId() != null
+                && !entry.getDestinationSector().getId().equals(current.getSectorId().getId())
+                && entry.getDestinationEmployee() == null) {
+            throw new BusinessException("Setor sem permissao para assumir");
         }
         entry.setAssignedTo(current);
         entry.setStatus(InboxEntry.Status.IN_PROGRESS);
@@ -64,9 +122,35 @@ public class InboxService {
     }
 
     @Transactional
+    public Response release(UUID id, Employee employee) {
+        Employee current = requireEmployee(employee);
+        InboxEntry entry = visibleEntry(id, current);
+        if (isPersonalTask(entry)) throw new BusinessException("Tarefa pessoal nao pode ser liberada");
+        boolean admin = Roles.ADMIN.equals(current.getRole());
+        if (!admin && entry.getAssignedTo() != null && !entry.getAssignedTo().getId().equals(current.getId())
+                && (entry.getDestinationEmployee() == null || !entry.getDestinationEmployee().getId().equals(current.getId()))) {
+            throw new BusinessException("Somente responsavel pode liberar");
+        }
+        entry.setAssignedTo(null);
+        entry.setStatus(InboxEntry.Status.NEW);
+        return toResponse(repository.save(entry));
+    }
+
+    @Transactional
+    public Response reopen(UUID id, Employee employee) {
+        Employee current = requireEmployee(employee);
+        if (!Roles.ADMIN.equals(current.getRole())) throw new BusinessException("Apenas admin pode reabrir");
+        InboxEntry entry = repository.findByIdAndCityHall_Id(id, cityHallId(current))
+                .orElseThrow(() -> new ResourceNotFoundException("Entrada nao encontrada"));
+        entry.setStatus(InboxEntry.Status.NEW);
+        return toResponse(repository.save(entry));
+    }
+
+    @Transactional
     public Response complete(UUID id, Employee employee) {
         Employee current = requireEmployee(employee);
         InboxEntry entry = visibleEntry(id, current);
+        if (isPersonalTask(entry)) throw new BusinessException("Tarefa pessoal nao pode ser concluida por aqui");
         boolean admin = Roles.ADMIN.equals(current.getRole());
         if (!admin && entry.getAssignedTo() != null && !entry.getAssignedTo().getId().equals(current.getId())) {
             throw new BusinessException("Somente o responsavel pode concluir esta entrada");
@@ -74,6 +158,10 @@ public class InboxService {
         entry.setStatus(InboxEntry.Status.COMPLETED);
         if (entry.getReadAt() == null) entry.setReadAt(LocalDateTime.now());
         return toResponse(repository.save(entry));
+    }
+
+    private boolean isPersonalTask(InboxEntry e) {
+        return "task".equals(e.getObjectType()) && e.getDestinationEmployee() != null;
     }
 
     @Transactional
@@ -207,7 +295,7 @@ public class InboxService {
                 entry.getDestinationEmployee() == null ? null : entry.getDestinationEmployee().getId(), employeeName(entry.getDestinationEmployee()),
                 entry.getAssignedTo() == null ? null : entry.getAssignedTo().getId(), employeeName(entry.getAssignedTo()),
                 entry.getToolSlug(), entry.getObjectType(), entry.getObjectId(), entry.getUrl(), employeeName(entry.getCreatedBy()),
-                entry.getReadAt(), entry.getCreatedAt(), entry.getUpdatedAt());
+                entry.getMetadata(), entry.getReadAt(), entry.getCreatedAt(), entry.getUpdatedAt());
     }
 
     private String employeeName(Employee employee) {

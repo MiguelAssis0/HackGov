@@ -18,6 +18,7 @@ const AccessControlPage = lazy(() => import("./pages/AccessControlPage.jsx"));
 const CityHallFormPage = lazy(() => import("./pages/CityHallFormPage.jsx"));
 const AgendaPage = lazy(() => import("./pages/AgendaPage.jsx"));
 const InboxPage = lazy(() => import("./pages/InboxPage.jsx"));
+const InboxDetailPage = lazy(() => import("./pages/InboxDetailPage.jsx"));
 const ClientsPage = lazy(() => import("./pages/ClientsPage.jsx"));
 const AgriculturePage = lazy(() => import("./pages/AgriculturePage.jsx"));
 const DocumentsPage = lazy(() => import("./pages/DocumentsPage.jsx"));
@@ -35,6 +36,7 @@ const routes = [
   { path: "/tarefas", element: <TasksPage /> },
   { path: "/agenda", element: <AgendaPage /> },
   { path: "/caixa-entrada", element: <InboxPage /> },
+  { path: "/caixa-entrada/:id", element: <InboxDetailPage /> },
   { path: "/clientes", element: <ClientsPage /> },
   { path: "/patrulha-agricola", element: <AgriculturePage /> },
   { path: "/documentos", element: <DocumentsPage /> },

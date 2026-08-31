@@ -24,10 +24,29 @@ public class InboxController {
             @RequestParam(required = false) InboxEntry.Type type,
             @RequestParam(defaultValue = "false") boolean unreadOnly,
             @RequestParam(defaultValue = "") String query,
+            @RequestParam(required = false) String caixa,
+            @RequestParam(required = false) String leitura,
+            @RequestParam(required = false) UUID setor,
             Pageable pageable,
             @AuthenticationPrincipal Employee employee
     ) {
+        if (caixa != null || leitura != null || setor != null) {
+            return service.listByScope(caixa, leitura, query, setor, pageable, employee);
+        }
         return service.findVisible(status, type, unreadOnly, query, pageable, employee);
+    }
+
+    @GetMapping("/counts")
+    public com.fiap.hackgov.inbox.internal.DTOs.InboxDTOs.Counts counts(
+            @RequestParam(defaultValue = "") String query,
+            @RequestParam(required = false) UUID setor,
+            @AuthenticationPrincipal Employee employee) {
+        return service.counts(query, setor, employee);
+    }
+
+    @GetMapping("/{id}")
+    public Response detail(@PathVariable UUID id, @AuthenticationPrincipal Employee employee) {
+        return service.getDetail(id, employee);
     }
 
     @PatchMapping("/{id}/read")
@@ -40,8 +59,18 @@ public class InboxController {
         return service.claim(id, employee);
     }
 
+    @PatchMapping("/{id}/release")
+    public Response release(@PathVariable UUID id, @AuthenticationPrincipal Employee employee) {
+        return service.release(id, employee);
+    }
+
     @PatchMapping("/{id}/complete")
     public Response complete(@PathVariable UUID id, @AuthenticationPrincipal Employee employee) {
         return service.complete(id, employee);
+    }
+
+    @PatchMapping("/{id}/reopen")
+    public Response reopen(@PathVariable UUID id, @AuthenticationPrincipal Employee employee) {
+        return service.reopen(id, employee);
     }
 }
