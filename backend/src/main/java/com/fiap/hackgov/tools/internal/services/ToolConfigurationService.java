@@ -176,10 +176,19 @@ public class ToolConfigurationService {
     }
 
     private record Seed(String slug, String name, String category, String icon, String description, String route,
-                        boolean mandatory, boolean enabled) {}
-    public record Update(boolean enabled, boolean restricted) {}
-    public record CategoryUpdate(UUID categoryId) {}
-    public record Favorite(String slug, boolean favorite) {}
+                        boolean mandatory, boolean enabled) {
+    }
+
+    public record Update(boolean enabled, boolean restricted) {
+    }
+
+    public record CategoryUpdate(UUID categoryId) {
+    }
+
+    public record Favorite(String slug, boolean favorite) {
+    }
+
     public record Response(String id, String name, String category, UUID categoryId, String icon, String description,
-                           String route, boolean mandatory, boolean enabled, boolean restricted, boolean favorite) {}
+                           String route, boolean mandatory, boolean enabled, boolean restricted, boolean favorite) {
+    }
 }

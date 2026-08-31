@@ -3,6 +3,10 @@ package com.fiap.hackgov.tasks.internal.services;
 import com.fiap.hackgov.auth.internal.entities.enums.Roles;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.cityhall_management.internal.repositories.EmployeeRepository;
+import com.fiap.hackgov.inbox.internal.services.InboxService;
+import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
+import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
+import com.fiap.hackgov.shared.infra.exceptions.UnauthorizedException;
 import com.fiap.hackgov.tasks.internal.DTOs.Tasks.CreateTaskDTO;
 import com.fiap.hackgov.tasks.internal.DTOs.Tasks.TaskResponseDTO;
 import com.fiap.hackgov.tasks.internal.DTOs.Tasks.UpdateTaskDTO;
@@ -12,19 +16,15 @@ import com.fiap.hackgov.tasks.internal.mapper.TaskMapper;
 import com.fiap.hackgov.tasks.internal.repositories.BoardRepository;
 import com.fiap.hackgov.tasks.internal.repositories.TaskReporitory;
 import com.fiap.hackgov.tasks.internal.repositories.TaskTimeEntryRepository;
-import com.fiap.hackgov.inbox.internal.services.InboxService;
-import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
-import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
-import com.fiap.hackgov.shared.infra.exceptions.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -177,7 +177,8 @@ public class TaskService {
         if (Roles.ADMIN.equals(employee.getRole())) return;
         boolean responsible = task.getResponsible() != null && task.getResponsible().getId().equals(employee.getId())
                 || task.getResponsibles().stream().anyMatch(item -> item.getId().equals(employee.getId()));
-        if (!responsible) throw new UnauthorizedException("Somente responsaveis ou administradores podem alterar a tarefa");
+        if (!responsible)
+            throw new UnauthorizedException("Somente responsaveis ou administradores podem alterar a tarefa");
     }
 
     private void validateResponsibleSector(Employee employee, Board board) {

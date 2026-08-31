@@ -66,15 +66,18 @@ public class AuditEventService {
         for (int index = 0; index < events.size(); index++) {
             AuditEvent event = events.get(index);
             if (!event.getEventHash().equals(sha256(canonical(event)))) return false;
-            if (index < events.size() - 1 && !event.getPreviousHash().equals(events.get(index + 1).getEventHash())) return false;
+            if (index < events.size() - 1 && !event.getPreviousHash().equals(events.get(index + 1).getEventHash()))
+                return false;
         }
         return true;
     }
 
     private void requireAdmin(Employee employee) {
         if (employee == null) throw new UnauthorizedException("E necessario estar autenticado");
-        if (employee.getCityHallId() == null) throw new BusinessException("O usuario precisa estar vinculado a uma prefeitura");
-        if (!Roles.ADMIN.equals(employee.getRole())) throw new BusinessException("Somente administradores podem consultar a auditoria");
+        if (employee.getCityHallId() == null)
+            throw new BusinessException("O usuario precisa estar vinculado a uma prefeitura");
+        if (!Roles.ADMIN.equals(employee.getRole()))
+            throw new BusinessException("Somente administradores podem consultar a auditoria");
     }
 
     private String sha256(String value) {

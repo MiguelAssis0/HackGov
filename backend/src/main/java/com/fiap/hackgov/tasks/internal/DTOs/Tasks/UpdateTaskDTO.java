@@ -1,14 +1,14 @@
 package com.fiap.hackgov.tasks.internal.DTOs.Tasks;
 
+import com.fiap.hackgov.tasks.internal.entities.Task;
 import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 import java.util.Set;
-import com.fiap.hackgov.tasks.internal.entities.Task;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
+import java.util.UUID;
 
 public record UpdateTaskDTO(
         @Size(min = 3, max = 120, message = "O titulo da tarefa deve ter entre 3 e 120 caracteres")

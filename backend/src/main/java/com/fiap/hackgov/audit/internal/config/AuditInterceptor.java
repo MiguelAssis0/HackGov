@@ -20,7 +20,8 @@ public class AuditInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception exception) {
-        if (!MUTATING.contains(request.getMethod()) || response.getStatus() >= 400 || request.getRequestURI().startsWith("/api/auth/")) return;
+        if (!MUTATING.contains(request.getMethod()) || response.getStatus() >= 400 || request.getRequestURI().startsWith("/api/auth/"))
+            return;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof Employee employee) {
             service.append(employee, request.getMethod(), request.getRequestURI(), response.getStatus(),

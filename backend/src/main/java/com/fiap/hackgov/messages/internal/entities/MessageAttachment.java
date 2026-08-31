@@ -1,2 +1,31 @@
-package com.fiap.hackgov.messages.internal.entities;import jakarta.persistence.*;import lombok.*;import java.util.UUID;
-@Getter @Setter @NoArgsConstructor @Entity @Table(name="message_attachments")public class MessageAttachment{@Id @GeneratedValue(strategy=GenerationType.UUID)private UUID id;@OneToOne(optional=false)@JoinColumn(name="message_id",nullable=false,unique=true)private Message message;@Column(nullable=false,length=255)private String originalName;@Column(nullable=false,length=120)private String contentType;@Column(nullable=false)private long sizeBytes;@Lob @Column(nullable=false)private byte[] content;}
+package com.fiap.hackgov.messages.internal.entities;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.UUID;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@Entity
+@Table(name = "message_attachments")
+public class MessageAttachment {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+    @OneToOne(optional = false)
+    @JoinColumn(name = "message_id", nullable = false, unique = true)
+    private Message message;
+    @Column(nullable = false, length = 255)
+    private String originalName;
+    @Column(nullable = false, length = 120)
+    private String contentType;
+    @Column(nullable = false)
+    private long sizeBytes;
+    @Lob
+    @Column(nullable = false)
+    private byte[] content;
+}

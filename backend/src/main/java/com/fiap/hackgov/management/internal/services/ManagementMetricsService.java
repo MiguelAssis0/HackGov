@@ -17,7 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.*;
 import java.time.temporal.TemporalAdjusters;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -75,11 +77,14 @@ public class ManagementMetricsService {
                 trend, 80, quality, Math.round(averageHours * 10.0) / 10.0, monthly, weekly);
     }
 
-    private int percent(long part, long total) { return total == 0 ? 0 : (int) Math.round(part * 100.0 / total); }
+    private int percent(long part, long total) {
+        return total == 0 ? 0 : (int) Math.round(part * 100.0 / total);
+    }
 
     private Employee require(Employee employee) {
         if (employee == null) throw new UnauthorizedException("E necessario estar autenticado");
-        if (employee.getCityHallId() == null) throw new BusinessException("O usuario precisa estar vinculado a uma prefeitura");
+        if (employee.getCityHallId() == null)
+            throw new BusinessException("O usuario precisa estar vinculado a uma prefeitura");
         return employee;
     }
 }

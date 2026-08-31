@@ -24,9 +24,11 @@ import java.util.UUID;
         @Index(name = "inbox_employee_status_idx", columnList = "destination_employee_id,status")
 })
 public class InboxEntry {
-    public enum Type { DOCUMENT, ALERT, REQUEST, TASK }
-    public enum Status { NEW, IN_PROGRESS, COMPLETED, ARCHIVED }
-    public enum Priority { LOW, NORMAL, HIGH }
+    public enum Type {DOCUMENT, ALERT, REQUEST, TASK}
+
+    public enum Status {NEW, IN_PROGRESS, COMPLETED, ARCHIVED}
+
+    public enum Priority {LOW, NORMAL, HIGH}
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

@@ -9,5 +9,6 @@ import java.util.UUID;
 
 public interface AuditEventRepository extends JpaRepository<AuditEvent, Long> {
     Optional<AuditEvent> findTopByCityHallIdOrderByIdDesc(UUID cityHallId);
+
     List<AuditEvent> findTop500ByCityHallIdOrderByIdDesc(UUID cityHallId);
 }

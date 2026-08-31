@@ -12,7 +12,8 @@ import java.time.LocalTime;
 import java.util.UUID;
 
 public final class AgendaEventDTOs {
-    private AgendaEventDTOs() {}
+    private AgendaEventDTOs() {
+    }
 
     public record SaveRequest(
             @NotBlank @Size(max = 160) String title,
@@ -51,5 +52,6 @@ public final class AgendaEventDTOs {
             String taskTitle,
             LocalDateTime createdAt,
             LocalDateTime updatedAt
-    ) {}
+    ) {
+    }
 }

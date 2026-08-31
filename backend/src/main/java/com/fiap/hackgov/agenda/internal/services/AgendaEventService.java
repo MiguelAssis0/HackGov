@@ -121,7 +121,8 @@ public class AgendaEventService {
     }
 
     private UUID cityHallId(Employee employee) {
-        if (employee.getCityHallId() == null) throw new BusinessException("O usuario precisa estar vinculado a uma prefeitura");
+        if (employee.getCityHallId() == null)
+            throw new BusinessException("O usuario precisa estar vinculado a uma prefeitura");
         return employee.getCityHallId().getId();
     }
 

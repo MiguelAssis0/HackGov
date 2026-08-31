@@ -1,10 +1,6 @@
 package com.fiap.hackgov.bidding.internal.controllers;
 
-import com.fiap.hackgov.bidding.internal.DTOs.licitation.CreateLicitationProcessDTO;
-import com.fiap.hackgov.bidding.internal.DTOs.licitation.LicitationHistoryDTO;
-import com.fiap.hackgov.bidding.internal.DTOs.licitation.LicitationProcessResponseDTO;
-import com.fiap.hackgov.bidding.internal.DTOs.licitation.PublishLicitationResultDTO;
-import com.fiap.hackgov.bidding.internal.DTOs.licitation.UpdateLicitationStatusDTO;
+import com.fiap.hackgov.bidding.internal.DTOs.licitation.*;
 import com.fiap.hackgov.bidding.internal.entities.LicitationHistory;
 import com.fiap.hackgov.bidding.internal.entities.LicitationProcess;
 import com.fiap.hackgov.bidding.internal.mappers.LicitationHistoryMapper;

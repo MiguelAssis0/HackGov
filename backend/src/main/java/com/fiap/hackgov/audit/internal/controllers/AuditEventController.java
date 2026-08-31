@@ -5,7 +5,10 @@ import com.fiap.hackgov.audit.internal.services.AuditEventService;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -26,5 +29,6 @@ public class AuditEventController {
         return new Verification(service.verify(employee));
     }
 
-    public record Verification(boolean valid) {}
+    public record Verification(boolean valid) {
+    }
 }

@@ -6,7 +6,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public final class InboxDTOs {
-    private InboxDTOs() {}
+    private InboxDTOs() {
+    }
 
     public record Response(
             UUID id, String title, String description, InboxEntry.Type type,
@@ -16,5 +17,6 @@ public final class InboxDTOs {
             UUID assignedToId, String assignedToName,
             String toolSlug, String objectType, UUID objectId, String url,
             String senderName, LocalDateTime readAt, LocalDateTime createdAt, LocalDateTime updatedAt
-    ) {}
+    ) {
+    }
 }

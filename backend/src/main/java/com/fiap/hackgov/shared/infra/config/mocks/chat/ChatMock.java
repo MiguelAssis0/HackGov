@@ -1,7 +1,7 @@
 package com.fiap.hackgov.shared.infra.config.mocks.chat;
 
-import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.cityhall_management.internal.entities.CityHall;
+import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.messages.internal.entities.Chat;
 import com.fiap.hackgov.messages.internal.entities.ChatParticipant;
 import com.fiap.hackgov.messages.internal.entities.enums.ChatRole;

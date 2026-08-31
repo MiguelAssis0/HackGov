@@ -25,8 +25,9 @@ import java.util.UUID;
 @Filter(name = "cityHallFilter", condition = "board_id in (select b.id from boards b where b.city_hall_id = :cityHallId)")
 @Filter(name = "sectorFilter", condition = "board_id in (select b.id from boards b where b.sector_id = :sectorId)")
 public class Task {
-    public enum Status { TODO, IN_PROGRESS, IN_REVIEW, COMPLETED }
-    public enum Priority { LOW, NORMAL, HIGH, URGENT }
+    public enum Status {TODO, IN_PROGRESS, IN_REVIEW, COMPLETED}
+
+    public enum Priority {LOW, NORMAL, HIGH, URGENT}
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

@@ -2,18 +2,13 @@ package com.fiap.hackgov.tasks.internal.DTOs.Tasks;
 
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.tasks.internal.entities.Board;
+import com.fiap.hackgov.tasks.internal.entities.Task;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.AssertTrue;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.*;
 
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
-import com.fiap.hackgov.tasks.internal.entities.Task;
 
 public record CreateTaskDTO(
         @NotBlank(message = "O titulo da tarefa e obrigatorio")

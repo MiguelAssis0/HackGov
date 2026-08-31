@@ -105,7 +105,8 @@ public class ToolCategoryService {
 
     private Employee admin(Employee employee) {
         Employee current = require(employee);
-        if (!Roles.ADMIN.equals(current.getRole())) throw new UnauthorizedException("Somente administradores podem configurar pastas");
+        if (!Roles.ADMIN.equals(current.getRole()))
+            throw new UnauthorizedException("Somente administradores podem configurar pastas");
         return current;
     }
 
@@ -120,7 +121,10 @@ public class ToolCategoryService {
                 toolRepository.countByCustomCategory_Id(category.getId()));
     }
 
-    public record Request(String name, String description, String icon, int order, boolean active) {}
+    public record Request(String name, String description, String icon, int order, boolean active) {
+    }
+
     public record Response(UUID id, String name, String slug, String description, String icon, int order,
-                           boolean active, long total) {}
+                           boolean active, long total) {
+    }
 }

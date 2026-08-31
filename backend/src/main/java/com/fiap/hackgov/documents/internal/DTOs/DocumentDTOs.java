@@ -10,7 +10,8 @@ import java.util.Set;
 import java.util.UUID;
 
 public final class DocumentDTOs {
-    private DocumentDTOs() {}
+    private DocumentDTOs() {
+    }
 
     public record GeneratedRequest(
             @NotBlank @Size(max = 180) String title,
@@ -19,9 +20,11 @@ public final class DocumentDTOs {
             @NotNull MunicipalDocument.Visibility visibility,
             @NotBlank @Size(max = 100_000) String content,
             Set<UUID> destinationIds
-    ) {}
+    ) {
+    }
 
-    public record ForwardRequest(@NotNull Set<UUID> destinationIds) {}
+    public record ForwardRequest(@NotNull Set<UUID> destinationIds) {
+    }
 
     public record Response(
             UUID id, String title, String documentType, String description,
@@ -30,5 +33,6 @@ public final class DocumentDTOs {
             String sourceType, UUID sourceId, String sourceUrl,
             MunicipalDocument.SignatureStatus signatureStatus, LocalDateTime signedAt,
             LocalDateTime createdAt, LocalDateTime updatedAt
-    ) {}
+    ) {
+    }
 }

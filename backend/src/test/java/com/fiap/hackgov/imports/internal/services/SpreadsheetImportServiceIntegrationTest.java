@@ -21,9 +21,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("dev")
 @Transactional
 class SpreadsheetImportServiceIntegrationTest {
-    @Autowired SpreadsheetImportService service;
-    @Autowired EmployeeRepository employeeRepository;
-    @Autowired SectorRepository sectorRepository;
+    @Autowired
+    SpreadsheetImportService service;
+    @Autowired
+    EmployeeRepository employeeRepository;
+    @Autowired
+    SectorRepository sectorRepository;
 
     @Test
     void previewsValidatesAndImportsCsvDepartment() {

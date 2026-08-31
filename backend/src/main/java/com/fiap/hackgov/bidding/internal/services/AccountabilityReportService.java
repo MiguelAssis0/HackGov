@@ -1,7 +1,7 @@
 package com.fiap.hackgov.bidding.internal.services;
 
-import com.fiap.hackgov.bidding.internal.DTOs.accountabilityReport.CreateAccountabilityReportDTO;
 import com.fiap.hackgov.bidding.internal.DTOs.accountabilityReport.AssignAccountabilityResponsibleDTO;
+import com.fiap.hackgov.bidding.internal.DTOs.accountabilityReport.CreateAccountabilityReportDTO;
 import com.fiap.hackgov.bidding.internal.DTOs.requisiton.RequisitionResponsibleDTO;
 import com.fiap.hackgov.bidding.internal.entities.AccountabilityReport;
 import com.fiap.hackgov.bidding.internal.entities.Contract;
@@ -10,11 +10,7 @@ import com.fiap.hackgov.bidding.internal.entities.Requisition;
 import com.fiap.hackgov.bidding.internal.entities.enums.AccountabilityStatus;
 import com.fiap.hackgov.bidding.internal.entities.enums.ProcessStage;
 import com.fiap.hackgov.bidding.internal.mappers.AccountabilityReportMapper;
-import com.fiap.hackgov.bidding.internal.repositories.AccountabilityReportRepository;
-import com.fiap.hackgov.bidding.internal.repositories.ContractRepository;
-import com.fiap.hackgov.bidding.internal.repositories.PaymentRepository;
-import com.fiap.hackgov.bidding.internal.repositories.ProcessStatusRepository;
-import com.fiap.hackgov.bidding.internal.repositories.RequisitionRepository;
+import com.fiap.hackgov.bidding.internal.repositories.*;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.cityhall_management.internal.repositories.EmployeeRepository;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;

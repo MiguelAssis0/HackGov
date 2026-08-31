@@ -3,7 +3,9 @@ package com.fiap.hackgov.documents.internal.services;
 import com.fiap.hackgov.auth.internal.entities.enums.Roles;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.cityhall_management.internal.repositories.EmployeeRepository;
-import com.fiap.hackgov.documents.internal.DTOs.DocumentDTOs.*;
+import com.fiap.hackgov.documents.internal.DTOs.DocumentDTOs.ForwardRequest;
+import com.fiap.hackgov.documents.internal.DTOs.DocumentDTOs.GeneratedRequest;
+import com.fiap.hackgov.documents.internal.DTOs.DocumentDTOs.Response;
 import com.fiap.hackgov.documents.internal.entities.MunicipalDocument;
 import com.fiap.hackgov.documents.internal.repositories.MunicipalDocumentRepository;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
@@ -76,7 +78,7 @@ public class MunicipalDocumentService {
     public List<Response> listForProcess(UUID requisitionId, Employee employee) {
         Employee current = require(employee);
         return repository.findByCityHall_IdAndSourceTypeAndSourceIdOrderByCreatedAtDesc(
-                cityId(current), "requisition", requisitionId).stream().filter(item -> canView(item, current))
+                        cityId(current), "requisition", requisitionId).stream().filter(item -> canView(item, current))
                 .map(this::toResponse).toList();
     }
 
@@ -199,7 +201,8 @@ public class MunicipalDocumentService {
     }
 
     private UUID cityId(Employee employee) {
-        if (employee.getCityHallId() == null) throw new BusinessException("O usuario precisa estar vinculado a uma prefeitura");
+        if (employee.getCityHallId() == null)
+            throw new BusinessException("O usuario precisa estar vinculado a uma prefeitura");
         return employee.getCityHallId().getId();
     }
 

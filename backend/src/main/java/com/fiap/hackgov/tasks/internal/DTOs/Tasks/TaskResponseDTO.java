@@ -1,9 +1,10 @@
 package com.fiap.hackgov.tasks.internal.DTOs.Tasks;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-import java.util.Set;
 import com.fiap.hackgov.tasks.internal.entities.Task;
+
+import java.time.LocalDateTime;
+import java.util.Set;
+import java.util.UUID;
 
 public record TaskResponseDTO(
         UUID id,

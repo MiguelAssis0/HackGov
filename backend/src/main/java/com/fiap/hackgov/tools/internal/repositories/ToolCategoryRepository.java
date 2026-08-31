@@ -9,7 +9,10 @@ import java.util.UUID;
 
 public interface ToolCategoryRepository extends JpaRepository<ToolCategory, UUID> {
     List<ToolCategory> findByCityHall_IdOrderByOrderAscNameAsc(UUID cityHallId);
+
     Optional<ToolCategory> findByIdAndCityHall_Id(UUID id, UUID cityHallId);
+
     boolean existsByCityHall_IdAndSlug(UUID cityHallId, String slug);
+
     boolean existsByCityHall_IdAndSlugAndIdNot(UUID cityHallId, String slug, UUID id);
 }

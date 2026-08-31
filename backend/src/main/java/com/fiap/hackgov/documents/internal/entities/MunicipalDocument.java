@@ -23,8 +23,9 @@ import java.util.UUID;
         @Index(name = "document_city_created_idx", columnList = "city_hall_id,created_at")
 })
 public class MunicipalDocument {
-    public enum Visibility { PERSONAL, SECTOR, CITY_HALL }
-    public enum SignatureStatus { NONE, HOMOLOGATION }
+    public enum Visibility {PERSONAL, SECTOR, CITY_HALL}
+
+    public enum SignatureStatus {NONE, HOMOLOGATION}
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

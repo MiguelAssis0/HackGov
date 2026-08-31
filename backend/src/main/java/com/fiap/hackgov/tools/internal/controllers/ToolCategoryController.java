@@ -24,14 +24,14 @@ public class ToolCategoryController {
 
     @PostMapping
     public ResponseEntity<ToolCategoryService.Response> create(@RequestBody ToolCategoryService.Request request,
-                                                                @AuthenticationPrincipal Employee employee) {
+                                                               @AuthenticationPrincipal Employee employee) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(request, employee));
     }
 
     @PutMapping("/{id}")
     public ToolCategoryService.Response update(@PathVariable UUID id,
-                                                @RequestBody ToolCategoryService.Request request,
-                                                @AuthenticationPrincipal Employee employee) {
+                                               @RequestBody ToolCategoryService.Request request,
+                                               @AuthenticationPrincipal Employee employee) {
         return service.update(id, request, employee);
     }
 

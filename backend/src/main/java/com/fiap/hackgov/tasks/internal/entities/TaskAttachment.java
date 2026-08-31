@@ -10,16 +10,29 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Getter @Setter @NoArgsConstructor
-@Entity @Table(name = "task_attachments")
+@Getter
+@Setter
+@NoArgsConstructor
+@Entity
+@Table(name = "task_attachments")
 public class TaskAttachment {
-    @Id @GeneratedValue(strategy = GenerationType.UUID)
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    @ManyToOne(optional = false, fetch = FetchType.LAZY) private Task task;
-    @Column(nullable = false, length = 255) private String originalName;
-    @Column(nullable = false, length = 120) private String contentType;
-    @Column(nullable = false) private long size;
-    @Lob @Basic(fetch = FetchType.LAZY) @Column(nullable = false) private byte[] content;
-    @ManyToOne(fetch = FetchType.LAZY) private Employee uploadedBy;
-    @CreationTimestamp private LocalDateTime createdAt;
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    private Task task;
+    @Column(nullable = false, length = 255)
+    private String originalName;
+    @Column(nullable = false, length = 120)
+    private String contentType;
+    @Column(nullable = false)
+    private long size;
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    @Column(nullable = false)
+    private byte[] content;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Employee uploadedBy;
+    @CreationTimestamp
+    private LocalDateTime createdAt;
 }

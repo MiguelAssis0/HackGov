@@ -5,12 +5,12 @@ import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.cityhall_management.internal.repositories.EmployeeRepository;
 import com.fiap.hackgov.cityhall_management.internal.repositories.SectorRepository;
 import com.fiap.hackgov.shared.infra.filters.HibernateFilterActivator;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-import jakarta.persistence.EntityManager;
 
 import java.util.UUID;
 
@@ -20,11 +20,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("dev")
 @Transactional
 class BiddingTenantIsolationIntegrationTest {
-    @Autowired RequisitionRepository requisitionRepository;
-    @Autowired EmployeeRepository employeeRepository;
-    @Autowired SectorRepository sectorRepository;
-    @Autowired HibernateFilterActivator filterActivator;
-    @Autowired EntityManager entityManager;
+    @Autowired
+    RequisitionRepository requisitionRepository;
+    @Autowired
+    EmployeeRepository employeeRepository;
+    @Autowired
+    SectorRepository sectorRepository;
+    @Autowired
+    HibernateFilterActivator filterActivator;
+    @Autowired
+    EntityManager entityManager;
 
     @Test
     void hidesRequisitionsFromAnotherCityHall() {

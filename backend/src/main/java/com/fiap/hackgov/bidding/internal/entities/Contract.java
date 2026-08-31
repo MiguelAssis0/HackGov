@@ -19,8 +19,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "contracts")
-@org.hibernate.annotations.Filter(name="cityHallFilter",condition=BiddingScopeConditions.LIC_CITY)
-@org.hibernate.annotations.Filter(name="sectorFilter",condition=BiddingScopeConditions.LIC_SECTOR)
+@org.hibernate.annotations.Filter(name = "cityHallFilter", condition = BiddingScopeConditions.LIC_CITY)
+@org.hibernate.annotations.Filter(name = "sectorFilter", condition = BiddingScopeConditions.LIC_SECTOR)
 @Getter
 @Setter
 @NoArgsConstructor

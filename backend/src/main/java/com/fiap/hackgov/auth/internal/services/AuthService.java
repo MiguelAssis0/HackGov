@@ -13,12 +13,12 @@ import com.fiap.hackgov.shared.infra.services.LoginAttemptService;
 import com.fiap.hackgov.shared.infra.services.TokenBlacklistService;
 import com.fiap.hackgov.shared.infra.services.TokenService;
 import com.fiap.hackgov.shared.infra.utils.AuditLog;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import jakarta.annotation.PostConstruct;
 
 import java.time.LocalDateTime;
 import java.util.Optional;

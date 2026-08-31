@@ -12,9 +12,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @ActiveProfiles("dev")
 class ToolCategoryServiceIntegrationTest {
-    @Autowired private ToolCategoryService categoryService;
-    @Autowired private ToolConfigurationService toolService;
-    @Autowired private EmployeeRepository employeeRepository;
+    @Autowired
+    private ToolCategoryService categoryService;
+    @Autowired
+    private ToolConfigurationService toolService;
+    @Autowired
+    private EmployeeRepository employeeRepository;
 
     @Test
     void createsAssignsAndDeletesMunicipalFolderWithoutLosingToolConfiguration() {

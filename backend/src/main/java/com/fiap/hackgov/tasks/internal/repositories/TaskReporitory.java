@@ -3,8 +3,8 @@ package com.fiap.hackgov.tasks.internal.repositories;
 import com.fiap.hackgov.tasks.internal.entities.Task;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -59,6 +59,7 @@ public interface TaskReporitory extends JpaRepository<Task, UUID> {
             @Param("monthStart") LocalDateTime monthStart,
             @Param("monthEndExclusive") LocalDateTime monthEndExclusive
     );
+
     Page<Task> findAllByBoard_CityHall_Id(UUID cityHallId, Pageable pageable);
 
     Page<Task> findAllByBoard_CityHall_IdAndBoard_Sector_Id(UUID cityHallId, UUID sectorId, Pageable pageable);

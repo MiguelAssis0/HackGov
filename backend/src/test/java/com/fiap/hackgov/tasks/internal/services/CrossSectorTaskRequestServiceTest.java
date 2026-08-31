@@ -1,11 +1,15 @@
 package com.fiap.hackgov.tasks.internal.services;
 
-import com.fiap.hackgov.cityhall_management.internal.entities.*;
+import com.fiap.hackgov.cityhall_management.internal.entities.CityHall;
+import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
+import com.fiap.hackgov.cityhall_management.internal.entities.Sector;
 import com.fiap.hackgov.cityhall_management.internal.repositories.SectorRepository;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.tasks.internal.DTOs.CrossSectorRequestDTOs.Create;
 import com.fiap.hackgov.tasks.internal.entities.Task;
-import com.fiap.hackgov.tasks.internal.repositories.*;
+import com.fiap.hackgov.tasks.internal.repositories.BoardRepository;
+import com.fiap.hackgov.tasks.internal.repositories.CrossSectorTaskRequestRepository;
+import com.fiap.hackgov.tasks.internal.repositories.TaskReporitory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -19,14 +23,26 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CrossSectorTaskRequestServiceTest {
-    @Mock CrossSectorTaskRequestRepository repository; @Mock SectorRepository sectorRepository;
-    @Mock BoardRepository boardRepository; @Mock TaskReporitory taskRepository;
+    @Mock
+    CrossSectorTaskRequestRepository repository;
+    @Mock
+    SectorRepository sectorRepository;
+    @Mock
+    BoardRepository boardRepository;
+    @Mock
+    TaskReporitory taskRepository;
 
     @Test
     void createRejectsDestinationEqualToOriginSector() {
-        CityHall city = new CityHall(); city.setId(UUID.randomUUID());
-        Sector sector = new Sector(); sector.setId(UUID.randomUUID()); sector.setCityHall(city);
-        Employee employee = new Employee(); employee.setId(UUID.randomUUID()); employee.setCityHallId(city); employee.setSectorId(sector);
+        CityHall city = new CityHall();
+        city.setId(UUID.randomUUID());
+        Sector sector = new Sector();
+        sector.setId(UUID.randomUUID());
+        sector.setCityHall(city);
+        Employee employee = new Employee();
+        employee.setId(UUID.randomUUID());
+        employee.setCityHallId(city);
+        employee.setSectorId(sector);
         when(sectorRepository.findByIdAndCityHall_Id(sector.getId(), city.getId())).thenReturn(Optional.of(sector));
         CrossSectorTaskRequestService service = new CrossSectorTaskRequestService(repository, sectorRepository, boardRepository, taskRepository, null);
 

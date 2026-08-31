@@ -23,7 +23,7 @@ import java.util.UUID;
         @Index(name = "agenda_city_dates_idx", columnList = "city_hall_id,start_date,end_date")
 })
 public class AgendaEvent {
-    public enum Type { MEETING, DEADLINE, SERVICE, CEREMONY, OTHER }
+    public enum Type {MEETING, DEADLINE, SERVICE, CEREMONY, OTHER}
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

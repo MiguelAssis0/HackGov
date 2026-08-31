@@ -1,12 +1,17 @@
 package com.fiap.hackgov.documents.internal.controllers;
 
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
-import com.fiap.hackgov.documents.internal.DTOs.DocumentDTOs.*;
+import com.fiap.hackgov.documents.internal.DTOs.DocumentDTOs.ForwardRequest;
+import com.fiap.hackgov.documents.internal.DTOs.DocumentDTOs.GeneratedRequest;
+import com.fiap.hackgov.documents.internal.DTOs.DocumentDTOs.Response;
 import com.fiap.hackgov.documents.internal.entities.MunicipalDocument;
 import com.fiap.hackgov.documents.internal.services.MunicipalDocumentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.*;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,7 +48,7 @@ public class MunicipalDocumentController {
 
     @PostMapping("/generated")
     public ResponseEntity<Response> createGenerated(@Valid @RequestBody GeneratedRequest request,
-                                                     @AuthenticationPrincipal Employee employee) {
+                                                    @AuthenticationPrincipal Employee employee) {
         Response response = service.createGenerated(request, employee);
         return ResponseEntity.created(URI.create("/api/documents/" + response.id())).body(response);
     }

@@ -3,16 +3,16 @@ package com.fiap.hackgov.bidding.internal.services;
 import com.fiap.hackgov.bidding.internal.DTOs.analysis.AnalysisResponseDTO;
 import com.fiap.hackgov.bidding.internal.DTOs.analysis.CreateAnalysisDTO;
 import com.fiap.hackgov.bidding.internal.DTOs.analysis.UpdateAnalysisDTO;
-import com.fiap.hackgov.bidding.internal.entities.Analysis;
 import com.fiap.hackgov.bidding.internal.entities.AccountabilityReport;
+import com.fiap.hackgov.bidding.internal.entities.Analysis;
 import com.fiap.hackgov.bidding.internal.entities.Requisition;
 import com.fiap.hackgov.bidding.internal.entities.enums.AccountabilityStatus;
 import com.fiap.hackgov.bidding.internal.entities.enums.AnalysisResult;
 import com.fiap.hackgov.bidding.internal.entities.enums.HistoryEventType;
 import com.fiap.hackgov.bidding.internal.entities.enums.ProcessStage;
 import com.fiap.hackgov.bidding.internal.mappers.AnalysisMapper;
-import com.fiap.hackgov.bidding.internal.repositories.AnalysisRepository;
 import com.fiap.hackgov.bidding.internal.repositories.AccountabilityReportRepository;
+import com.fiap.hackgov.bidding.internal.repositories.AnalysisRepository;
 import com.fiap.hackgov.bidding.internal.repositories.RequisitionRepository;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
@@ -112,7 +112,8 @@ public class AnalysisService {
                         "Requisição retornada para " + ProcessStage.REQUISICAO_CADASTRADA.getDescription() + " para correção"
                 );
             }
-            case REPROVADO, CANCELADO -> processHistoryService.createProcessHistory(requisition, employee, "Análise encerrada: " + currentStage.getDescription(), currentStage, HistoryEventType.REJECTED);
+            case REPROVADO, CANCELADO ->
+                    processHistoryService.createProcessHistory(requisition, employee, "Análise encerrada: " + currentStage.getDescription(), currentStage, HistoryEventType.REJECTED);
             case PENDENTE -> {
             }
         }

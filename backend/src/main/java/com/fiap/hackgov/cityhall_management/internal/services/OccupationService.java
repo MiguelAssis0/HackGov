@@ -5,10 +5,10 @@ import com.fiap.hackgov.cityhall_management.internal.DTOs.Occupation.OccupationR
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.cityhall_management.internal.entities.Occupation;
 import com.fiap.hackgov.cityhall_management.internal.entities.Sector;
+import com.fiap.hackgov.cityhall_management.internal.entities.enums.Actions;
 import com.fiap.hackgov.cityhall_management.internal.mapper.OccupationMapper;
 import com.fiap.hackgov.cityhall_management.internal.repositories.OccupationRepository;
 import com.fiap.hackgov.cityhall_management.internal.repositories.SectorRepository;
-import com.fiap.hackgov.cityhall_management.internal.entities.enums.Actions;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.permissions.RequiresPermission;
 import lombok.AllArgsConstructor;

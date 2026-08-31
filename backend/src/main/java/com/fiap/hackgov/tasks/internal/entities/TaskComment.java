@@ -11,14 +11,23 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Getter @Setter @NoArgsConstructor
-@Entity @Table(name = "task_comments")
+@Getter
+@Setter
+@NoArgsConstructor
+@Entity
+@Table(name = "task_comments")
 public class TaskComment {
-    @Id @GeneratedValue(strategy = GenerationType.UUID)
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    @ManyToOne(optional = false, fetch = FetchType.LAZY) private Task task;
-    @ManyToOne(fetch = FetchType.LAZY) private Employee author;
-    @Column(nullable = false, length = 2000) private String text;
-    @CreationTimestamp private LocalDateTime createdAt;
-    @UpdateTimestamp private LocalDateTime editedAt;
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    private Task task;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Employee author;
+    @Column(nullable = false, length = 2000)
+    private String text;
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+    @UpdateTimestamp
+    private LocalDateTime editedAt;
 }

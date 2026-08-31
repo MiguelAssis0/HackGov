@@ -18,6 +18,7 @@ public interface BoardRepository extends JpaRepository<Board, UUID> {
     Optional<Board> findById(UUID id);
 
     Optional<Board> findByIdAndCityHall_Id(UUID id, UUID cityHallId);
+
     Optional<Board> findFirstByCityHall_IdAndSector_Id(UUID cityHallId, UUID sectorId);
 
 }

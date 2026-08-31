@@ -37,6 +37,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
     Optional<Employee> findByIdWithDetails(@Param("id") UUID id);
 
     Optional<Employee> findByEmail(String email);
+
     Optional<Employee> findByCpf(String cpf);
 
     @EntityGraph(attributePaths = {"occupationId", "sectorId"})

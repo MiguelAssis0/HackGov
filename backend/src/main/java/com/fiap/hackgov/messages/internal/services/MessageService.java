@@ -9,8 +9,8 @@ import com.fiap.hackgov.messages.internal.entities.MessageAttachment;
 import com.fiap.hackgov.messages.internal.mapper.MessageMapper;
 import com.fiap.hackgov.messages.internal.repositories.ChatParticipantRepository;
 import com.fiap.hackgov.messages.internal.repositories.ChatRepository;
-import com.fiap.hackgov.messages.internal.repositories.MessageRepository;
 import com.fiap.hackgov.messages.internal.repositories.MessageAttachmentRepository;
+import com.fiap.hackgov.messages.internal.repositories.MessageRepository;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
 import com.fiap.hackgov.shared.infra.pagination.PageResponseDTO;
@@ -21,12 +21,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
 import org.springframework.web.multipart.MultipartFile;
-import java.util.Set;
+
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -69,19 +69,49 @@ public class MessageService {
     @Transactional
     public MessageDTO sendAttachment(Employee employee, UUID chatId, String text, MultipartFile file) {
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new ResourceNotFoundException("Chat not found"));
-        if (!chatParticipantRepository.existsByChatIdAndEmployeeId(chatId, employee.getId())) throw new BusinessException("You are not a participant of this chat");
-        validateFile(file); Message message=new Message();message.setChat(chat);message.setSender(employee);message.setContent(text==null?"":text.trim());message.setSentAt(LocalDateTime.now());message=messageRepository.save(message);
-        MessageAttachment attachment=new MessageAttachment();attachment.setMessage(message);attachment.setOriginalName(safe(file.getOriginalFilename()));attachment.setContentType(file.getContentType()==null?"application/octet-stream":file.getContentType());attachment.setSizeBytes(file.getSize());try{attachment.setContent(file.getBytes());}catch(IOException e){throw new BusinessException("Nao foi possivel ler o anexo");}message.setAttachment(attachmentRepository.save(attachment));return messageMapper.toDTO(message);
+        if (!chatParticipantRepository.existsByChatIdAndEmployeeId(chatId, employee.getId()))
+            throw new BusinessException("You are not a participant of this chat");
+        validateFile(file);
+        Message message = new Message();
+        message.setChat(chat);
+        message.setSender(employee);
+        message.setContent(text == null ? "" : text.trim());
+        message.setSentAt(LocalDateTime.now());
+        message = messageRepository.save(message);
+        MessageAttachment attachment = new MessageAttachment();
+        attachment.setMessage(message);
+        attachment.setOriginalName(safe(file.getOriginalFilename()));
+        attachment.setContentType(file.getContentType() == null ? "application/octet-stream" : file.getContentType());
+        attachment.setSizeBytes(file.getSize());
+        try {
+            attachment.setContent(file.getBytes());
+        } catch (IOException e) {
+            throw new BusinessException("Nao foi possivel ler o anexo");
+        }
+        message.setAttachment(attachmentRepository.save(attachment));
+        return messageMapper.toDTO(message);
     }
 
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public MessageAttachment downloadAttachment(UUID chatId, UUID attachmentId, Employee employee) {
-        if (!chatParticipantRepository.existsByChatIdAndEmployeeId(chatId,employee.getId()))throw new ResourceNotFoundException("Anexo nao encontrado");
-        return attachmentRepository.findByIdAndMessage_Chat_Id(attachmentId,chatId).orElseThrow(()->new ResourceNotFoundException("Anexo nao encontrado"));
+        if (!chatParticipantRepository.existsByChatIdAndEmployeeId(chatId, employee.getId()))
+            throw new ResourceNotFoundException("Anexo nao encontrado");
+        return attachmentRepository.findByIdAndMessage_Chat_Id(attachmentId, chatId).orElseThrow(() -> new ResourceNotFoundException("Anexo nao encontrado"));
     }
 
-    private void validateFile(MultipartFile file){if(file==null||file.isEmpty())throw new BusinessException("Selecione um arquivo");if(file.getSize()>10L*1024*1024)throw new BusinessException("O anexo deve ter no maximo 10 MB");String name=safe(file.getOriginalFilename()).toLowerCase();if(Set.of(".exe",".bat",".cmd",".sh",".js",".jar").stream().anyMatch(name::endsWith))throw new BusinessException("Tipo de arquivo nao permitido");}
-    private String safe(String name){if(name==null||name.isBlank())return"anexo";String value=name.replace('\\','/');return value.substring(value.lastIndexOf('/')+1).replaceAll("[^a-zA-Z0-9._ -]","_");}
+    private void validateFile(MultipartFile file) {
+        if (file == null || file.isEmpty()) throw new BusinessException("Selecione um arquivo");
+        if (file.getSize() > 10L * 1024 * 1024) throw new BusinessException("O anexo deve ter no maximo 10 MB");
+        String name = safe(file.getOriginalFilename()).toLowerCase();
+        if (Set.of(".exe", ".bat", ".cmd", ".sh", ".js", ".jar").stream().anyMatch(name::endsWith))
+            throw new BusinessException("Tipo de arquivo nao permitido");
+    }
+
+    private String safe(String name) {
+        if (name == null || name.isBlank()) return "anexo";
+        String value = name.replace('\\', '/');
+        return value.substring(value.lastIndexOf('/') + 1).replaceAll("[^a-zA-Z0-9._ -]", "_");
+    }
 
     @Transactional(readOnly = true)
     public PageResponseDTO<MessageDTO> getChatMessages(

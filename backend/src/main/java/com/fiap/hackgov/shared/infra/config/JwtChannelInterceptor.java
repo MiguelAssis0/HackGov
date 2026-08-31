@@ -1,7 +1,7 @@
 package com.fiap.hackgov.shared.infra.config;
 
-import com.fiap.hackgov.auth.internal.services.UserDetailsServiceImpl;
 import com.fiap.hackgov.auth.internal.entities.User;
+import com.fiap.hackgov.auth.internal.services.UserDetailsServiceImpl;
 import com.fiap.hackgov.auth.internal.services.UserSessionService;
 import com.fiap.hackgov.shared.infra.services.TokenService;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,8 @@
 package com.fiap.hackgov.inbox.internal.services;
 
 import com.fiap.hackgov.auth.internal.entities.enums.Roles;
+import com.fiap.hackgov.bidding.internal.entities.Requisition;
+import com.fiap.hackgov.bidding.internal.entities.enums.ProcessStage;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.inbox.internal.DTOs.InboxDTOs.Response;
 import com.fiap.hackgov.inbox.internal.entities.InboxEntry;
@@ -8,10 +10,8 @@ import com.fiap.hackgov.inbox.internal.repositories.InboxEntryRepository;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
 import com.fiap.hackgov.shared.infra.exceptions.UnauthorizedException;
-import com.fiap.hackgov.tasks.internal.entities.Task;
 import com.fiap.hackgov.tasks.internal.entities.CrossSectorTaskRequest;
-import com.fiap.hackgov.bidding.internal.entities.Requisition;
-import com.fiap.hackgov.bidding.internal.entities.enums.ProcessStage;
+import com.fiap.hackgov.tasks.internal.entities.Task;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -78,7 +78,8 @@ public class InboxService {
 
     @Transactional
     public InboxEntry notifyTask(Task task, Employee actor) {
-        if (task.getResponsible() == null || task.getBoard() == null || task.getBoard().getCityHall() == null) return null;
+        if (task.getResponsible() == null || task.getBoard() == null || task.getBoard().getCityHall() == null)
+            return null;
         UUID cityId = task.getBoard().getCityHall().getId();
         String key = "task:" + task.getId() + ":employee:" + task.getResponsible().getId();
         InboxEntry entry = repository.findByCityHall_IdAndKey(cityId, key).orElseGet(InboxEntry::new);
@@ -101,7 +102,8 @@ public class InboxService {
 
     @Transactional
     public InboxEntry notifyBiddingStage(Requisition requisition, ProcessStage stage, Employee actor) {
-        if (requisition == null || requisition.getSector() == null || requisition.getSector().getCityHall() == null) return null;
+        if (requisition == null || requisition.getSector() == null || requisition.getSector().getCityHall() == null)
+            return null;
         UUID cityId = requisition.getSector().getCityHall().getId();
         String key = "bidding:" + requisition.getId() + ":" + stage.name();
         InboxEntry entry = repository.findByCityHall_IdAndKey(cityId, key).orElseGet(InboxEntry::new);
@@ -131,30 +133,47 @@ public class InboxService {
 
     @Transactional
     public InboxEntry notifyCrossSectorRequest(CrossSectorTaskRequest request) {
-        InboxEntry entry = new InboxEntry(); entry.setCityHall(request.getCityHall());
+        InboxEntry entry = new InboxEntry();
+        entry.setCityHall(request.getCityHall());
         entry.setTitle("Demanda de " + request.getOriginSector().getName() + ": " + request.getTitle());
-        entry.setDescription(request.getDescription()); entry.setType(InboxEntry.Type.REQUEST);
+        entry.setDescription(request.getDescription());
+        entry.setType(InboxEntry.Type.REQUEST);
         entry.setPriority(request.getPriority() == Task.Priority.URGENT || request.getPriority() == Task.Priority.HIGH ? InboxEntry.Priority.HIGH : InboxEntry.Priority.NORMAL);
-        entry.setDestinationSector(request.getDestinationSector()); entry.setToolSlug("tarefas");
-        entry.setObjectType("cross_sector_task_request"); entry.setObjectId(request.getId());
-        entry.setUrl("/caixa-entrada"); entry.setKey("task-request:" + request.getId() + ":destination"); entry.setCreatedBy(request.getRequestedBy());
+        entry.setDestinationSector(request.getDestinationSector());
+        entry.setToolSlug("tarefas");
+        entry.setObjectType("cross_sector_task_request");
+        entry.setObjectId(request.getId());
+        entry.setUrl("/caixa-entrada");
+        entry.setKey("task-request:" + request.getId() + ":destination");
+        entry.setCreatedBy(request.getRequestedBy());
         return repository.save(entry);
     }
 
     @Transactional
     public void completeObject(UUID cityId, String objectType, UUID objectId) {
         repository.findByCityHall_IdAndKey(cityId, "task-request:" + objectId + ":destination").ifPresent(entry -> {
-            entry.setStatus(InboxEntry.Status.COMPLETED); if (entry.getReadAt() == null) entry.setReadAt(LocalDateTime.now()); repository.save(entry);
+            entry.setStatus(InboxEntry.Status.COMPLETED);
+            if (entry.getReadAt() == null) entry.setReadAt(LocalDateTime.now());
+            repository.save(entry);
         });
     }
 
     @Transactional
     public InboxEntry notifyRequestResult(CrossSectorTaskRequest request, String result) {
-        InboxEntry entry = new InboxEntry(); entry.setCityHall(request.getCityHall()); entry.setTitle("Demanda " + result + ": " + request.getTitle());
-        entry.setDescription(request.getFeedback()); entry.setType(InboxEntry.Type.REQUEST); entry.setDestinationSector(request.getOriginSector());
-        entry.setDestinationEmployee(request.getRequestedBy()); entry.setToolSlug("tarefas"); entry.setObjectType("cross_sector_task_request");
-        entry.setObjectId(request.getId()); entry.setUrl(request.getGeneratedTask()==null?"/tarefas":"/tarefas?task="+request.getGeneratedTask().getId());
-        entry.setKey("task-request:" + request.getId() + ":result"); entry.setCreatedBy(request.getAnsweredBy()); return repository.save(entry);
+        InboxEntry entry = new InboxEntry();
+        entry.setCityHall(request.getCityHall());
+        entry.setTitle("Demanda " + result + ": " + request.getTitle());
+        entry.setDescription(request.getFeedback());
+        entry.setType(InboxEntry.Type.REQUEST);
+        entry.setDestinationSector(request.getOriginSector());
+        entry.setDestinationEmployee(request.getRequestedBy());
+        entry.setToolSlug("tarefas");
+        entry.setObjectType("cross_sector_task_request");
+        entry.setObjectId(request.getId());
+        entry.setUrl(request.getGeneratedTask() == null ? "/tarefas" : "/tarefas?task=" + request.getGeneratedTask().getId());
+        entry.setKey("task-request:" + request.getId() + ":result");
+        entry.setCreatedBy(request.getAnsweredBy());
+        return repository.save(entry);
     }
 
     private InboxEntry visibleEntry(UUID id, Employee employee) {
@@ -169,13 +188,15 @@ public class InboxService {
     }
 
     private Employee requireEmployee(Employee employee) {
-        if (employee == null) throw new UnauthorizedException("E necessario estar autenticado para acessar a caixa de entrada");
+        if (employee == null)
+            throw new UnauthorizedException("E necessario estar autenticado para acessar a caixa de entrada");
         cityHallId(employee);
         return employee;
     }
 
     private UUID cityHallId(Employee employee) {
-        if (employee.getCityHallId() == null) throw new BusinessException("O usuario precisa estar vinculado a uma prefeitura");
+        if (employee.getCityHallId() == null)
+            throw new BusinessException("O usuario precisa estar vinculado a uma prefeitura");
         return employee.getCityHallId().getId();
     }
 

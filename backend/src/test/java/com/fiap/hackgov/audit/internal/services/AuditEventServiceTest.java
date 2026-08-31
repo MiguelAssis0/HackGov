@@ -14,16 +14,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AuditEventServiceTest {
-    @Mock AuditEventRepository repository;
+    @Mock
+    AuditEventRepository repository;
 
     @Test
     void appendCreatesHashLinkedToPreviousEvent() {
-        AuditEvent previous = new AuditEvent(); previous.setEventHash("a".repeat(64));
+        AuditEvent previous = new AuditEvent();
+        previous.setEventHash("a".repeat(64));
         Employee employee = employee();
         when(repository.findTopByCityHallIdOrderByIdDesc(employee.getCityHallId().getId())).thenReturn(Optional.of(previous));
         AuditEventService service = new AuditEventService(repository);
@@ -38,8 +41,13 @@ class AuditEventServiceTest {
     }
 
     private Employee employee() {
-        CityHall cityHall = new CityHall(); cityHall.setId(UUID.randomUUID());
-        Employee employee = new Employee(); employee.setId(UUID.randomUUID()); employee.setEmail("admin@cidade.gov.br");
-        employee.setCityHallId(cityHall); employee.setRole(Roles.ADMIN); return employee;
+        CityHall cityHall = new CityHall();
+        cityHall.setId(UUID.randomUUID());
+        Employee employee = new Employee();
+        employee.setId(UUID.randomUUID());
+        employee.setEmail("admin@cidade.gov.br");
+        employee.setCityHallId(cityHall);
+        employee.setRole(Roles.ADMIN);
+        return employee;
     }
 }

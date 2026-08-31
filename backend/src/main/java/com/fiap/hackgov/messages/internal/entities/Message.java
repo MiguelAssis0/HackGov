@@ -39,6 +39,6 @@ public class Message {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime sentAt;
 
-    @OneToOne(mappedBy="message",cascade=CascadeType.ALL,orphanRemoval=true)
+    @OneToOne(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
     private MessageAttachment attachment;
 }

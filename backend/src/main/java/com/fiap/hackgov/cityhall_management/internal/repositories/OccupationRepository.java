@@ -6,12 +6,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.UUID;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface OccupationRepository extends JpaRepository<Occupation, UUID> {
     long countBySectorId_CityHall_Id(UUID cityHallId);
+
     Page<Occupation> findAllBySectorId_CityHall_Id(UUID cityHallId, Pageable pageable);
+
     Optional<Occupation> findFirstByNameIgnoreCaseAndSectorId_CityHall_Id(String name, UUID cityHallId);
 }

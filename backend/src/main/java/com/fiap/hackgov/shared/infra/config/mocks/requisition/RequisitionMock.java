@@ -1,21 +1,8 @@
 package com.fiap.hackgov.shared.infra.config.mocks.requisition;
 
-import com.fiap.hackgov.bidding.internal.entities.Approval;
-import com.fiap.hackgov.bidding.internal.entities.Analysis;
-import com.fiap.hackgov.bidding.internal.entities.ProcessHistory;
-import com.fiap.hackgov.bidding.internal.entities.ProcessStatus;
-import com.fiap.hackgov.bidding.internal.entities.Requisition;
-import com.fiap.hackgov.bidding.internal.entities.enums.AnalysisResult;
-import com.fiap.hackgov.bidding.internal.entities.enums.AcquisitionType;
-import com.fiap.hackgov.bidding.internal.entities.enums.ApprovalSector;
-import com.fiap.hackgov.bidding.internal.entities.enums.ApprovalStatus;
-import com.fiap.hackgov.bidding.internal.entities.enums.HistoryEventType;
-import com.fiap.hackgov.bidding.internal.entities.enums.ProcessStage;
-import com.fiap.hackgov.bidding.internal.repositories.AnalysisRepository;
-import com.fiap.hackgov.bidding.internal.repositories.ApprovalRepository;
-import com.fiap.hackgov.bidding.internal.repositories.ProcessHistoryRepository;
-import com.fiap.hackgov.bidding.internal.repositories.ProcessStatusRepository;
-import com.fiap.hackgov.bidding.internal.repositories.RequisitionRepository;
+import com.fiap.hackgov.bidding.internal.entities.*;
+import com.fiap.hackgov.bidding.internal.entities.enums.*;
+import com.fiap.hackgov.bidding.internal.repositories.*;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.shared.infra.config.mocks.util.MockContext;
 import lombok.RequiredArgsConstructor;

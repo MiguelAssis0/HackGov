@@ -209,7 +209,8 @@ public class TaskDetailService {
             return taskRepository.findByIdAndBoard_CityHall_Id(taskId, cityId)
                     .orElseThrow(() -> new ResourceNotFoundException("Tarefa nao encontrada"));
         }
-        if (current.getSectorId() == null) throw new BusinessException("O funcionario precisa estar vinculado a um setor");
+        if (current.getSectorId() == null)
+            throw new BusinessException("O funcionario precisa estar vinculado a um setor");
         return taskRepository.findByIdAndBoard_CityHall_IdAndBoard_Sector_Id(taskId, cityId, current.getSectorId().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Tarefa nao encontrada para o seu setor"));
     }
@@ -219,13 +220,15 @@ public class TaskDetailService {
         if (Roles.ADMIN.equals(employee.getRole())) return task;
         boolean responsible = task.getResponsible() != null && task.getResponsible().getId().equals(employee.getId())
                 || task.getResponsibles().stream().anyMatch(item -> item.getId().equals(employee.getId()));
-        if (!responsible) throw new UnauthorizedException("Somente responsaveis ou administradores podem gerenciar esta tarefa");
+        if (!responsible)
+            throw new UnauthorizedException("Somente responsaveis ou administradores podem gerenciar esta tarefa");
         return task;
     }
 
     private Employee requireEmployee(Employee employee) {
         if (employee == null) throw new UnauthorizedException("E necessario estar autenticado");
-        if (employee.getCityHallId() == null) throw new BusinessException("O usuario precisa estar vinculado a uma prefeitura");
+        if (employee.getCityHallId() == null)
+            throw new BusinessException("O usuario precisa estar vinculado a uma prefeitura");
         return employee;
     }
 
@@ -250,7 +253,8 @@ public class TaskDetailService {
         if (!ALLOWED_EXTENSIONS.contains(extension)) throw new BusinessException("Tipo de arquivo nao permitido");
         try {
             byte[] content = file.getBytes();
-            if (content.length == 0 || hasBlockedSignature(content)) throw new BusinessException("Conteudo de arquivo invalido");
+            if (content.length == 0 || hasBlockedSignature(content))
+                throw new BusinessException("Conteudo de arquivo invalido");
             return content;
         } catch (IOException exception) {
             throw new BusinessException("Nao foi possivel ler o arquivo");
@@ -267,14 +271,29 @@ public class TaskDetailService {
         return normalized.isEmpty() ? "arquivo" : normalized.substring(0, Math.min(255, normalized.length()));
     }
 
-    private CommentResponse commentResponse(TaskComment item) { return new CommentResponse(item.getId(), item.getText(), id(item.getAuthor()), name(item.getAuthor()), item.getCreatedAt(), item.getEditedAt()); }
-    private ChecklistResponse checklistResponse(TaskChecklistItem item) { return new ChecklistResponse(item.getId(), item.getTitle(), item.getOrderIndex(), item.isCompleted(), id(item.getCompletedBy()), name(item.getCompletedBy()), item.getCompletedAt()); }
+    private CommentResponse commentResponse(TaskComment item) {
+        return new CommentResponse(item.getId(), item.getText(), id(item.getAuthor()), name(item.getAuthor()), item.getCreatedAt(), item.getEditedAt());
+    }
+
+    private ChecklistResponse checklistResponse(TaskChecklistItem item) {
+        return new ChecklistResponse(item.getId(), item.getTitle(), item.getOrderIndex(), item.isCompleted(), id(item.getCompletedBy()), name(item.getCompletedBy()), item.getCompletedAt());
+    }
+
     private TimeResponse timeResponse(TaskTimeEntry item) {
         boolean active = !item.isManual() && item.getFinishedAt() == null;
         long seconds = active && item.getStartedAt() != null ? Math.max(0, Duration.between(item.getStartedAt(), LocalDateTime.now()).getSeconds()) : item.getDurationSeconds();
         return new TimeResponse(item.getId(), id(item.getEmployee()), name(item.getEmployee()), item.getStartedAt(), item.getFinishedAt(), seconds, active, item.isManual(), item.getReferenceDate(), item.getObservation());
     }
-    private AttachmentResponse attachmentResponse(TaskAttachment item) { return new AttachmentResponse(item.getId(), item.getOriginalName(), item.getContentType(), item.getSize(), id(item.getUploadedBy()), name(item.getUploadedBy()), item.getCreatedAt()); }
-    private UUID id(Employee employee) { return employee == null ? null : employee.getId(); }
-    private String name(Employee employee) { return employee == null ? null : employee.getFullName(); }
+
+    private AttachmentResponse attachmentResponse(TaskAttachment item) {
+        return new AttachmentResponse(item.getId(), item.getOriginalName(), item.getContentType(), item.getSize(), id(item.getUploadedBy()), name(item.getUploadedBy()), item.getCreatedAt());
+    }
+
+    private UUID id(Employee employee) {
+        return employee == null ? null : employee.getId();
+    }
+
+    private String name(Employee employee) {
+        return employee == null ? null : employee.getFullName();
+    }
 }

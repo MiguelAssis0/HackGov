@@ -10,16 +10,26 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Getter @Setter @NoArgsConstructor
-@Entity @Table(name = "task_checklist_items", indexes = @Index(name = "checklist_task_order_idx", columnList = "task_id,item_order"))
+@Getter
+@Setter
+@NoArgsConstructor
+@Entity
+@Table(name = "task_checklist_items", indexes = @Index(name = "checklist_task_order_idx", columnList = "task_id,item_order"))
 public class TaskChecklistItem {
-    @Id @GeneratedValue(strategy = GenerationType.UUID)
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    @ManyToOne(optional = false, fetch = FetchType.LAZY) @JoinColumn(name = "task_id") private Task task;
-    @Column(nullable = false, length = 180) private String title;
-    @Column(name = "item_order", nullable = false) private int orderIndex;
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "task_id")
+    private Task task;
+    @Column(nullable = false, length = 180)
+    private String title;
+    @Column(name = "item_order", nullable = false)
+    private int orderIndex;
     private boolean completed;
-    @ManyToOne(fetch = FetchType.LAZY) private Employee completedBy;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Employee completedBy;
     private LocalDateTime completedAt;
-    @CreationTimestamp private LocalDateTime createdAt;
+    @CreationTimestamp
+    private LocalDateTime createdAt;
 }
