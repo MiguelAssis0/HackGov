@@ -60,6 +60,66 @@ public interface TaskReporitory extends JpaRepository<Task, UUID> {
             @Param("monthEndExclusive") LocalDateTime monthEndExclusive
     );
 
+    @EntityGraph(attributePaths = {"board", "board.sector"})
+    @Query("""
+            select task from Task task
+            where task.board.cityHall.id = :cityHallId
+              and task.status <> :completed
+              and task.endDate >= :monthStart
+              and task.endDate < :monthEndExclusive
+            order by task.endDate, task.title
+            """)
+    List<Task> findAgendaTasks(
+            @Param("cityHallId") UUID cityHallId,
+            @Param("completed") Task.Status completed,
+            @Param("monthStart") LocalDateTime monthStart,
+            @Param("monthEndExclusive") LocalDateTime monthEndExclusive
+    );
+
+    @EntityGraph(attributePaths = {"board", "board.sector"})
+    @Query("""
+            select task from Task task
+            where task.board.cityHall.id = :cityHallId
+              and task.board.sector.id = :sectorId
+              and task.status <> :completed
+              and task.endDate >= :monthStart
+              and task.endDate < :monthEndExclusive
+            order by task.endDate, task.title
+            """)
+    List<Task> findAgendaTasksForSector(
+            @Param("cityHallId") UUID cityHallId,
+            @Param("sectorId") UUID sectorId,
+            @Param("completed") Task.Status completed,
+            @Param("monthStart") LocalDateTime monthStart,
+            @Param("monthEndExclusive") LocalDateTime monthEndExclusive
+    );
+
+    @EntityGraph(attributePaths = {"board", "board.sector"})
+    @Query("""
+            select task from Task task
+            where task.board.cityHall.id = :cityHallId
+              and task.status <> :completed
+            order by task.endDate, task.title
+            """)
+    List<Task> findAgendaTaskOptions(
+            @Param("cityHallId") UUID cityHallId,
+            @Param("completed") Task.Status completed
+    );
+
+    @EntityGraph(attributePaths = {"board", "board.sector"})
+    @Query("""
+            select task from Task task
+            where task.board.cityHall.id = :cityHallId
+              and task.board.sector.id = :sectorId
+              and task.status <> :completed
+            order by task.endDate, task.title
+            """)
+    List<Task> findAgendaTaskOptionsForSector(
+            @Param("cityHallId") UUID cityHallId,
+            @Param("sectorId") UUID sectorId,
+            @Param("completed") Task.Status completed
+    );
+
     Page<Task> findAllByBoard_CityHall_Id(UUID cityHallId, Pageable pageable);
 
     Page<Task> findAllByBoard_CityHall_IdAndBoard_Sector_Id(UUID cityHallId, UUID sectorId, Pageable pageable);

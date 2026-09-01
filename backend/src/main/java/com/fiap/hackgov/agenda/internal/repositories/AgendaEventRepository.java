@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface AgendaEventRepository extends JpaRepository<AgendaEvent, UUID> {
-    @EntityGraph(attributePaths = {"task"})
+    @EntityGraph(attributePaths = {"task", "task.board", "task.board.sector"})
     @Query("""
             select e from AgendaEvent e
             where e.cityHall.id = :cityHallId
@@ -28,7 +28,7 @@ public interface AgendaEventRepository extends JpaRepository<AgendaEvent, UUID> 
             @Param("taskId") UUID taskId
     );
 
-    @EntityGraph(attributePaths = {"task"})
+    @EntityGraph(attributePaths = {"task", "task.board", "task.board.sector"})
     @Query("""
             select e from AgendaEvent e
             where e.cityHall.id = :cityHallId

@@ -72,6 +72,19 @@ public class ToolPermissionService {
         return rules.stream().filter(r -> r.getEmployee() == null).sorted(Comparator.comparingInt(this::specificity).reversed()).filter(r -> matches(r, employee)).findFirst().map(ToolPermissionRule::isEnabled).orElse(false);
     }
 
+    public boolean canManage(String slug, Employee employee) {
+        List<ToolPermissionRule> rules = repository.findByCityHall_IdAndToolSlug(city(employee), slug);
+        List<ToolPermissionRule> personal = rules.stream().filter(r -> r.getEmployee() != null && r.getEmployee().getId().equals(employee.getId())).toList();
+        if (!personal.isEmpty()) return personal.stream().anyMatch(r -> r.isEnabled() && r.getLevel() != ToolPermissionRule.Level.VIEW);
+        return rules.stream().filter(r -> r.getEmployee() == null && matches(r, employee))
+                .max(Comparator.comparingInt(this::specificity).thenComparingInt(r -> levelRank(r.getLevel())))
+                .map(r -> r.isEnabled() && r.getLevel() != ToolPermissionRule.Level.VIEW).orElse(false);
+    }
+
+    private int levelRank(ToolPermissionRule.Level level) {
+        return level == ToolPermissionRule.Level.ADMIN ? 2 : level == ToolPermissionRule.Level.MANAGE ? 1 : 0;
+    }
+
     private int specificity(ToolPermissionRule r) {
         return (r.getSector() != null ? 1 : 0) + (r.getOccupation() != null ? 1 : 0);
     }

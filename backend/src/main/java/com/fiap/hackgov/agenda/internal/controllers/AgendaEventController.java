@@ -2,6 +2,9 @@ package com.fiap.hackgov.agenda.internal.controllers;
 
 import com.fiap.hackgov.agenda.internal.DTOs.AgendaEventDTOs.Response;
 import com.fiap.hackgov.agenda.internal.DTOs.AgendaEventDTOs.SaveRequest;
+import com.fiap.hackgov.agenda.internal.DTOs.AgendaEventDTOs.Access;
+import com.fiap.hackgov.agenda.internal.DTOs.AgendaEventDTOs.TaskDeadline;
+import com.fiap.hackgov.agenda.internal.DTOs.AgendaEventDTOs.TaskOption;
 import com.fiap.hackgov.agenda.internal.services.AgendaEventService;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import jakarta.validation.Valid;
@@ -11,7 +14,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.time.YearMonth;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,11 +25,30 @@ public class AgendaEventController {
 
     @GetMapping
     public List<Response> findMonth(
-            @RequestParam(required = false) YearMonth month,
+            @RequestParam(required = false) String month,
             @RequestParam(required = false) UUID taskId,
             @AuthenticationPrincipal Employee employee
     ) {
-        return service.findMonth(month == null ? YearMonth.now() : month, taskId, employee);
+        return service.findMonth(month, taskId, employee);
+    }
+
+    @GetMapping("/tasks")
+    public List<TaskDeadline> findTasks(
+            @RequestParam(required = false) String month,
+            @RequestParam(required = false) UUID taskId,
+            @AuthenticationPrincipal Employee employee
+    ) {
+        return service.findTasks(month, taskId, employee);
+    }
+
+    @GetMapping("/task-options")
+    public List<TaskOption> findTaskOptions(@AuthenticationPrincipal Employee employee) {
+        return service.findTaskOptions(employee);
+    }
+
+    @GetMapping("/access")
+    public Access access(@AuthenticationPrincipal Employee employee) {
+        return service.access(employee);
     }
 
     @GetMapping("/upcoming")

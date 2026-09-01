@@ -50,8 +50,19 @@ public final class AgendaEventDTOs {
             String location,
             UUID taskId,
             String taskTitle,
+            UUID taskSectorId,
+            String taskSectorName,
             LocalDateTime createdAt,
             LocalDateTime updatedAt
     ) {
+    }
+
+    public record TaskDeadline(UUID id, String title, LocalDate deadline, UUID sectorId, String sectorName) {
+    }
+
+    public record TaskOption(UUID id, String title, UUID sectorId, String sectorName) {
+    }
+
+    public record Access(boolean canView, boolean canCreate, boolean canViewAllTasks, String sectorName) {
     }
 }

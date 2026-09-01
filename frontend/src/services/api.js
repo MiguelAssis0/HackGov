@@ -218,6 +218,13 @@ export const api = {
   getAgendaEvents: (month, taskId = "") =>
     request(`/agenda/events?month=${encodeURIComponent(month)}${taskId ? `&taskId=${encodeURIComponent(taskId)}` : ""}`),
 
+  getAgendaTasks: (month, taskId = "") =>
+    request(`/agenda/events/tasks?month=${encodeURIComponent(month)}${taskId ? `&taskId=${encodeURIComponent(taskId)}` : ""}`),
+
+  getAgendaTaskOptions: () => request("/agenda/events/task-options"),
+
+  getAgendaAccess: () => request("/agenda/events/access"),
+
   getUpcomingAgendaEvents: (limit = 5) =>
     request(`/agenda/events/upcoming?limit=${limit}`),
 

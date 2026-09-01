@@ -11,7 +11,7 @@ RUN --mount=type=cache,target=/root/.m2 \
 COPY src ./src
 
 RUN --mount=type=cache,target=/root/.m2 \
-    mvn clean package -DskipTests
+    mvn clean package -Dmaven.test.skip=true
 
 # Stage 2
 FROM eclipse-temurin:21-jre-alpine
