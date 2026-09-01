@@ -319,16 +319,32 @@ export const api = {
   uploadAgricultureProof: (id, file) => { const body = new FormData(); body.append("file", file); return request(`/agriculture/services/${id}/proof`, { method: "POST", body }); },
 
   // DOCUMENTOS
-  getDocuments: ({ query = "", type = "" } = {}) => request(`/documents?query=${encodeURIComponent(query)}&type=${encodeURIComponent(type)}`),
+  getDocuments: ({ query = "", type = "", number = "", year = "", dateStart = "", dateEnd = "", related = "", tags = "" } = {}) => request(`/documents?query=${encodeURIComponent(query)}&type=${encodeURIComponent(type)}&number=${encodeURIComponent(number)}&year=${encodeURIComponent(year)}&dateStart=${encodeURIComponent(dateStart)}&dateEnd=${encodeURIComponent(dateEnd)}&related=${encodeURIComponent(related)}&tags=${encodeURIComponent(tags)}`),
   uploadDocument: (payload) => {
     const body = new FormData();
     body.append("title", payload.title); body.append("documentType", payload.documentType);
     body.append("description", payload.description || ""); body.append("visibility", payload.visibility);
+    body.append("kind", payload.kind || "SEND");
+    if (payload.number) body.append("number", payload.number);
+    if (payload.year) body.append("year", payload.year);
+    if (payload.documentDate) body.append("documentDate", payload.documentDate);
+    if (payload.purpose) body.append("purpose", payload.purpose);
+    if (payload.keywords) body.append("keywords", payload.keywords);
+    if (payload.tags) body.append("tags", payload.tags);
+    (payload.destinationIds || []).forEach((id) => body.append("destinationIds", id));
     body.append("file", payload.file);
     return request("/documents", { method: "POST", body });
   },
-  createGeneratedDocument: (payload) => request("/documents/generated", { method: "POST", body: JSON.stringify(payload) }),
-  signDocumentHomologation: (id) => request(`/documents/${id}/sign-homologation`, { method: "POST" }),
+  createGeneratedDocument: (payload) => {
+    const { file, ...data } = payload;
+    if (!file) return request("/documents/generated", { method: "POST", body: JSON.stringify(data) });
+    const body = new FormData();
+    body.append("payload", new Blob([JSON.stringify(data)], { type: "application/json" }));
+    body.append("file", file);
+    return request("/documents/generated", { method: "POST", body });
+  },
+  forwardDocument: (id, destinationIds) => request(`/documents/${id}/forward`, { method: "POST", body: JSON.stringify({ destinationIds }) }),
+  signDocumentHomologation: (id, consentimento) => request(`/documents/${id}/sign-homologation`, { method: "POST", body: JSON.stringify({ consentimento }) }),
   deleteDocument: (id) => request(`/documents/${id}`, { method: "DELETE" }),
   downloadDocument: async (document) => {
     const response = await fetch(`${API_BASE_URL}/documents/${document.id}/download`, { headers: { Authorization: `Bearer ${getToken()}` } });

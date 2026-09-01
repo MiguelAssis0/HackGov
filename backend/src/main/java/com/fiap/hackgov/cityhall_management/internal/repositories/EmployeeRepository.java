@@ -40,6 +40,9 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
 
     Optional<Employee> findByCpf(String cpf);
 
+    @EntityGraph(attributePaths = {"sectorId", "occupationId"})
+    List<Employee> findAllByCityHallId_IdAndStatusTrueOrderByFirstNameAscLastNameAsc(UUID cityHallId);
+
     @EntityGraph(attributePaths = {"occupationId", "sectorId"})
     @Query("""
             SELECT e

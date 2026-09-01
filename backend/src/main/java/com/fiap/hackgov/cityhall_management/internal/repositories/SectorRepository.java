@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
 @Repository
@@ -15,6 +16,8 @@ public interface SectorRepository extends JpaRepository<Sector, UUID> {
     long countByCityHall_Id(UUID cityHallId);
 
     Page<Sector> findAllByCityHall_Id(UUID cityHallId, Pageable pageable);
+
+    List<Sector> findAllByCityHall_Id(UUID cityHallId);
 
     Optional<Sector> findByIdAndCityHall_Id(UUID id, UUID cityHallId);
 

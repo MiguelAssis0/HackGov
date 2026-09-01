@@ -11,9 +11,9 @@ import java.util.UUID;
 public interface MunicipalDocumentRepository extends JpaRepository<MunicipalDocument, UUID> {
     List<MunicipalDocument> findByCityHall_IdAndSourceTypeAndSourceIdOrderByCreatedAtDesc(UUID cityHallId, String sourceType, UUID sourceId);
 
-    @EntityGraph(attributePaths = {"owner", "sector", "destinations", "signedBy"})
+    @EntityGraph(attributePaths = {"owner", "sector", "destinations", "signedBy", "relatedSectors", "relatedEmployees", "relatedOccupations", "cityHall"})
     List<MunicipalDocument> findDistinctByCityHall_IdOrderByCreatedAtDesc(UUID cityHallId);
 
-    @EntityGraph(attributePaths = {"owner", "sector", "destinations", "signedBy"})
+    @EntityGraph(attributePaths = {"owner", "sector", "destinations", "signedBy", "relatedSectors", "relatedEmployees", "relatedOccupations", "cityHall"})
     Optional<MunicipalDocument> findByIdAndCityHall_Id(UUID id, UUID cityHallId);
 }

@@ -1,0 +1,13 @@
+alter table municipal_documents add column if not exists signature_code varchar(64) not null default '';
+alter table municipal_documents add column if not exists signature_hash varchar(64) not null default '';
+alter table municipal_documents add column if not exists signature_standard varchar(30) not null default '';
+alter table municipal_documents add column if not exists signature_holder varchar(180) not null default '';
+alter table municipal_documents add column if not exists signature_issuer varchar(255) not null default '';
+alter table municipal_documents add column if not exists signature_certificate_serial varchar(80) not null default '';
+alter table municipal_documents add column if not exists signature_certificate_fingerprint varchar(64) not null default '';
+alter table municipal_documents add column if not exists signature_certificate_valid_from timestamp;
+alter table municipal_documents add column if not exists signature_certificate_valid_until timestamp;
+alter table municipal_documents add column if not exists signature_timestamp_included boolean not null default false;
+alter table municipal_documents add column if not exists signature_provider varchar(80) not null default '';
+alter table municipal_documents add column if not exists signature_environment varchar(20) not null default '';
+alter table municipal_documents add column if not exists signature_external_reference varchar(180) not null default '';
