@@ -363,7 +363,23 @@ export const api = {
   },
 
   // AUDITORIA
-  getAuditEvents: (query = "") => request(`/audit?query=${encodeURIComponent(query)}`),
+  getAuditEvents: (params = {}) => {
+    const query = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") query.set(key, value);
+    });
+    return request(`/audit${query.toString() ? `?${query}` : ""}`);
+  },
+  exportAudit: async (params = {}) => {
+    const query = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (key !== "page" && value !== undefined && value !== null && value !== "") query.set(key, value);
+    });
+    const blob = await request(`/audit/export${query.toString() ? `?${query}` : ""}`, { responseType: "blob" });
+    const url = URL.createObjectURL(blob);
+    const anchor = window.document.createElement("a");
+    anchor.href = url; anchor.download = "auditoria.csv"; anchor.click(); URL.revokeObjectURL(url);
+  },
   verifyAuditChain: () => request("/audit/verify"),
 
   // GESTAO

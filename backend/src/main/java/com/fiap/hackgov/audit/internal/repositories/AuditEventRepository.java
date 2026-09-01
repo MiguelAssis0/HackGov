@@ -11,4 +11,10 @@ public interface AuditEventRepository extends JpaRepository<AuditEvent, Long> {
     Optional<AuditEvent> findTopByCityHallIdOrderByIdDesc(UUID cityHallId);
 
     List<AuditEvent> findTop500ByCityHallIdOrderByIdDesc(UUID cityHallId);
+
+    List<AuditEvent> findTop500ByOrderByIdDesc();
+
+    List<AuditEvent> findAllByCityHallIdOrderByIdDesc(UUID cityHallId);
+
+    List<AuditEvent> findAllByOrderByIdDesc();
 }
