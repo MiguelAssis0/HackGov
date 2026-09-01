@@ -367,7 +367,11 @@ export const api = {
   verifyAuditChain: () => request("/audit/verify"),
 
   // GESTAO
-  getSectorPerformance: () => request("/management/sector-performance"),
+  getManagement: (params = {}) => {
+    const query = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => { if (value !== undefined && value !== null && value !== "") query.set(key, value); });
+    return request(`/management${query.toString() ? `?${query}` : ""}`);
+  },
 
   // FERRAMENTAS E FAVORITOS
   getTools: () => request("/tools"),

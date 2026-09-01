@@ -124,6 +124,24 @@ public interface TaskReporitory extends JpaRepository<Task, UUID> {
 
     Page<Task> findAllByBoard_CityHall_IdAndBoard_Sector_Id(UUID cityHallId, UUID sectorId, Pageable pageable);
 
+    @EntityGraph(attributePaths = {"board", "board.sector", "responsible", "responsibles"})
+    @Query("""
+            select distinct task from Task task
+            where task.board.cityHall.id = :cityHallId
+              and task.status = :completed
+              and task.completedAt >= :start
+              and task.completedAt < :endExclusive
+              and (:sectorId is null or task.board.sector.id = :sectorId)
+            order by task.completedAt, task.id
+            """)
+    List<Task> findCompletedForManagement(
+            @Param("cityHallId") UUID cityHallId,
+            @Param("completed") Task.Status completed,
+            @Param("start") LocalDateTime start,
+            @Param("endExclusive") LocalDateTime endExclusive,
+            @Param("sectorId") UUID sectorId
+    );
+
     Optional<Task> findByIdAndBoard_CityHall_Id(UUID id, UUID cityHallId);
 
     Optional<Task> findByIdAndBoard_CityHall_IdAndBoard_Sector_Id(UUID id, UUID cityHallId, UUID sectorId);

@@ -19,6 +19,8 @@ public interface SectorRepository extends JpaRepository<Sector, UUID> {
 
     List<Sector> findAllByCityHall_Id(UUID cityHallId);
 
+    List<Sector> findAllByCityHall_IdAndActiveTrueOrderByNameAsc(UUID cityHallId);
+
     Optional<Sector> findByIdAndCityHall_Id(UUID id, UUID cityHallId);
 
     Optional<Sector> findByNameAndCityHall_Id(String name, UUID cityHallId);
