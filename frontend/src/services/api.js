@@ -375,10 +375,20 @@ export const api = {
   updateClient: (id, payload) => request(`/clients/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
   addClientService: (id, payload) => request(`/clients/${id}/services`, { method: "POST", body: JSON.stringify(payload) }),
 
-  // PATRULHA AGRICOLA
+  // PATRULHA AGRICOLA — Django 1:1: q/status com paginacao 15
   getAgricultureCatalog: () => request("/agriculture/catalog"),
   addAgricultureCatalog: (kind, payload) => request(`/agriculture/catalog/${kind}`, { method: "POST", body: JSON.stringify(payload) }),
-  getAgricultureServices: (query = "") => request(`/agriculture/services?size=100&query=${encodeURIComponent(query)}`),
+  getAgricultureServices: (params = "") => {
+    if (typeof params === "string") return request(`/agriculture/services?size=100&query=${encodeURIComponent(params)}`);
+    const q = params.query ?? params.q ?? "";
+    const page = params.page ?? 0;
+    const size = params.size ?? 100;
+    const status = params.status ?? "";
+    const qs = new URLSearchParams({ page: String(page), size: String(size), sort: "scheduledDate,desc" });
+    if (q) qs.set("query", q);
+    if (status) qs.set("status", status);
+    return request(`/agriculture/services?${qs}`);
+  },
   createAgricultureService: (payload) => request("/agriculture/services", { method: "POST", body: JSON.stringify(payload) }),
   updateAgricultureService: (id, payload) => request(`/agriculture/services/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
   updateAgricultureControl: (id, payload) => request(`/agriculture/services/${id}/control`, { method: "PUT", body: JSON.stringify(payload) }),
