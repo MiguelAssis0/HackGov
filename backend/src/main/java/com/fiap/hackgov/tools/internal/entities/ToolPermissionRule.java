@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.UUID;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -18,6 +20,7 @@ import java.util.UUID;
 @Table(name = "tool_permission_rules")
 public class ToolPermissionRule {
     public enum Level {VIEW, MANAGE, ADMIN}
+    public enum DataScope {ALL_SECTORS, SELECTED_SECTORS}
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -37,4 +40,12 @@ public class ToolPermissionRule {
     private Level level = Level.VIEW;
     @Column(nullable = false)
     private boolean enabled = true;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private DataScope dataScope = DataScope.ALL_SECTORS;
+    @ManyToMany
+    @JoinTable(name = "tool_permission_visible_sectors",
+            joinColumns = @JoinColumn(name = "permission_id"),
+            inverseJoinColumns = @JoinColumn(name = "sector_id"))
+    private Set<Sector> visibleSectors = new HashSet<>();
 }

@@ -2,12 +2,14 @@ package com.fiap.hackgov.tools.internal.services;
 
 import com.fiap.hackgov.auth.internal.entities.enums.Roles;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
+import com.fiap.hackgov.cityhall_management.internal.entities.Sector;
 import com.fiap.hackgov.cityhall_management.internal.repositories.EmployeeRepository;
 import com.fiap.hackgov.cityhall_management.internal.repositories.OccupationRepository;
 import com.fiap.hackgov.cityhall_management.internal.repositories.SectorRepository;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
 import com.fiap.hackgov.shared.infra.exceptions.UnauthorizedException;
+import com.fiap.hackgov.tools.internal.entities.ToolConfiguration;
 import com.fiap.hackgov.tools.internal.entities.ToolPermissionRule;
 import com.fiap.hackgov.tools.internal.repositories.ToolConfigurationRepository;
 import com.fiap.hackgov.tools.internal.repositories.ToolPermissionRuleRepository;
@@ -17,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -43,7 +46,11 @@ public class ToolPermissionService {
         toolRepository.findByCityHall_IdAndSlug(city(current), dto.toolSlug()).orElseThrow(() -> new BusinessException("Ferramenta invalida"));
         if (dto.employeeId() != null && (dto.sectorId() != null || dto.occupationId() != null))
             throw new BusinessException("Selecione um usuario ou um grupo por setor/cargo, nao ambos");
-        ToolPermissionRule rule = new ToolPermissionRule();
+        ToolPermissionRule rule = repository.findByCityHall_IdAndToolSlug(city(current), dto.toolSlug()).stream()
+                .filter(item -> Objects.equals(item.getEmployee() == null ? null : item.getEmployee().getId(), dto.employeeId()))
+                .filter(item -> Objects.equals(item.getSector() == null ? null : item.getSector().getId(), dto.sectorId()))
+                .filter(item -> Objects.equals(item.getOccupation() == null ? null : item.getOccupation().getId(), dto.occupationId()))
+                .findFirst().orElseGet(ToolPermissionRule::new);
         rule.setCityHall(current.getCityHallId());
         rule.setToolSlug(dto.toolSlug());
         rule.setLevel(dto.level() == null ? ToolPermissionRule.Level.VIEW : dto.level());
@@ -56,6 +63,15 @@ public class ToolPermissionService {
             throw new BusinessException("O cargo precisa pertencer ao setor selecionado");
         if (dto.employeeId() != null)
             rule.setEmployee(employeeRepository.findByIdWithDetails(dto.employeeId()).filter(item -> item.getCityHallId() != null && item.getCityHallId().getId().equals(city(current))).orElseThrow(() -> new BusinessException("Funcionario invalido")));
+        ToolPermissionRule.DataScope scope = "relatorios".equals(dto.toolSlug()) && dto.dataScope() != null
+                ? dto.dataScope() : ToolPermissionRule.DataScope.ALL_SECTORS;
+        Set<UUID> visibleIds = dto.visibleSectorIds() == null ? Set.of() : dto.visibleSectorIds();
+        if (scope == ToolPermissionRule.DataScope.SELECTED_SECTORS && visibleIds.isEmpty())
+            throw new BusinessException("Selecione ao menos um setor para o escopo restrito");
+        rule.setDataScope(scope);
+        rule.getVisibleSectors().clear();
+        for (UUID sectorId : visibleIds)
+            rule.getVisibleSectors().add(sectorRepository.findByIdAndCityHall_Id(sectorId, city(current)).orElseThrow(() -> new BusinessException("Setor invalido")));
         return response(repository.save(rule));
     }
 
@@ -107,15 +123,20 @@ public class ToolPermissionService {
     }
 
     private Response response(ToolPermissionRule r) {
-        return new Response(r.getId(), r.getToolSlug(), r.getEmployee() == null ? null : r.getEmployee().getId(), r.getEmployee() == null ? null : r.getEmployee().getFullName(), r.getSector() == null ? null : r.getSector().getId(), r.getSector() == null ? null : r.getSector().getName(), r.getOccupation() == null ? null : r.getOccupation().getId(), r.getOccupation() == null ? null : r.getOccupation().getName(), r.getLevel(), r.isEnabled());
+        boolean restricted = toolRepository.findByCityHall_IdAndSlug(r.getCityHall().getId(), r.getToolSlug())
+                .map(ToolConfiguration::isRestricted).orElse(false);
+        List<String> visibleSectorNames = r.getVisibleSectors().stream().map(Sector::getName).sorted(String.CASE_INSENSITIVE_ORDER).toList();
+        return new Response(r.getId(), r.getToolSlug(), r.getEmployee() == null ? null : r.getEmployee().getId(), r.getEmployee() == null ? null : r.getEmployee().getFullName(), r.getSector() == null ? null : r.getSector().getId(), r.getSector() == null ? null : r.getSector().getName(), r.getEmployee() == null ? null : r.getEmployee().getEmail(), r.getOccupation() == null ? null : r.getOccupation().getId(), r.getOccupation() == null ? null : r.getOccupation().getName(), r.getLevel(), r.isEnabled(), restricted, r.getDataScope(), visibleSectorNames);
     }
 
     public record Create(String toolSlug, UUID employeeId, UUID sectorId, UUID occupationId,
-                         ToolPermissionRule.Level level, Boolean enabled) {
+                         ToolPermissionRule.Level level, Boolean enabled, ToolPermissionRule.DataScope dataScope,
+                         Set<UUID> visibleSectorIds) {
     }
 
     public record Response(UUID id, String toolSlug, UUID employeeId, String employeeName, UUID sectorId,
-                           String sectorName, UUID occupationId, String occupationName, ToolPermissionRule.Level level,
-                           boolean enabled) {
+                           String sectorName, String employeeEmail, UUID occupationId, String occupationName,
+                           ToolPermissionRule.Level level, boolean enabled, boolean accessRestricted,
+                           ToolPermissionRule.DataScope dataScope, List<String> visibleSectorNames) {
     }
 }

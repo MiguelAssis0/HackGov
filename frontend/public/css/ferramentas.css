@@ -268,6 +268,21 @@
     border-bottom: var(--border1);
 }
 
+.ferr-access-page-title { color: var(--azul-escuro); font-size: 1.4rem; font-weight: 700; }
+.ferr-access-title { color: var(--azul-escuro); font-size: 1rem; font-weight: 700; }
+.ferr-access-label { color: var(--text-muted); display: block; font-size: .7rem; font-weight: 700; letter-spacing: .06em; margin-bottom: .25rem; text-transform: uppercase; }
+.ferr-access-policy-form { align-items: end; border-bottom: var(--border1); display: grid; gap: .75rem; grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr) auto; margin-bottom: 1rem; padding-bottom: 1rem; }
+.ferr-access-policy-form small { grid-column: 1 / -1; }
+.ferr-access-table-head { background: var(--cinza-claro); }
+.ferr-access-table-head th { color: var(--text-muted); font-size: .7rem; font-weight: 700; letter-spacing: .06em; padding: .75rem 1rem; text-transform: uppercase; white-space: nowrap; }
+.ferr-permissoes-wrap tbody td { font-size: .84rem; padding: .75rem 1rem; }
+.ferr-access-empty { font-size: .85rem; }
+.ferr-access-pagination { border-top: var(--border1); display: flex; justify-content: flex-end; padding: .85rem 1rem; }
+.ferr-access-pagination .pagination-actions { align-items: center; display: flex; gap: .55rem; }
+.ferr-access-pagination .pagination-btn { align-items: center; background: var(--branco); border: var(--border1-5); border-radius: 8px; color: var(--azul); display: inline-flex; height: 34px; justify-content: center; width: 34px; }
+.ferr-access-pagination .pagination-btn:disabled { color: #aab4c2; cursor: not-allowed; opacity: .7; }
+.ferr-access-pagination .pagination-current { color: var(--text-muted); font-size: .8rem; font-weight: 700; }
+
 @media (max-width: 1200px) { .ferr-grade { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
 @media (max-width: 991px) {
@@ -277,10 +292,13 @@
         max-height: none;
     }
     .ferr-grade { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .ferr-access-policy-form { grid-template-columns: 1fr; }
+    .ferr-access-policy-form small { grid-column: auto; }
 }
 
 @media (max-width: 576px) {
     .ferr-grade { grid-template-columns: 1fr; }
+    .ferr-access-policy-form { grid-template-columns: 1fr; }
 }
 
 .ferr-nav-section { padding: .75rem 0; border-bottom: var(--border1); }
