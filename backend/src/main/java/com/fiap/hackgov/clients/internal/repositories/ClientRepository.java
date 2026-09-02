@@ -11,8 +11,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface ClientRepository extends JpaRepository<Client, UUID> {
-    @Query("select c from Client c where c.cityHall.id=:cityId and (:query='' or lower(c.fullName) like lower(concat('%',:query,'%')) or lower(c.nickname) like lower(concat('%',:query,'%'))) order by c.fullName")
-    Page<Client> search(@Param("cityId") UUID cityId, @Param("query") String query, Pageable pageable);
+    @Query("select c from Client c where c.cityHall.id=:cityId and (:query='' or lower(c.fullName) like lower(concat('%',:query,'%')) or lower(c.nickname) like lower(concat('%',:query,'%')) or c.cpfLookup=:cpfLookup) order by c.fullName")
+    Page<Client> search(@Param("cityId") UUID cityId, @Param("query") String query, @Param("cpfLookup") String cpfLookup, Pageable pageable);
 
     Optional<Client> findByIdAndCityHall_Id(UUID id, UUID cityId);
 

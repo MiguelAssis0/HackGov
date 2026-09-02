@@ -1,10 +1,44 @@
-.clients-shell { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--radius-lg); display: grid; grid-template-columns: minmax(280px,.75fr) minmax(420px,1.4fr); min-height: 34rem; overflow: hidden; }
-.clients-list-panel { border-right: 1px solid var(--borda); }
-.client-row { align-items: center; background: transparent; border: 0; border-bottom: 1px solid var(--borda); display: flex; gap: .7rem; padding: .8rem 1rem; text-align: left; width: 100%; }
-.client-row.active,.client-row:hover { background: #eef6ff; }.client-row small { color: var(--texto-muted); display:block; font-size:.72rem; }
-.client-folder { padding: 1.3rem; }.client-folder h2 { font-size:1.4rem; }.client-data-grid { display:grid; gap:.7rem; grid-template-columns:repeat(2,1fr); margin-top:1rem; }
-.client-data-grid div { background:var(--cinza-50); border-radius:.55rem; padding:.75rem; }.client-data-grid span { color:var(--texto-muted); display:block; font-size:.7rem; text-transform:uppercase; }
-.client-service-form { display:grid; gap:.55rem; grid-template-columns:1fr 160px; }.client-service-form input:nth-child(3) { grid-column:1/-1; }
-.client-timeline { border-left:2px solid var(--borda); display:grid; gap:1rem; margin:1.2rem 0 0 .5rem; padding-left:1.2rem; }.client-timeline article { display:grid; gap:.75rem; grid-template-columns:90px 1fr; }.client-timeline p { margin:.2rem 0; }
-.client-modal { max-width:760px; } body.theme-dark .clients-shell,body.theme-dark .client-row,body.theme-dark .client-folder { background:var(--dark-card);border-color:var(--dark-border); }
-@media(max-width:767px){.clients-shell{grid-template-columns:1fr}.clients-list-panel{border-bottom:1px solid var(--borda);border-right:0}.client-data-grid,.client-service-form{grid-template-columns:1fr}.client-service-form input:nth-child(3){grid-column:auto}}
+.clients-page { padding-bottom: 1rem; }
+.clients-intro { color: var(--text-muted); margin: -0.7rem 0 1rem; }
+.clients-header, .client-folder-header { align-items: flex-start; display: flex; gap: 1rem; justify-content: space-between; }
+.clients-header { margin-bottom: 1rem; }
+.clients-header h3, .client-folder-header h4 { color: var(--azul-escuro); font-size: 1.45rem; font-weight: 800; margin: 0; }
+.clients-header p, .client-folder-header p { color: var(--text-muted); }
+.clients-layout { display: grid; gap: 1rem; grid-template-columns: minmax(240px, .75fr) minmax(0, 1.8fr); }
+.clients-list-panel, .client-folder-panel { background: var(--branco); border: var(--border1-5); border-radius: 14px; }
+.clients-list-panel { overflow: hidden; }
+.clients-search { border-bottom: var(--border1); position: relative; }
+.clients-search i { color: var(--text-muted); left: 1rem; position: absolute; top: 50%; transform: translateY(-50%); }
+.clients-search input { background: transparent; border: 0; color: var(--azul-escuro); outline: none; padding: .95rem 1rem .95rem 2.6rem; width: 100%; }
+.client-item { background: transparent; border: 0; border-bottom: var(--border1); display: block; padding: .85rem 1rem; text-align: left; text-decoration: none; width: 100%; }
+.client-item:hover, .client-item.active { background: var(--azul-claro); }
+.client-item strong, .client-item span { display: block; }
+.client-item strong { color: var(--azul-escuro); font-size: .92rem; }
+.client-item span, .clients-pagination, .client-attendance-item span { color: var(--text-muted); font-size: .78rem; }
+.clients-empty { color: var(--text-muted); margin: 1rem; text-align: center; }
+.clients-pagination { align-items: center; display: flex; justify-content: space-between; padding: .8rem 1rem; }
+.clients-pagination button { background: transparent; border: 0; color: var(--azul); padding: 0; }
+.clients-pagination button:disabled { color: var(--text-muted); cursor: not-allowed; opacity: .55; }
+.client-folder-panel { min-height: 440px; padding: 1.25rem; }
+.client-folder-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+.client-data-grid { display: grid; gap: .75rem; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 1.25rem 0; }
+.client-data-grid div { background: var(--cinza-claro); border-radius: 9px; padding: .7rem .8rem; }
+.client-data-grid dt { color: var(--text-muted); font-size: .68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.client-data-grid dd { color: var(--azul-escuro); font-size: .9rem; margin: .2rem 0 0; }
+.client-attendance-title { align-items: center; border-bottom: var(--border1); display: flex; justify-content: space-between; margin-bottom: .5rem; padding-bottom: .6rem; }
+.client-attendance-title h5 { color: var(--azul-escuro); font-size: 1rem; margin: 0; }
+.client-attendance-title span { color: var(--text-muted); font-size: .78rem; }
+.client-attendance-item { display: flex; gap: .7rem; padding: .85rem 0; }
+.client-attendance-item + .client-attendance-item { border-top: var(--border1); }
+.client-attendance-icon { color: var(--azul); font-size: 1.1rem; }
+.client-attendance-item strong { color: var(--azul-escuro); display: block; font-size: .9rem; }
+.client-attendance-item p { color: var(--text-muted); font-size: .85rem; margin: .25rem 0; white-space: pre-line; }
+.clients-empty-state { align-items: center; color: var(--text-muted); display: flex; flex-direction: column; justify-content: center; min-height: 390px; text-align: center; }
+.clients-empty-state i { color: var(--azul); font-size: 3rem; }
+.clients-empty-state h4 { color: var(--azul-escuro); margin-top: .8rem; }
+.management-modal-body .client-form-textarea { resize: vertical; }
+body.theme-dark .clients-list-panel, body.theme-dark .client-folder-panel { background: var(--surface-color); border-color: var(--border-color); }
+body.theme-dark .client-data-grid div, body.theme-dark .client-item:hover, body.theme-dark .client-item.active { background: var(--surface-muted); }
+body.theme-dark .clients-search input, body.theme-dark .client-item strong, body.theme-dark .client-folder-header h4, body.theme-dark .client-data-grid dd, body.theme-dark .client-attendance-title h5, body.theme-dark .client-attendance-item strong, body.theme-dark .clients-empty-state h4 { color: var(--text-color); }
+@media (max-width: 900px) { .clients-layout { grid-template-columns: 1fr; } .clients-list-panel { max-height: 340px; overflow-y: auto; } }
+@media (max-width: 576px) { .client-folder-header { flex-direction: column; } .client-folder-actions { width: 100%; } .client-folder-actions button { flex: 1; } .client-data-grid { grid-template-columns: 1fr; } }

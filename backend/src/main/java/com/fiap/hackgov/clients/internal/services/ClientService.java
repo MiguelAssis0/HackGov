@@ -4,12 +4,14 @@ import com.fiap.hackgov.auth.internal.entities.enums.Roles;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.clients.internal.DTOs.ClientDTOs.Response;
 import com.fiap.hackgov.clients.internal.DTOs.ClientDTOs.SaveRequest;
+import com.fiap.hackgov.clients.internal.DTOs.ClientDTOs.Capabilities;
 import com.fiap.hackgov.clients.internal.DTOs.ClientDTOs.ServiceRequest;
 import com.fiap.hackgov.clients.internal.DTOs.ClientDTOs.ServiceResponse;
 import com.fiap.hackgov.clients.internal.entities.Client;
 import com.fiap.hackgov.clients.internal.entities.ClientServiceRecord;
 import com.fiap.hackgov.clients.internal.repositories.ClientRepository;
 import com.fiap.hackgov.clients.internal.repositories.ClientServiceRecordRepository;
+import com.fiap.hackgov.tools.internal.services.ToolPermissionService;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceAlreadyExistsException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
@@ -22,6 +24,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,22 +34,35 @@ import java.util.UUID;
 public class ClientService {
     private final ClientRepository repository;
     private final ClientServiceRecordRepository recordRepository;
+    private final ToolPermissionService permissionService;
 
     @Transactional(readOnly = true)
     public Page<Response> findAll(String query, Pageable pageable, Employee employee) {
         Employee current = requireEmployee(employee);
-        return repository.search(cityId(current), query == null ? "" : query.trim(), pageable).map(client -> toResponse(client, current));
+        String search = query == null ? "" : query.trim();
+        String cpfLookup = canViewSensitive(current) && normalizeCpf(search).length() == 11
+                ? SensitiveStringConverter.lookup("client-cpf", normalizeCpf(search)) : "";
+        boolean sensitive = canViewSensitive(current);
+        return repository.search(cityId(current), search, cpfLookup, pageable).map(client -> toResponse(client, sensitive));
     }
 
     @Transactional(readOnly = true)
     public Response findById(UUID id, Employee employee) {
         Employee current = requireEmployee(employee);
-        return toResponse(findScoped(id, current), current);
+        return toResponse(findScoped(id, current), canViewSensitive(current));
+    }
+
+    @Transactional(readOnly = true)
+    public Capabilities capabilities(Employee employee) {
+        Employee current = requireEmployee(employee);
+        boolean canManage = canManage(current);
+        return new Capabilities(canManage, canManage);
     }
 
     @Transactional
     public Response create(SaveRequest request, Employee employee) {
         Employee current = requireEmployee(employee);
+        requireManage(current);
         String cpf = normalizeCpf(request.cpf());
         validateCpf(cpf);
         String lookup = SensitiveStringConverter.lookup("client-cpf", cpf);
@@ -54,12 +71,13 @@ public class ClientService {
         Client client = new Client();
         client.setCityHall(current.getCityHallId());
         apply(client, request, cpf, lookup);
-        return toResponse(repository.save(client), current);
+        return toResponse(repository.save(client), canViewSensitive(current));
     }
 
     @Transactional
     public Response update(UUID id, SaveRequest request, Employee employee) {
         Employee current = requireEmployee(employee);
+        requireManage(current);
         Client client = findScoped(id, current);
         String cpf = normalizeCpf(request.cpf());
         validateCpf(cpf);
@@ -68,19 +86,22 @@ public class ClientService {
             throw new ResourceAlreadyExistsException("Ja existe cliente com este CPF na prefeitura");
         });
         apply(client, request, cpf, lookup);
-        return toResponse(repository.save(client), current);
+        return toResponse(repository.save(client), canViewSensitive(current));
     }
 
     @Transactional
     public ServiceResponse addService(UUID clientId, ServiceRequest request, Employee employee) {
         Employee current = requireEmployee(employee);
+        requireManage(current);
         Client client = findScoped(clientId, current);
         ClientServiceRecord record = new ClientServiceRecord();
         record.setClient(client);
         record.setArea(request.area().trim());
-        record.setDescription(request.description().trim());
+        LocalDate date = request.serviceDate() == null ? LocalDate.now() : request.serviceDate();
+        record.setDescription("Foi atendido por " + record.getArea() + ", dia "
+                + date.format(DateTimeFormatter.ofPattern("dd 'de' MMMM 'de' yyyy", new Locale("pt", "BR"))) + ".");
         record.setObservation(request.observation() == null ? "" : request.observation().trim());
-        record.setServiceDate(request.serviceDate() == null ? LocalDate.now() : request.serviceDate());
+        record.setServiceDate(date);
         record.setCreatedBy(current);
         return serviceResponse(recordRepository.save(record), canViewSensitive(current));
     }
@@ -97,8 +118,7 @@ public class ClientService {
         client.setCaf(clean(request.caf()));
     }
 
-    private Response toResponse(Client client, Employee viewer) {
-        boolean sensitive = canViewSensitive(viewer);
+    private Response toResponse(Client client, boolean sensitive) {
         List<ServiceResponse> services = recordRepository.findByClient_IdOrderByServiceDateDescCreatedAtDesc(client.getId()).stream().map(record -> serviceResponse(record, sensitive)).toList();
         return new Response(client.getId(), client.getFullName(), client.getNickname(), sensitive ? formatCpf(client.getCpf()) : maskCpf(client.getCpf()),
                 sensitive ? client.getPhone() : maskPhone(client.getPhone()), sensitive ? client.getSecondaryContact() : maskPhone(client.getSecondaryContact()),
@@ -127,7 +147,15 @@ public class ClientService {
     }
 
     private boolean canViewSensitive(Employee employee) {
-        return Roles.ADMIN.equals(employee.getRole());
+        return canManage(employee);
+    }
+
+    private boolean canManage(Employee employee) {
+        return Roles.ADMIN.equals(employee.getRole()) || permissionService.canManage("clientes-gerais", employee);
+    }
+
+    private void requireManage(Employee employee) {
+        if (!canManage(employee)) throw new UnauthorizedException("Voce nao possui permissao para gerenciar clientes");
     }
 
     private String clean(String value) {

@@ -21,7 +21,7 @@ public final class ClientDTOs {
                               @Size(max = 50) String stateRegistration, @Size(max = 50) String caf) {
     }
 
-    public record ServiceRequest(@NotBlank @Size(max = 140) String area, @NotBlank @Size(max = 280) String description,
+    public record ServiceRequest(@NotBlank @Size(max = 140) String area,
                                  @Size(max = 2000) String observation, @PastOrPresent LocalDate serviceDate) {
     }
 
@@ -33,5 +33,8 @@ public final class ClientDTOs {
                            String address,
                            String stateRegistration, String caf, boolean masked, List<ServiceResponse> services,
                            LocalDateTime createdAt, LocalDateTime updatedAt) {
+    }
+
+    public record Capabilities(boolean canManage, boolean canViewSensitive) {
     }
 }

@@ -325,7 +325,8 @@ export const api = {
   },
 
   // CLIENTES MUNICIPAIS
-  getClients: (query = "") => request(`/clients?size=100&sort=fullName,asc&query=${encodeURIComponent(query)}`),
+  getClients: (query = "", page = 0) => request(`/clients?size=15&page=${page}&sort=fullName,asc&query=${encodeURIComponent(query)}`),
+  getClientCapabilities: () => request("/clients/capabilities"),
   getClient: (id) => request(`/clients/${id}`),
   createClient: (payload) => request("/clients", { method: "POST", body: JSON.stringify(payload) }),
   updateClient: (id, payload) => request(`/clients/${id}`, { method: "PUT", body: JSON.stringify(payload) }),

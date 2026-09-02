@@ -2,6 +2,7 @@ package com.fiap.hackgov.clients.internal.controllers;
 
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.clients.internal.DTOs.ClientDTOs.Response;
+import com.fiap.hackgov.clients.internal.DTOs.ClientDTOs.Capabilities;
 import com.fiap.hackgov.clients.internal.DTOs.ClientDTOs.SaveRequest;
 import com.fiap.hackgov.clients.internal.DTOs.ClientDTOs.ServiceRequest;
 import com.fiap.hackgov.clients.internal.DTOs.ClientDTOs.ServiceResponse;
@@ -31,6 +32,11 @@ public class ClientController {
     @GetMapping("/{id}")
     public Response findById(@PathVariable UUID id, @AuthenticationPrincipal Employee employee) {
         return service.findById(id, employee);
+    }
+
+    @GetMapping("/capabilities")
+    public Capabilities capabilities(@AuthenticationPrincipal Employee employee) {
+        return service.capabilities(employee);
     }
 
     @PostMapping
