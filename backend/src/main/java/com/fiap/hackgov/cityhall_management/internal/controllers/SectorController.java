@@ -52,4 +52,16 @@ public class SectorController {
     public ResponseEntity<SectorResponseDTO> getByName(@PathVariable String name, @AuthenticationPrincipal Employee employee) {
         return ResponseEntity.ok(sectorService.getByName(name, employee));
     }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update a sector", security = @SecurityRequirement(name = "bearer"))
+    public ResponseEntity<SectorResponseDTO> updateSector(@PathVariable UUID id, @RequestBody @Valid CreateSectorDTO dto, @AuthenticationPrincipal Employee employee) {
+        return ResponseEntity.ok(sectorService.updateSector(id, dto, employee));
+    }
+
+    @PatchMapping("/{id}/toggle")
+    @Operation(summary = "Toggle sector status", security = @SecurityRequirement(name = "bearer"))
+    public ResponseEntity<SectorResponseDTO> toggleSector(@PathVariable UUID id, @AuthenticationPrincipal Employee employee) {
+        return ResponseEntity.ok(sectorService.toggleSector(id, employee));
+    }
 }

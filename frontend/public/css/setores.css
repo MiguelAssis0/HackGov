@@ -189,6 +189,11 @@
     font-size: 0.75rem;
 }
 
+.resource-description-cell {
+    color: var(--text-muted) !important;
+    max-width: 340px;
+}
+
 .resource-table-name {
     align-items: center;
     display: inline-flex;

@@ -24,4 +24,8 @@ public interface SectorRepository extends JpaRepository<Sector, UUID> {
     Optional<Sector> findByIdAndCityHall_Id(UUID id, UUID cityHallId);
 
     Optional<Sector> findByNameAndCityHall_Id(String name, UUID cityHallId);
+
+    boolean existsByCityHall_IdAndSlug(UUID cityHallId, String slug);
+
+    boolean existsByCityHall_IdAndSlugAndIdNot(UUID cityHallId, String slug, UUID id);
 }

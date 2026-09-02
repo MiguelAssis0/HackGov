@@ -36,6 +36,9 @@ public class Sector implements Serializable {
     @Column(nullable = false)
     private String name;
 
+    @Column(length = 140)
+    private String slug;
+
     @Column(length = 1000)
     private String description = "";
 

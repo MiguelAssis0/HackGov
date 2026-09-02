@@ -170,12 +170,23 @@ export const api = {
     }),
 
   // SECTORS
-  getSectors: () => request("/sectors?size=100"),
+  getSectors: () => request("/sectors?size=1000&sort=name,asc"),
 
   createSector: (payload) =>
     request("/sectors", {
       method: "POST",
       body: JSON.stringify(payload),
+    }),
+
+  updateSector: (id, payload) =>
+    request(`/sectors/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }),
+
+  toggleSector: (id) =>
+    request(`/sectors/${id}/toggle`, {
+      method: "PATCH",
     }),
 
   // STATES
