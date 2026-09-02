@@ -35,6 +35,9 @@ public class Occupation implements Serializable {
 
     private String name;
 
+    @Column(length = 140)
+    private String slug;
+
     private String description;
 
     @Enumerated(EnumType.STRING)
@@ -42,13 +45,22 @@ public class Occupation implements Serializable {
 
     private LevelOccupation level;
 
+    @Column(nullable = false)
+    private boolean active = true;
+
     @OneToMany(mappedBy = "pk.occupation", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<PermissionsOccupation> permissions = new ArrayList<>();
 
     @ManyToOne
+    @JoinColumn(name = "sector_id_id")
     @JsonIgnore
     private Sector sectorId;
+
+    @ManyToOne
+    @JoinColumn(name = "city_hall_id")
+    @JsonIgnore
+    private CityHall cityHall;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

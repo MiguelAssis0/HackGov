@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/occupations")
@@ -36,5 +37,17 @@ public class OccupationController {
     @Operation(summary = "Get all occupations", security = @SecurityRequirement(name = "bearer-key"), description = "Get all occupations")
     public ResponseEntity<Page<OccupationResponseDTO>> getAllOccupations(Pageable pageable, @AuthenticationPrincipal Employee employee) {
         return ResponseEntity.ok(occupationService.getAllOccupations(pageable, employee));
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update an occupation", security = @SecurityRequirement(name = "bearer"))
+    public ResponseEntity<OccupationResponseDTO> updateOccupation(@PathVariable UUID id, @RequestBody @Valid CreateOccupationDTO dto, @AuthenticationPrincipal Employee employee) {
+        return ResponseEntity.ok(occupationService.updateOccupation(id, dto, employee));
+    }
+
+    @PatchMapping("/{id}/toggle")
+    @Operation(summary = "Toggle occupation status", security = @SecurityRequirement(name = "bearer"))
+    public ResponseEntity<OccupationResponseDTO> toggleOccupation(@PathVariable UUID id, @AuthenticationPrincipal Employee employee) {
+        return ResponseEntity.ok(occupationService.toggleOccupation(id, employee));
     }
 }

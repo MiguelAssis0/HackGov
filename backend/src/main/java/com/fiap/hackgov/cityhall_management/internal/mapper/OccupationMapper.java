@@ -11,6 +11,7 @@ public interface OccupationMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "sectorId", ignore = true)
+    @Mapping(target = "cityHall", ignore = true)
     @Mapping(target = "permissions", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)

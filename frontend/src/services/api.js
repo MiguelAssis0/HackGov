@@ -144,12 +144,23 @@ export const api = {
       responseType: "blob",
     }),
 
-  getOccupations: () => request("/occupations?size=100&sort=name,asc"),
+  getOccupations: () => request("/occupations?size=1000&sort=name,asc"),
 
   createOccupation: (payload) =>
     request("/occupations", {
       method: "POST",
       body: JSON.stringify(payload),
+    }),
+
+  updateOccupation: (id, payload) =>
+    request(`/occupations/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }),
+
+  toggleOccupation: (id) =>
+    request(`/occupations/${id}/toggle`, {
+      method: "PATCH",
     }),
 
   createEmployee: (payload) =>
