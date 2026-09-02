@@ -1,3 +1,18 @@
+.task-dashboard {
+    min-width: 0;
+}
+
+.task-page {
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+}
+
+.task-page .kanban-board {
+    min-width: 0;
+    width: 100%;
+}
+
 .task-header {
     align-items: flex-start;
     display: flex;
@@ -107,19 +122,41 @@
     text-transform: uppercase;
 }
 
-.task-filters select {
+.task-filters select,
+.task-filters .field-input {
+    appearance: none;
     background: var(--branco);
-    border: var(--border1-5);
-    border-radius: 8px;
+    border: 1px solid #d8e1ec;
+    border-radius: 10px;
+    box-shadow: 0 1px 2px rgba(15, 35, 65, 0.04);
     color: var(--azul-escuro);
-    min-height: 40px;
-    padding: 0.45rem 0.7rem;
+    font-size: 0.9rem;
+    min-height: 42px;
+    outline: 0;
+    padding: 0.55rem 0.75rem;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
     width: 100%;
 }
 
+.task-filters .field-input::placeholder {
+    color: #94a3b8;
+}
+
+.task-filters select:focus,
+.task-filters .field-input:focus {
+    border-color: var(--azul);
+    box-shadow: 0 0 0 0.2rem rgba(46, 139, 255, 0.12);
+}
+
 .task-filter-actions {
+    align-items: stretch;
     display: flex;
     gap: 0.5rem;
+}
+
+.task-filter-actions .field-input {
+    flex: 1 1 180px;
+    min-width: 0;
 }
 
 .kanban-board {
@@ -577,5 +614,76 @@ body.theme-dark .task-tags .task-event-link {
 @media (max-width: 576px) {
     .task-card-edit-form {
         grid-template-columns: 1fr;
+    }
+}
+
+/* Os filtros e modais também recebem estilos inline no markup legado; estas
+   regras mantêm o comportamento responsivo como no template Django. */
+.task-title-link {
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+    padding: 0;
+    text-align: left;
+}
+
+.react-modal-backdrop .modal-dialog {
+    margin: 0 !important;
+    max-width: 560px !important;
+    width: 100% !important;
+}
+
+.react-modal-backdrop .modal-dialog.modal-lg,
+.react-modal-backdrop .task-modal-dialog-lg {
+    max-width: 760px !important;
+}
+
+@media (max-width: 992px) {
+    .task-filters,
+    .task-requests {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .task-filter-actions {
+        flex-direction: column !important;
+    }
+
+    .task-filter-actions .field-input {
+        min-width: 0 !important;
+        width: 100%;
+    }
+
+    .react-modal-backdrop {
+        align-items: center;
+        overflow-y: auto;
+        padding: .5rem;
+    }
+
+    .react-modal-backdrop .modal-content {
+        max-height: calc(100dvh - 1rem);
+    }
+
+    .react-modal-backdrop .modal-dialog,
+    .react-modal-backdrop .modal-dialog.modal-lg,
+    .react-modal-backdrop .task-modal-dialog-lg {
+        max-width: 100% !important;
+    }
+
+    .react-modal-backdrop .modal-header,
+    .react-modal-backdrop .modal-body,
+    .react-modal-backdrop .modal-footer {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .react-modal-backdrop .modal-footer {
+        justify-content: stretch;
+    }
+
+    .react-modal-backdrop .modal-footer .btn {
+        flex: 1 1 120px;
     }
 }
