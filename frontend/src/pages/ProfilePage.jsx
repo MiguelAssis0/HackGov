@@ -20,23 +20,59 @@ export default function ProfilePage(){
   async function load(){
     setLoading(true);
     try{
-      const [details, sess]=await Promise.all([api.getEmployeeDetails(), api.getSessions().catch(()=>[])]);
+      const [details, sess, prefs]=await Promise.all([api.getEmployeeDetails(), api.getSessions().catch(()=>[]), api.getProfileSettings().catch(()=>null)]);
       setProfile(details);
       setDraft({nome:details?.name||"", email:details?.email||"", cpf:details?.cpf||"", celular:details?.phone||"", avatar:details?.avatarPath||""});
       setTwoFactor(Boolean(details?.twoFactor));
       const list=Array.isArray(sess)? sess: sess?.content||[];
       setSessions(list);
-      // current session key from cookie/session? backend returns current via header, fallback first
       const cur=list.find(s=>s.current)?.sessionKey || list.find(s=>s.current)?.id || "";
       setCurrentSessionKey(cur);
-      // sync settings
-      setSettings(s=>{ const n={...s, twoFactor:Boolean(details?.twoFactor), vlibras:Boolean(details?.accessibility)}; localStorage.setItem("hackgov.profileSettings", JSON.stringify(n)); return n; });
+      // 1:1 Django: acessibilidade JSON {modo_escuro, vlibras, tamanho_fonte} + two_factor_auth
+      if(prefs){
+        const n={darkMode: Boolean(prefs.modo_escuro ?? prefs.darkMode), notifications: prefs.notificacoes ?? prefs.notifications ?? true, vlibras: Boolean(prefs.vlibras), fontSize: (prefs.tamanho_fonte||prefs.fontSize||"medio").replace("medio","Médio").replace("grande","Grande").replace("pequeno","Pequeno"), twoFactor: Boolean(prefs.two_factor_auth ?? details?.twoFactor)};
+        localStorage.setItem("hackgov.profileSettings", JSON.stringify(n));
+        setSettings(n);
+        setTwoFactor(n.twoFactor);
+      } else {
+        setSettings(s=>{ const n={...s, twoFactor:Boolean(details?.twoFactor), vlibras:Boolean(details?.accessibility)}; localStorage.setItem("hackgov.profileSettings", JSON.stringify(n)); return n; });
+      }
     }catch(e){ setMessage({type:"error", text:e.message}); }
     finally{ setLoading(false); }
   }
   useEffect(()=>{ load(); },[]);
-  useEffect(()=>{ document.body.classList.toggle("theme-dark", settings.darkMode); document.body.classList.toggle("vlibras", settings.vlibras); },[settings.darkMode, settings.vlibras]);
+  // 1:1 Django: body {% if modo_escuro %}theme-dark{% endif %} + font-{{ tamanho_fonte }}
+  useEffect(()=>{
+    document.body.classList.toggle("theme-dark", settings.darkMode);
+    document.body.classList.toggle("vlibras", settings.vlibras);
+    document.body.classList.remove("font-pequeno","font-medio","font-grande");
+    const f=(settings.fontSize||"Médio").toLowerCase();
+    document.body.classList.add(`font-${f}`);
+  },[settings.darkMode, settings.vlibras, settings.fontSize]);
   useEffect(()=>{ const sz={Pequeno:"14px", Médio:"16px", Grande:"18px"}[settings.fontSize]||"16px"; document.documentElement.style.fontSize=sz; },[settings.fontSize]);
+  // V-Libras widget 1:1 Django (vlibras-plugin.js) — só quando ativado
+  useEffect(()=>{
+    const id="vlibras-plugin-script";
+    let el=document.getElementById(id);
+    if(settings.vlibras){
+      if(!el){
+        el=document.createElement("script");
+        el.id=id;
+        el.src="https://vlibras.gov.br/app/vlibras-plugin.js";
+        el.onload=()=> { try{ window.VLibras && new window.VLibras.Widget('https://vlibras.gov.br/app'); }catch{} };
+        document.body.appendChild(el);
+      }
+      if(!document.querySelector("[vw]")){
+        const w=document.createElement("div");
+        w.setAttribute("vw",""); w.className="enabled";
+        w.innerHTML='<div vw-access-button class="active"></div><div vw-plugin-wrapper><div class="vw-plugin-top-wrapper"></div></div>';
+        document.body.appendChild(w);
+      }
+    } else {
+      el?.remove();
+      document.querySelectorAll("[vw]").forEach(e=> e.remove());
+    }
+  },[settings.vlibras]);
 
   function saveSettings(next){
     localStorage.setItem("hackgov.profileSettings", JSON.stringify(next));
@@ -45,17 +81,24 @@ export default function ProfilePage(){
   async function toggleSetting(key, value){
     const next={...settings, [key]:value};
     saveSettings(next);
-    // auto-save para 2FA precisa backend
-    if(key==="twoFactor"){
-      try{
+    try{
+      if(key==="twoFactor"){
         const res=await api.toggleTwoFactor(value);
         setTwoFactor(Boolean(res.two_factor_auth ?? res.twoFactor ?? value));
         setMessage({type:"success", text: value? "2FA ativado — próximo login exigirá código por email":"2FA desativado"});
-      }catch(e){ 
-        // revert
-        saveSettings({...next, twoFactor:!value}); 
-        setMessage({type:"error", text:e.message});
+      } else if(key==="darkMode"){
+        await api.updateProfileSettings({modo_escuro: value}).catch(()=>{});
+      } else if(key==="notifications"){
+        await api.updateProfileSettings({notificacoes: value}).catch(()=>{});
+      } else if(key==="vlibras" || key==="fontSize"){
+        const payload={};
+        if(key==="vlibras") payload.vlibras=value;
+        if(key==="fontSize") payload.tamanho_fonte=value.toLowerCase();
+        if(key==="vlibras"||key==="fontSize") await api.updateAccessibility(payload).catch(()=>{});
       }
+    }catch(e){
+      if(key==="twoFactor") saveSettings({...next, twoFactor:!value});
+      setMessage({type:"error", text:e.message});
     }
   }
   async function saveProfile(e){
@@ -128,19 +171,33 @@ export default function ProfilePage(){
               <div className="perfil-card-body border-top-0 pt-0">
                 <h4 className="mb-2">Dispositivos conectados</h4>
                 {sessions.map(s=>{
-                  const key=s.sessionKey||s.id;
+                  const key=s.sessionKey||s.session_key||s.id;
                   const isCur=key===currentSessionKey;
-                  const icon=s.deviceIcon|| (s.deviceType==="mobile"?"bi-phone": s.deviceType==="tablet"?"bi-tablet":"bi-laptop");
+                  // ponytail: Django device_icon vem de dashboard.views (bi-laptop/bi-phone/bi-tablet); fallback por deviceType
+                  const icon=s.device_icon||s.deviceIcon|| (s.deviceType==="mobile"?"bi-phone": s.deviceType==="tablet"?"bi-tablet":"bi-laptop");
+                  const browser=s.browser||s.browser_name;
+                  const os=s.os||s.operatingSystem||s.os_name;
+                  const browserVersion=s.browser_version||s.browserVersion;
+                  const userAgent=(s.user_agent||s.userAgent||"").slice(0,72);
+                  const ip=s.ip_address||s.ipAddress;
+                  const lastActivity=s.last_activity||s.lastActivity;
                   return (
                     <div key={key} className={`device-card ${isCur? "device-current":""}`}>
                       <i className={`bi ${icon}`}></i>
                       <div className="device-info">
-                        <h4 className="mb-1">{s.browser||"Dispositivo"}{s.os? ` — ${s.os}`:""}{isCur && <span className="device-badge-atual">Atual</span>}</h4>
-                        {s.browser_version && <span className="device-detail">Versão {s.browser_version}</span>}
-                        <span className="device-detail">{s.userAgent||s.user_agent||""}</span>
-                        <small>{s.ipAddress||s.ip_address? `IP: ${s.ipAddress||s.ip_address} · `:""}Último acesso: {s.lastActivity||s.last_activity? new Date(s.lastActivity||s.last_activity).toLocaleString("pt-BR"):"-"}</small>
+                        <h4 className="mb-1">
+                          {browser? <>{browser}{os? <> &mdash; {os}</>:null}</> : "Dispositivo"}
+                          {isCur && <span className="device-badge-atual">Atual</span>}
+                        </h4>
+                        {browserVersion && <span className="device-detail">Versão {browserVersion}</span>}
+                        <span className="device-detail">{userAgent}</span>
+                        <small>{ip? `IP: ${ip} · `:""}Último acesso: {lastActivity? new Date(lastActivity).toLocaleString("pt-BR"):"-"}</small>
                       </div>
-                      {key!==currentSessionKey && <button type="button" className="device-revoke-btn" title="Remover dispositivo" onClick={()=> revokeSession(key)}><i className="bi bi-x-lg"></i></button>}
+                      {key!==currentSessionKey && (
+                        <form className="device-revoke-form" onSubmit={e=>{ e.preventDefault(); revokeSession(key); }}>
+                          <button type="submit" className="device-revoke-btn" title="Remover dispositivo"><i className="bi bi-x-lg"></i></button>
+                        </form>
+                      )}
                     </div>
                   );
                 })}

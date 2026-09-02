@@ -26,6 +26,7 @@ const dashboardStyles = [
   "/css/agenda.css",
   "/css/caixa-entrada.css",
   "/css/documentos.css",
+  "/css/_dark_mode.css",
 ];
 
 const demoUser = {
@@ -99,6 +100,33 @@ export function DashboardLayout({ children, styles = [] }) {
     document.body.classList.remove("public-body");
     document.body.classList.toggle("modal-open", false);
     return () => document.body.classList.remove("dashboard-body");
+  }, []);
+
+  // 1:1 Django: body {% if modo_escuro %}theme-dark{% endif %} em todas as páginas — aplica globalmente, não só no perfil
+  useEffect(() => {
+    function apply(s){
+      document.body.classList.toggle("theme-dark", !!s.darkMode);
+      document.body.classList.toggle("vlibras", !!s.vlibras);
+      document.body.classList.remove("font-pequeno","font-medio","font-grande");
+      const f=(s.fontSize||"Médio").toLowerCase();
+      document.body.classList.add(`font-${f}`);
+      document.documentElement.style.fontSize= ({Pequeno:"14px", Médio:"16px", Grande:"18px"}[s.fontSize]||"16px");
+      const id="vlibras-plugin-script";
+      let el=document.getElementById(id);
+      if(s.vlibras){
+        if(!el){ el=document.createElement("script"); el.id=id; el.src="https://vlibras.gov.br/app/vlibras-plugin.js"; el.onload=()=>{ try{ window.VLibras && new window.VLibras.Widget('https://vlibras.gov.br/app'); }catch{} }; document.body.appendChild(el); }
+        if(!document.querySelector("[vw]")){ const w=document.createElement("div"); w.setAttribute("vw",""); w.className="enabled"; w.innerHTML='<div vw-access-button class="active"></div><div vw-plugin-wrapper><div class="vw-plugin-top-wrapper"></div></div>'; document.body.appendChild(w); }
+      } else { el?.remove(); document.querySelectorAll("[vw]").forEach(e=> e.remove()); }
+    }
+    try{ const cached=JSON.parse(localStorage.getItem("hackgov.profileSettings")||"null"); if(cached) apply(cached); }catch{}
+    api.getProfileSettings().then(p=>{
+      const s={darkMode:Boolean(p.modo_escuro??p.darkMode), notifications:p.notificacoes??p.notifications??true, vlibras:Boolean(p.vlibras), fontSize:(p.tamanho_fonte||p.fontSize||"medio").replace("medio","Médio").replace("grande","Grande").replace("pequeno","Pequeno"), twoFactor:Boolean(p.two_factor_auth??p.twoFactor)};
+      localStorage.setItem("hackgov.profileSettings", JSON.stringify(s));
+      apply(s);
+    }).catch(()=>{});
+    const onStorage=e=>{ if(e.key==="hackgov.profileSettings") try{ apply(JSON.parse(e.newValue)); }catch{} };
+    window.addEventListener("storage", onStorage);
+    return ()=> window.removeEventListener("storage", onStorage);
   }, []);
 
   useEffect(() => {

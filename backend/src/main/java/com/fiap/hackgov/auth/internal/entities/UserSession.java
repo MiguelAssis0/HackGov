@@ -29,6 +29,8 @@ public class UserSession {
     private String userAgent = "";
     @Column(length = 60)
     private String browser = "";
+    @Column(length = 50)
+    private String browserVersion = "";
     @Column(length = 60)
     private String operatingSystem = "";
     @Column(length = 20)

@@ -1,0 +1,948 @@
+/* ============================================
+   DARK MODE — Tema escuro do Integra Brasil
+   ============================================ */
+
+/* ── Variáveis ── */
+body.theme-dark {
+    --cinza-claro: #313135;
+    --branco: #29292D;
+    --line: rgba(255,255,255,.06);
+    --border-color: rgba(255,255,255,.08);
+    --border1: 1px solid var(--border-color);
+
+    --azul: #3b82f6;
+    --azul-claro: #1d4ed8;
+    --secondary: #1d4ed8;
+
+    --azul-escuro: #ffffff;
+    --preto: #ffffff;
+    --text-muted: #d1d5db;
+    --tool-icon-bg-1: color-mix(in srgb, var(--tool-icon-fg-1) 20%, transparent);
+    --tool-icon-bg-2: color-mix(in srgb, var(--tool-icon-fg-2) 20%, transparent);
+    --tool-icon-bg-3: color-mix(in srgb, var(--tool-icon-fg-3) 20%, transparent);
+    --tool-icon-bg-4: color-mix(in srgb, var(--tool-icon-fg-4) 20%, transparent);
+    --tool-icon-bg-5: color-mix(in srgb, var(--tool-icon-fg-5) 20%, transparent);
+    --tool-icon-bg-6: color-mix(in srgb, var(--tool-icon-fg-6) 20%, transparent);
+    --tool-icon-bg-7: color-mix(in srgb, var(--tool-icon-fg-7) 20%, transparent);
+    --tool-icon-bg-8: color-mix(in srgb, var(--tool-icon-fg-8) 20%, transparent);
+
+    --bs-body-bg: #29292D;
+
+    background: #313135;
+    color: #ffffff;
+}
+
+/* ── Tipografia ── */
+body.theme-dark h1,
+body.theme-dark h2,
+body.theme-dark h3,
+body.theme-dark h4,
+body.theme-dark h5,
+body.theme-dark h6,
+body.theme-dark strong,
+body.theme-dark label,
+body.theme-dark .user-avatar i,
+body.theme-dark .funcionarios-title,
+body.theme-dark .audit-title {
+    color: #ffffff;
+}
+
+body.theme-dark p,
+body.theme-dark span,
+body.theme-dark div,
+body.theme-dark td,
+body.theme-dark th,
+body.theme-dark li {
+    color: #ffffff;
+}
+
+body.theme-dark small,
+body.theme-dark .text-muted,
+body.theme-dark .meta-label,
+body.theme-dark .funcionarios-filter-label,
+body.theme-dark .audit-filter-label,
+body.theme-dark .funcionarios-table thead th,
+body.theme-dark .audit-table thead th {
+    color: #d1d5db !important;
+}
+
+/* ── Links ── */
+body.theme-dark a {
+    color: #60a5fa;
+}
+
+/* ── Inputs / Formulários ── */
+body.theme-dark input:not([type="radio"]):not([type="checkbox"]),
+body.theme-dark select,
+body.theme-dark textarea,
+body.theme-dark .form-control,
+body.theme-dark .form-select {
+    background: #1f1f24 !important;
+    border-color: var(--border-color);
+    color: #ffffff !important;
+}
+
+body.theme-dark .user-info,
+body.theme-dark .user-name {
+    background: transparent !important;
+    color: var(--azul-escuro) !important;
+}
+
+body.theme-dark input::placeholder,
+body.theme-dark textarea::placeholder {
+    color: #d1d5db;
+}
+
+body.theme-dark input[type="search"],
+body.theme-dark input[type="search"]:focus,
+body.theme-dark .form-control[type="search"],
+body.theme-dark .form-control[type="search"]:focus {
+    background-color: #29292D !important;
+    color: #ffffff !important;
+    border-color: var(--border-color) !important;
+}
+
+body.theme-dark .inbox-sector-filter select,
+body.theme-dark .docs-sector-filter select,
+body.theme-dark .inbox-sector-filter .form-select {
+    background-color: #29292D !important;
+    color: #ffffff !important;
+    border-color: var(--border-color) !important;
+}
+
+body.theme-dark .form-check-input {
+    background-color: #4b5563;
+    border-color: #6b7280;
+}
+
+body.theme-dark .form-check-input:checked {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+}
+
+/* ── Fundo geral ── */
+body.theme-dark,
+body.theme-dark .dashboard {
+    background: #313135;
+}
+
+/* ── Sidebar, Navbar, Hero ── */
+body.theme-dark .sidebar {
+    background: linear-gradient(180deg, #0f172a 0%, #16213e 100%);
+}
+
+body.theme-dark .navbar-custom {
+    background: #172554;
+}
+
+body.theme-dark .equipe-card,
+body.theme-dark .dash-hero,
+body.theme-dark .docs-header-card,
+body.theme-dark .inbox-header-card {
+    background: linear-gradient(135deg, #071525 0%, #0d2647 100%);
+}
+
+body.theme-dark .sidebar-item.active,
+body.theme-dark .menu-item.active,
+body.theme-dark .nav-link.active {
+    background: #2563eb;
+    color: white;
+}
+
+body.theme-dark .sidebar .nav-item,
+body.theme-dark .sidebar .nav-link,
+body.theme-dark .nav-item,
+body.theme-dark .nav-link,
+body.theme-dark .bnav-btn,
+body.theme-dark .sidebar-nav .nav-label {
+    color: #ffffff;
+}
+
+body.theme-dark .sidebar .nav-item i,
+body.theme-dark .sidebar .nav-link i,
+body.theme-dark .nav-item i,
+body.theme-dark .nav-link i,
+body.theme-dark .bnav-btn i {
+    color: #ffffff;
+}
+
+body.theme-dark .sidebar-brand span {
+    color: var(--azul);
+}
+
+/* ── Componentes base (cards, painéis, tabelas, etc.) ── */
+body.theme-dark .card,
+body.theme-dark .card-2,
+body.theme-dark .panel,
+body.theme-dark .favorite-card,
+body.theme-dark .stat-card,
+body.theme-dark .credential-panel,
+body.theme-dark .task-card,
+body.theme-dark .kanban-column,
+body.theme-dark .modal-content,
+body.theme-dark .dropdown-menu,
+body.theme-dark .table,
+body.theme-dark .perfil-side-card,
+body.theme-dark .perfil-acc-body,
+body.theme-dark .perfil-hero,
+body.theme-dark .ferr-painel-header,
+body.theme-dark .ferr-card,
+body.theme-dark .ferramentas-nav,
+body.theme-dark .perfil-accordion,
+body.theme-dark .inbox-mailbox,
+body.theme-dark .docs-folder-card,
+body.theme-dark .docs-step-indicator,
+body.theme-dark .docs-search-bar,
+body.theme-dark .docs-sector-filter,
+body.theme-dark .docs-folder-panel,
+body.theme-dark .docs-open-folder-card,
+body.theme-dark .docs-list-panel,
+body.theme-dark .docs-filter-panel,
+body.theme-dark .docs-filter-grid,
+body.theme-dark .docs-empty,
+body.theme-dark .processo-header,
+body.theme-dark .lista-processos,
+body.theme-dark .filtros-wrap,
+body.theme-dark .empty-state,
+body.theme-dark .task-request-panel,
+body.theme-dark .task-summary div,
+body.theme-dark .task-filters,
+body.theme-dark .table-responsive,
+body.theme-dark .inbox-detail-card,
+body.theme-dark .inbox-detail-meta div,
+body.theme-dark .perfil-card,
+body.theme-dark .setor-card,
+body.theme-dark .alert {
+    background: #29292D;
+    border-color: var(--border-color);
+    color: #ffffff;
+}
+
+body.theme-dark .kanban-column span,
+body.theme-dark .kanban-column strong {
+    color: #ffffff;
+}
+
+/* ── Hover dos componentes ── */
+body.theme-dark .favorite-card:hover,
+body.theme-dark .task-card:hover,
+body.theme-dark .perfil-side-card:hover,
+body.theme-dark .perfil-hero:hover,
+body.theme-dark .ferr-card:hover,
+body.theme-dark .docs-folder-card:hover,
+body.theme-dark .docs-open-folder-card:hover,
+body.theme-dark .inbox-message-item:hover,
+body.theme-dark .ferr-item:hover,
+body.theme-dark .setor-card:hover {
+    background: #323238;
+    border-color: rgba(59,130,246,.35);
+    transition: all .2s ease;
+}
+
+body.theme-dark .ferr-item.active span {
+    color: #fff !important;
+}
+
+body.theme-dark .ferr-item:hover .ferr-item-icon i {
+    color: #fff !important;
+}
+
+/* ── Bordas / separadores ── */
+body.theme-dark .inbox-mailbox-head,
+body.theme-dark .inbox-message-item,
+body.theme-dark .inbox-detail-content,
+body.theme-dark .inbox-detail-head,
+body.theme-dark .inbox-message-columns {
+    border-bottom: var(--border1);
+}
+
+body.theme-dark .pagination-shell,
+body.theme-dark .inbox-detail-content {
+    border-top: var(--border1);
+}
+
+body.theme-dark .docs-tabs {
+    border-bottom: 2px solid var(--border-color);
+}
+
+/* ── Botões ── */
+body.theme-dark .btn-primary,
+body.theme-dark .btn-outline-primary,
+body.theme-dark .btn-primary:hover,
+body.theme-dark .btn-primary:focus,
+body.theme-dark .btn-primary:active {
+    color: #fff !important;
+}
+
+body.theme-dark .inbox-read-tabs a:hover {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    color: #fff;
+}
+
+body.theme-dark .inbox-read-tabs a:hover i {
+    color: #fff;
+}
+
+body.theme-dark .tag.status {
+    color: #fff;
+}
+
+/* ── Caixa de Entrada ── */
+body.theme-dark .inbox-mailbox-head h4,
+body.theme-dark .inbox-detail-head h3,
+body.theme-dark .inbox-panel-head h4 {
+    color: #f8fafc;
+}
+
+body.theme-dark .inbox-message-sender {
+    color: #f8fafc;
+}
+
+body.theme-dark .inbox-message-copy strong {
+    color: #f8fafc;
+}
+
+body.theme-dark .inbox-detail-meta dd {
+    color: #f8fafc;
+}
+
+body.theme-dark .inbox-detail-content {
+    border-color: var(--border-color);
+    color: #e2e8f0;
+}
+
+/* ── Ferramentas ── */
+body.theme-dark .ferr-toggle-button {
+    border-color: var(--border-color);
+    transition: border-color .2s ease;
+}
+
+body.theme-dark .ferr-toggle-button:hover {
+    border-color: rgba(59,130,246,.35);
+}
+
+/* ── Icon buttons genéricos ── */
+body.theme-dark .icon-btn {
+    background: transparent;
+    border-color: var(--border-color);
+    transition: border-color .2s ease;
+}
+
+body.theme-dark .icon-btn:hover {
+    border-color: rgba(59,130,246,.35);
+}
+
+body.theme-dark .pagination-btn {
+    background: transparent;
+    border-color: var(--border-color);
+    transition: border-color .2s ease;
+}
+
+body.theme-dark .pagination-btn:hover {
+    border-color: rgba(59,130,246,.35);
+    background: #323238;
+}
+
+/* ── Alertas ── */
+body.theme-dark .alert-success {
+    background: rgba(34,197,94,.12);
+    border-color: rgba(34,197,94,.30);
+    color: #86efac;
+}
+
+body.theme-dark .alert-danger {
+    background: rgba(239,68,68,.12);
+    border-color: rgba(239,68,68,.30);
+    color: #fca5a5;
+}
+
+body.theme-dark .alert-warning {
+    background: rgba(245,158,11,.12);
+    border-color: rgba(245,158,11,.30);
+    color: #fcd34d;
+}
+
+body.theme-dark .alert-info {
+    background: rgba(59,130,246,.12);
+    border-color: rgba(59,130,246,.30);
+    color: #93c5fd;
+}
+
+/* ── Ícone de fechar (btn-close) ── */
+body.theme-dark .alert .btn-close {
+    filter: invert(1);
+}
+
+body.theme-dark .btn-close {
+    filter: invert(1) brightness(2.8) contrast(1.75);
+}
+
+/* ════════════════════════════════════════════
+   TABELAS (funcionários, auditoria)
+   ════════════════════════════════════════════ */
+
+body.theme-dark .funcionarios-table-wrap,
+body.theme-dark .audit-table-wrap {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+
+body.theme-dark .funcionarios-table,
+body.theme-dark .audit-table {
+    --bs-table-bg: #29292D;
+    --bs-table-color: #f5f7fa;
+    --bs-table-border-color: var(--border-color);
+    --bs-table-hover-bg: #323238;
+    --bs-table-hover-color: #ffffff;
+    margin-bottom: 0;
+}
+
+body.theme-dark .funcionarios-table tbody tr,
+body.theme-dark .audit-table tbody tr {
+    border-color: var(--border-color);
+}
+
+body.theme-dark .funcionarios-table tbody tr:hover > *,
+body.theme-dark .audit-table tbody tr:hover > * {
+    background: #323238;
+    color: #ffffff;
+}
+
+body.theme-dark .funcionarios-table td,
+body.theme-dark .audit-table td {
+    color: #f5f7fa;
+}
+
+body.theme-dark .funcionarios-table .user-cell small,
+body.theme-dark .funcionarios-table .empty-state,
+body.theme-dark .audit-table .empty-state {
+    color: #d1d5db;
+}
+
+body.theme-dark .funcionarios-table .user-cell h4 {
+    color: #f5f7fa;
+}
+
+body.theme-dark .funcionarios-table .avatar.small {
+    background: #0f2649;
+    color: #bfdbfe;
+    border: 1px solid rgba(96,165,250,.28);
+}
+
+body.theme-dark .funcionarios-table .badge.text-bg-light,
+body.theme-dark .audit-table .badge.text-bg-light {
+    background: #202024 !important;
+    color: #e5e7eb !important;
+    border: 1px solid var(--border-color);
+}
+
+body.theme-dark .funcionarios-table .icon-btn {
+    background: #202024;
+    border-color: var(--border-color);
+    color: #dbeafe;
+}
+
+body.theme-dark .funcionarios-table .icon-btn:hover {
+    background: #0f2649;
+    border-color: rgba(96,165,250,.45);
+    color: #93c5fd;
+}
+
+body.theme-dark .funcionarios-table .icon-btn.danger:hover {
+    background: rgba(239,68,68,.12);
+    border-color: rgba(248,113,113,.55);
+    color: #fca5a5;
+}
+
+/* ════════════════════════════════════════════
+   CHAT
+   ════════════════════════════════════════════ */
+
+body.theme-dark .chat-widget,
+body.theme-dark .chat-widget-fixed,
+body.theme-dark .chat-widget-body,
+body.theme-dark .chat-conversation-header,
+body.theme-dark .chat-compose,
+body.theme-dark .chat-file-name {
+    background: #29292D;
+    border-color: var(--border-color);
+}
+
+body.theme-dark .chat-widget {
+    box-shadow: 0 16px 38px rgba(0, 0, 0, 0.38);
+}
+
+body.theme-dark .chat-widget-header,
+body.theme-dark .chat-ai-header {
+    background: #0f2649;
+    color: #ffffff;
+}
+
+body.theme-dark .chat-widget-subtitle,
+body.theme-dark .chat-ai-header small,
+body.theme-dark .chat-conversation-header small,
+body.theme-dark .msg-preview,
+body.theme-dark .chat-file-name,
+body.theme-dark .chat-empty {
+    color: #d1d5db;
+}
+
+body.theme-dark .chat-widget .chat-action-btn,
+body.theme-dark .chat-back-btn {
+    background: rgba(255,255,255,.08);
+    color: #e5e7eb;
+}
+
+body.theme-dark .chat-widget .chat-action-btn:hover,
+body.theme-dark .chat-back-btn:hover {
+    background: rgba(59,130,246,.22);
+    color: #ffffff;
+}
+
+body.theme-dark .msg-busca {
+    background: #202024;
+    color: #f5f7fa;
+    border-color: var(--border-color);
+}
+
+body.theme-dark .msg-busca::placeholder {
+    color: #9ca3af;
+}
+
+body.theme-dark .msg-tabs {
+    border-color: var(--border-color);
+}
+
+body.theme-dark .msg-tab {
+    color: #9ca3af;
+}
+
+body.theme-dark .msg-tab.active {
+    background: rgba(59,130,246,.16);
+    border-bottom-color: #60a5fa;
+    color: #ffffff;
+}
+
+body.theme-dark .msg-tab:hover {
+    color: #ffffff;
+}
+
+body.theme-dark .msg-item {
+    border-bottom-color: var(--border-color);
+}
+
+body.theme-dark .msg-item:hover {
+    background: #323238;
+}
+
+body.theme-dark .msg-sender,
+body.theme-dark .msg-item.is-unread .msg-sender,
+body.theme-dark .msg-item.is-unread .msg-preview {
+    color: #ffffff;
+}
+
+body.theme-dark .msg-avatar {
+    background: linear-gradient(135deg, #2563eb, #0ea5e9);
+    color: #ffffff;
+}
+
+body.theme-dark .ai-avatar {
+    background: #0f2649;
+    border-color: rgba(96,165,250,.35);
+}
+
+body.theme-dark .chat-bubble {
+    background: #202024;
+    border-color: var(--border-color);
+    color: #f5f7fa;
+}
+
+body.theme-dark .chat-bubble small {
+    color: #9ca3af;
+}
+
+body.theme-dark .chat-bubble-row.own .chat-bubble {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+}
+
+body.theme-dark .chat-bubble-row.own .chat-bubble small {
+    color: rgba(255,255,255,.8);
+}
+
+body.theme-dark .chat-compose input[type="text"] {
+    background: #202024;
+    color: #f5f7fa;
+    border-color: var(--border-color);
+}
+
+body.theme-dark .chat-compose .chat-file-btn {
+    background: rgba(96,165,250,.12);
+    color: #bfdbfe;
+}
+
+body.theme-dark .chat-compose button {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+/* ════════════════════════════════════════════
+   DOCUMENTOS
+   ════════════════════════════════════════════ */
+
+body.theme-dark .docs-folder-icon {
+    background: #2a2f3c;
+    border-color: var(--border-color);
+}
+
+body.theme-dark .docs-step-indicator {
+    color: #d1d5db;
+}
+
+body.theme-dark .docs-step-indicator.active {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+}
+
+body.theme-dark .docs-step-indicator.completed {
+    background: rgba(96, 165, 250, 0.14);
+    border-color: rgba(96, 165, 250, 0.28);
+    color: #60a5fa;
+}
+
+body.theme-dark .docs-delivery-tabs {
+    border-bottom-color: var(--border-color);
+}
+
+body.theme-dark .docs-delivery-tab {
+    color: #d1d5db;
+}
+
+body.theme-dark .docs-delivery-tab.active {
+    border-bottom-color: #60a5fa;
+    color: #60a5fa;
+}
+
+body.theme-dark .docs-employee-sector {
+    color: #d1d5db;
+}
+
+body.theme-dark .docs-table-scroll {
+    border-color: var(--border-color) !important;
+}
+
+body.theme-dark .docs-filter-panel,
+body.theme-dark .docs-open-folder-card,
+body.theme-dark .docs-folder-panel,
+body.theme-dark .docs-list-panel {
+    background: #29292D;
+    border-color: var(--border-color);
+}
+
+body.theme-dark .docs-search-bar,
+body.theme-dark .docs-sector-filter {
+    background: #29292D;
+    border-color: var(--border-color);
+}
+
+body.theme-dark .docs-folder-card {
+    background: #202024;
+    border-color: var(--border-color);
+}
+
+body.theme-dark .docs-folder-card:hover,
+body.theme-dark .docs-folder-card.active {
+    background: rgba(59, 130, 246, 0.12);
+}
+
+body.theme-dark .docs-folder-icon {
+    background: #2a2f3c;
+    border-color: var(--border-color);
+}
+
+body.theme-dark .docs-doc-tag {
+    background: #202024;
+    border-color: var(--border-color);
+}
+
+body.theme-dark .drag-drop-zone {
+    background: #202024;
+    border-color: var(--border-color);
+}
+
+body.theme-dark .drag-drop-zone:hover {
+    border-color: var(--azul);
+    background: rgba(59, 130, 246, 0.08);
+}
+
+body.theme-dark .drag-drop-zone.drag-over {
+    background: rgba(59, 130, 246, 0.12);
+    border-color: var(--azul);
+}
+
+body.theme-dark .docs-list-head {
+    border-bottom-color: var(--border-color);
+}
+
+body.theme-dark .docs-document-columns,
+body.theme-dark .docs-document-row {
+    border-bottom-color: var(--border-color);
+}
+
+body.theme-dark .docs-document-row:last-child {
+    border-bottom-color: transparent;
+}
+
+body.theme-dark .docs-empty {
+    color: #9ca3af;
+}
+
+body.theme-dark .check-scroll {
+    border-color: var(--border-color);
+}
+
+/* Hover em cards */
+body.theme-dark .card:hover,
+body.theme-dark .favorite-card:hover {
+    border-color: rgba(59,130,246,.35);
+}
+
+/* ── Footer da home ── */
+body.theme-dark footer {
+    background: #1a1a1e;
+    color: #d1d5db;
+}
+
+body.theme-dark footer a {
+    color: #93c5fd;
+}
+
+body.theme-dark footer a:hover {
+    color: #60a5fa;
+}
+
+/* ════════════════════════════════════════════
+   LICITAÇÕES / COMPRAS
+   ════════════════════════════════════════════ */
+
+body.theme-dark .processo-card,
+body.theme-dark .stepper-wrap,
+body.theme-dark .stepper-content {
+    background: #29292D;
+    border-color: var(--border-color);
+}
+
+body.theme-dark .stepper-nav {
+    background: #1f1f24;
+    border-color: var(--border-color);
+}
+
+body.theme-dark .stepper-nav::-webkit-scrollbar {
+    background: #1f1f24;
+}
+
+body.theme-dark .step-btn:hover {
+    background: #323238;
+}
+
+body.theme-dark .step-btn.active {
+    background: rgba(59,130,246,.12);
+    border-left-color: #3b82f6;
+}
+
+body.theme-dark .step-connector {
+    background: var(--border-color);
+}
+
+body.theme-dark .step-connector.concluido {
+    background: #16a34a;
+}
+
+body.theme-dark .step-label {
+    color: #d1d5db;
+}
+
+body.theme-dark .step-btn.active .step-label {
+    color: #60a5fa;
+}
+
+body.theme-dark .step-sublabel {
+    color: #9ca3af;
+}
+
+body.theme-dark .step-section-label {
+    color: #9ca3af;
+}
+
+body.theme-dark .secao-titulo {
+    color: #f5f7fa;
+}
+
+body.theme-dark .detalhe-row {
+    border-color: var(--border-color);
+}
+
+body.theme-dark .detalhe-chave {
+    color: #9ca3af;
+}
+
+body.theme-dark .detalhe-valor {
+    color: #f5f7fa;
+}
+
+body.theme-dark .fase-status.fase-pendente {
+    background: #2e2e32;
+    color: #9ca3af;
+}
+
+body.theme-dark .documentos-fase {
+    background: #202024;
+    border-color: var(--border-color);
+}
+
+body.theme-dark .documento-card {
+    background: #29292D;
+    border-color: var(--border-color);
+}
+
+body.theme-dark .documento-topo strong {
+    color: #f5f7fa;
+}
+
+body.theme-dark .documento-card p {
+    color: #d1d5db;
+}
+
+body.theme-dark .documento-link {
+    color: #60a5fa;
+}
+
+body.theme-dark .advance-box {
+    background: #202024;
+    border-color: var(--border-color);
+}
+
+body.theme-dark .advance-box .form-label {
+    color: #d1d5db;
+}
+
+body.theme-dark .advance-box textarea {
+    background: #1f1f24 !important;
+    border-color: var(--border-color);
+    color: #ffffff !important;
+}
+
+body.theme-dark .comite-decisao {
+    background: rgba(59,130,246,.12);
+    color: #93c5fd;
+}
+
+body.theme-dark .processo-item {
+    border-color: var(--border-color);
+}
+
+body.theme-dark .processo-item:hover {
+    background: #323238;
+}
+
+body.theme-dark .processo-item.active {
+    background: rgba(59,130,246,.12);
+    border-left-color: #3b82f6;
+}
+
+body.theme-dark .processo-item-titulo {
+    color: #f5f7fa;
+}
+
+body.theme-dark .processo-item.active .processo-item-titulo {
+    color: #60a5fa;
+}
+
+body.theme-dark .processo-item-orgao {
+    color: #9ca3af;
+}
+
+body.theme-dark .lista-busca {
+    background: #1f1f24 !important;
+    border-color: var(--border-color);
+    color: #ffffff !important;
+}
+
+body.theme-dark .lista-busca::placeholder {
+    color: #9ca3af;
+}
+
+body.theme-dark .lista-busca:focus {
+    background: #1f1f24 !important;
+    border-color: #3b82f6 !important;
+}
+
+body.theme-dark .modal-docs-box {
+    background: #202024;
+    border-color: var(--border-color);
+}
+
+body.theme-dark .modal-docs-title {
+    color: #f5f7fa;
+}
+
+body.theme-dark .documento-icon {
+    background: rgba(34,197,94,.14);
+    color: #4ade80;
+    border: 1px solid rgba(34,197,94,.25);
+}
+
+body.theme-dark .documento-topo span {
+    background: rgba(34,197,94,.14);
+    color: #86efac;
+    border: 1px solid rgba(34,197,94,.20);
+}
+
+/* React document-page + chat — 1:1 Django (documentos + Mensagens widget) */
+body.theme-dark .document-page,
+body.theme-dark .document-intro,
+body.theme-dark .document-folder-heading,
+body.theme-dark .document-folders,
+body.theme-dark .document-list-heading,
+body.theme-dark .document-filters,
+body.theme-dark .document-table-wrap,
+body.theme-dark .document-table {
+    background: #29292D;
+    border-color: var(--border-color);
+    color: #ffffff;
+}
+
+body.theme-dark .document-folder {
+    background: #202024;
+    border-color: var(--border-color);
+    color: #ffffff;
+}
+
+body.theme-dark .document-folder strong,
+body.theme-dark .document-folder small,
+body.theme-dark .document-folder-heading h3,
+body.theme-dark .document-folder-heading p {
+    color: #ffffff;
+}
+
+body.theme-dark .document-folder-icon {
+    background: #2a2f3c;
+    border-color: var(--border-color);
+}
+
+body.theme-dark .chat-widget,
+body.theme-dark .chat-widget-body,
+body.theme-dark .chat-widget-fixed,
+body.theme-dark .chat-widget-scroll,
+body.theme-dark .chat-conversation {
+    background: #29292D;
+    border-color: var(--border-color);
+    color: #ffffff;
+}
+
+body.theme-dark .chat-widget-body {
+    background: #1f1f24;
+}

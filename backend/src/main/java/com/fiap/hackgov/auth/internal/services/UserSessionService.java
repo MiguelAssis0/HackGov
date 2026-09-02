@@ -28,13 +28,15 @@ public class UserSessionService {
 
     @Transactional
     public Tokens issue(User user, String ip, String agent) {
+        var parsed = parseUserAgent(agent);
         UserSession session = new UserSession();
         session.setUser(user);
         session.setIpAddress(trim(ip, 80));
         session.setUserAgent(trim(agent, 500));
-        session.setBrowser(browser(agent));
-        session.setOperatingSystem(os(agent));
-        session.setDeviceType(device(agent));
+        session.setBrowser(parsed.browser());
+        session.setBrowserVersion(parsed.browserVersion());
+        session.setOperatingSystem(parsed.os());
+        session.setDeviceType(parsed.deviceType());
         session.setLastActivity(LocalDateTime.now());
         session.setExpiresAt(LocalDateTime.now().plusDays(7));
         session = repository.save(session);
@@ -78,15 +80,21 @@ public class UserSessionService {
 
     @Transactional(readOnly = true)
     public List<Response> list(User user, UUID current) {
-        return repository.findByUser_IdOrderByLastActivityDesc(user.getId()).stream().map(s -> new Response(s.getId(), s.getBrowser(), s.getOperatingSystem(), s.getDeviceType(), s.getIpAddress(), s.getUserAgent(), s.getCreatedAt(), s.getLastActivity(), s.getExpiresAt(), s.getRevokedAt(), s.getId().equals(current), s.active())).toList();
+        // ponytail: Django filtra UserSession.objects.filter(user=request.user) e delete no revoke → só ativos aparecem
+        return repository.findByUser_IdOrderByLastActivityDesc(user.getId()).stream()
+                .filter(s -> s.getRevokedAt() == null)
+                .map(s -> new Response(
+                        s.getId(), s.getId().toString(), deviceIcon(s.getDeviceType()), s.getBrowser(), s.getBrowserVersion(), s.getOperatingSystem(), s.getDeviceType(),
+                        s.getIpAddress(), s.getUserAgent(), s.getCreatedAt(), s.getLastActivity(), s.getExpiresAt(), s.getRevokedAt(), s.getId().equals(current), s.active()
+                )).toList();
     }
 
     @Transactional
     public void revoke(UUID id, User user, UUID current) {
         if (id.equals(current)) throw new BusinessException("A sessao atual deve ser encerrada pelo botao Sair");
         UserSession session = repository.findByIdAndUser_Id(id, user.getId()).orElseThrow(() -> new ResourceNotFoundException("Sessao nao encontrada"));
-        session.setRevokedAt(LocalDateTime.now());
-        repository.save(session);
+        // Django 1:1: UserSession.objects.filter(session_key=...).delete() + Session.delete() → some da lista no reload
+        repository.delete(session);
     }
 
     private String hash(String v) {
@@ -97,19 +105,36 @@ public class UserSessionService {
         }
     }
 
-    private String browser(String a) {
-        String v = a == null ? "" : a;
-        return v.contains("Firefox") ? "Firefox" : v.contains("Edg/") ? "Edge" : v.contains("Chrome") ? "Chrome" : v.contains("Safari") ? "Safari" : "Navegador";
+    // ponytail: 1:1 com Sistema-ERP-Municipal/accounts/middleware.py:_parse_user_agent
+    private ParsedAgent parseUserAgent(String a) {
+        if (a == null) a = "";
+        String ua = a.toLowerCase(Locale.ROOT);
+        String browser = "", browserVersion = "", os = "", deviceType = "desktop";
+        // browser
+        java.util.regex.Matcher m;
+        String[][] browsers = {{"edg/([\\d.]+)", "Edge"}, {"opr/([\\d.]+)", "Opera"}, {"chrome/([\\d.]+)", "Chrome"}, {"firefox/([\\d.]+)", "Firefox"}, {"safari/([\\d.]+)", "Safari"}};
+        for (String[] b : browsers) {
+            m = java.util.regex.Pattern.compile(b[0]).matcher(ua);
+            if (m.find()) { browser = b[1]; browserVersion = m.group(1); break; }
+        }
+        // os
+        String[][] oses = {{"windows nt ([\\d.]+)", "Windows"}, {"mac os x ([\\d_]+)", "macOS"}, {"android ([\\d.]+)", "Android"}, {"linux", "Linux"}, {"iphone.*os ([\\d_]+)", "iOS"}, {"ipad.*os ([\\d_]+)", "iPadOS"}, {"cros", "ChromeOS"}};
+        for (String[] o : oses) {
+            if (java.util.regex.Pattern.compile(o[0]).matcher(ua).find()) { os = o[1]; break; }
+        }
+        if (ua.contains("mobile") || ua.contains("iphone") || ua.contains("android") && ua.contains("mobile")) deviceType = "mobile";
+        else if (ua.contains("tablet") || ua.contains("ipad") || (ua.contains("android") && !ua.contains("mobile"))) deviceType = "tablet";
+        return new ParsedAgent(browser, browserVersion, os, deviceType);
     }
 
-    private String os(String a) {
-        String v = a == null ? "" : a;
-        return v.contains("Windows") ? "Windows" : v.contains("Android") ? "Android" : v.contains("iPhone") || v.contains("iPad") ? "iOS" : v.contains("Linux") ? "Linux" : v.contains("Mac OS") ? "macOS" : "";
-    }
+    private record ParsedAgent(String browser, String browserVersion, String os, String deviceType) {}
 
-    private String device(String a) {
-        String v = a == null ? "" : a.toLowerCase(Locale.ROOT);
-        return v.contains("mobile") || v.contains("iphone") ? "mobile" : v.contains("tablet") || v.contains("ipad") ? "tablet" : "desktop";
+    private String deviceIcon(String deviceType) {
+        return switch (deviceType) {
+            case "mobile" -> "bi-phone";
+            case "tablet" -> "bi-tablet";
+            default -> "bi-laptop";
+        };
     }
 
     private String trim(String v, int n) {
@@ -120,8 +145,19 @@ public class UserSessionService {
     public record Tokens(String accessToken, String refreshToken, UUID sessionId) {
     }
 
-    public record Response(UUID id, String browser, String operatingSystem, String deviceType, String ipAddress,
-                           String userAgent, LocalDateTime createdAt, LocalDateTime lastActivity,
-                           LocalDateTime expiresAt, LocalDateTime revokedAt, boolean current, boolean active) {
+    public record Response(
+            UUID id, String sessionKey, String deviceIcon,
+            String browser, String browserVersion, String operatingSystem, String deviceType,
+            String ipAddress, String userAgent, LocalDateTime createdAt, LocalDateTime lastActivity,
+            LocalDateTime expiresAt, LocalDateTime revokedAt, boolean current, boolean active
+    ) {
+        // Django 1:1 aliases for perfil.html
+        public String session_key() { return sessionKey; }
+        public String device_icon() { return deviceIcon; }
+        public String browser_version() { return browserVersion; }
+        public String user_agent() { return userAgent; }
+        public String ip_address() { return ipAddress; }
+        public LocalDateTime last_activity() { return lastActivity; }
+        public String os() { return operatingSystem; }
     }
 }

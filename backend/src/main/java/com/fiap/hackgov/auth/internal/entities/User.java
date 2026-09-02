@@ -42,6 +42,14 @@ public abstract class User implements UserDetails {
 
     private Boolean accessibility;
 
+    // ponytail: 1:1 Django accounts.User.acessibilidade JSON {modo_escuro, vlibras, tamanho_fonte, notificacoes}
+    private Boolean darkMode = false;
+
+    @Column(length = 20)
+    private String fontSize = "medio";
+
+    private Boolean notifications = true;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Roles role;

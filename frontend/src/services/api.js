@@ -124,6 +124,10 @@ export const api = {
       body: JSON.stringify(payload),
     }),
 
+  getProfileSettings: () => request("/profile/settings"),
+  updateProfileSettings: (payload) => request("/profile/settings", { method: "PUT", body: JSON.stringify(payload) }),
+  updateAccessibility: (payload) => request("/profile/accessibility", { method: "PUT", body: JSON.stringify(payload) }),
+
   // EMPLOYEES
   getEmployees: (params = {}) => {
     if (typeof params === "string" || Array.isArray(params)) return request("/employee?size=100&sort=firstName,asc");
