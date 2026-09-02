@@ -19,6 +19,16 @@ services:
     networks:
       - hackgov-network
 
+  mailpit:
+    image: axllent/mailpit
+    container_name: hackgov-mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - hackgov-network
+    restart: unless-stopped
+
   # Backend (Spring Boot)
   backend:
     build:
@@ -37,10 +47,14 @@ services:
       SPRING_FLYWAY_ENABLED: "true"
       HACKGOV_MOCK_DATA_ENABLED: ${HACKGOV_DOCKER_MOCK_DATA_ENABLED:-true}
       SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
-      SPRING_EMAIL_HOST: ${SPRING_EMAIL_HOST:-smtp.gmail.com}
-      SPRING_EMAIL_PORT: ${SPRING_EMAIL_PORT:-587}
-      SPRING_EMAIL: ${SPRING_EMAIL:-your-email@gmail.com}
-      SPRING_EMAIL_PASSWORD: ${SPRING_EMAIL_PASSWORD:-your-password}
+      # Mailpit para dev (http://localhost:8025), SMTP real via env em prod
+      SPRING_EMAIL_HOST: ${SPRING_EMAIL_HOST:-mailpit}
+      SPRING_EMAIL_PORT: ${SPRING_EMAIL_PORT:-1025}
+      SPRING_EMAIL: ${SPRING_EMAIL:-}
+      SPRING_EMAIL_PASSWORD: ${SPRING_EMAIL_PASSWORD:-}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: ${SPRING_MAIL_SMTP_AUTH:-false}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: ${SPRING_MAIL_STARTTLS_ENABLE:-false}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_REQUIRED: ${SPRING_MAIL_STARTTLS_REQUIRED:-false}
       GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
       PASSWORD_EXPIRE_HOURS: ${PASSWORD_EXPIRE_HOURS:-24}
       SERVER_PORT: 8080

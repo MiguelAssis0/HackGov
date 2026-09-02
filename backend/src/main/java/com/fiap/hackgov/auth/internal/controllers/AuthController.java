@@ -70,6 +70,15 @@ public class AuthController {
         return ResponseEntity.ok(authService.verifyTwoFactor(twoFactorRequest, clientIp, httpRequest.getHeader("User-Agent")));
     }
 
+    public record ResendRequest(@jakarta.validation.constraints.Email @jakarta.validation.constraints.NotBlank String email) {}
+
+    @Operation(summary = "Resend Two-Factor Code", description = "Resend 2FA code via email (Mailpit in dev, SMTP in prod)")
+    @PostMapping("/2fa/resend")
+    public ResponseEntity<Void> resendTwoFactor(@RequestBody @Valid ResendRequest request) {
+        authService.resendTwoFactorCode(request.email());
+        return ResponseEntity.ok().build();
+    }
+
     @Operation(summary = "Logout", description = "Invalidate current access token")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Logout successful"),

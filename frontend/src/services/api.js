@@ -19,7 +19,8 @@ async function requestFrom(baseUrl, path, options = {}) {
   }
 
   const token = getToken();
-  if (token) {
+  const isAuth = path.startsWith("/auth/") || path.includes("/auth/login") || path.includes("/auth/refresh");
+  if (token && !isAuth) {
     headers.Authorization = `Bearer ${token}`;
   }
 
@@ -93,13 +94,51 @@ export const api = {
       body: JSON.stringify({ email, password }),
     }),
 
+  verifyTwoFactor: (email, code) =>
+    request("/auth/2fa/verify", {
+      method: "POST",
+      body: JSON.stringify({ email, code }),
+    }),
+
+  resendTwoFactor: (email) =>
+    request("/auth/2fa/resend", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }),
+
   logout: () =>
     request("/auth/logout", {
       method: "POST",
     }),
 
+  // PROFILE — 2FA toggle (Mailpit em dev, SMTP em prod via SPRING_EMAIL_*)
+  toggleTwoFactor: (enabled) =>
+    request("/profile/two-factor", {
+      method: "PUT",
+      body: JSON.stringify({ enabled }),
+    }),
+
+  updateProfile: (payload) =>
+    request("/profile", {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }),
+
   // EMPLOYEES
-  getEmployees: () => request("/employee?size=100&sort=firstName,asc"),
+  getEmployees: (params = {}) => {
+    if (typeof params === "string" || Array.isArray(params)) return request("/employee?size=100&sort=firstName,asc");
+    const q = params.q || params.query || "";
+    const setorId = params.setorId || params.setor || "";
+    const page = params.page ?? 0;
+    const size = params.size ?? 100;
+    const qs = new URLSearchParams({ page: String(page), size: String(size), sort: "firstName,asc" });
+    if (q) qs.set("q", q);
+    if (setorId) qs.set("setor", setorId);
+    return request(`/employee?${qs}`);
+  },
+
+  updateEmployee: (id, payload) => request(`/employee/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
+  toggleEmployee: (id) => request(`/employee/${id}/toggle`, { method: "POST" }),
 
   getEmployeeDetails: () => request("/employee/details"),
   getSessions: () => request("/sessions"),

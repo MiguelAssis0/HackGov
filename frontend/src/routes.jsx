@@ -9,6 +9,7 @@ const DashboardPage = lazy(() => import("./pages/DashboardPage.jsx"));
 const ToolsPage = lazy(() => import("./pages/ToolsPage.jsx"));
 const ProcessesPage = lazy(() => import("./pages/ProcessesPage.jsx"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage.jsx"));
+const Verify2FAPage = lazy(() => import("./pages/Verify2FAPage.jsx"));
 const TasksPage = lazy(() => import("./pages/TasksPage.jsx"));
 const SectorsPage = lazy(() => import("./pages/SectorsPage.jsx"));
 const JobsPage = lazy(() => import("./pages/JobsPage.jsx"));
@@ -43,6 +44,7 @@ const routes = [
   { path: "/auditoria", element: <AuditPage /> },
   { path: "/importacao", element: <SpreadsheetImportPage /> },
   { path: "/perfil", element: <ProfilePage /> },
+  { path: "/verify-2fa", element: <Verify2FAPage /> },
   { path: "/setores", element: <SectorsPage /> },
   { path: "/cargos", element: <JobsPage /> },
   { path: "/funcionarios", element: <EmployeesPage /> },

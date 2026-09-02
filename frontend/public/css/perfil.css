@@ -48,7 +48,7 @@
 
 .perfil-hero-info h2 {
     color: var(--azul-escuro);
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 3vw, 2rem);
     font-weight: 900;
     line-height: 1.1;
     margin: 0.15rem 0;
@@ -84,61 +84,58 @@
     gap: 1rem;
 }
 
-.perfil-side {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+.perfil-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.85rem;
+    margin-bottom: 1.2rem;
 }
 
+.perfil-mini-card,
 .perfil-side-card,
-.perfil-accordion {
+.perfil-card {
     background: var(--branco);
     border: var(--border1-5);
     border-radius: 12px;
     box-shadow: 0 10px 28px rgba(11, 31, 58, 0.04);
 }
 
-.perfil-accordion {
-    overflow: hidden;
+.perfil-card {
     margin-bottom: 0.85rem;
+    overflow: hidden;
 }
 
-.perfil-acc-head {
-    width: 100%;
-    min-height: 78px;
-    padding: 0 1.25rem;
-    border: 0;
-    background: var(--branco);
-    color: var(--azul-escuro);
+.perfil-card-title {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    text-align: left;
-    font-weight: 800;
-}
-
-.perfil-acc-head span {
-    display: inline-flex;
-    align-items: center;
     gap: 0.8rem;
-}
-
-.perfil-acc-head i:first-child {
+    margin: 0;
+    padding: 1rem 1.25rem;
     color: var(--azul-escuro);
-    font-size: 1.05rem;
+    font-size: 1rem;
+    font-weight: 800;
+    border-bottom: var(--border1);
 }
 
-.perfil-acc-head .bi-chevron-down {
-    transition: transform 0.18s;
-}
-
-.perfil-acc-head:not(.collapsed) .bi-chevron-down {
-    transform: rotate(180deg);
-}
-
-.perfil-acc-body {
-    border-top: var(--border1);
+.perfil-card-body {
     padding: 1.25rem;
+}
+
+.perfil-mini-card {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-height: 72px;
+    padding: 1rem;
+    color: var(--azul-escuro);
+    font-weight: 700;
+}
+
+.perfil-section-title {
+    margin: 0 0 0.75rem;
+    color: var(--azul-escuro);
+    font-size: 1rem;
+    font-weight: 800;
 }
 
 .perfil-setting-row {
@@ -155,6 +152,13 @@
     border-bottom: 0;
 }
 
+.perfil-setting-row strong,
+.perfil-font-block strong {
+    display: block;
+    color: var(--azul-escuro);
+    font-size: 0.95rem;
+}
+
 .perfil-setting-row p,
 .perfil-font-block p {
     margin: 0.25rem 0 0;
@@ -167,7 +171,7 @@
     padding: 0.22rem 0.55rem;
     border-radius: 7px;
     font-size: 0.72rem;
-    font-weight: 500;
+    font-weight: 800;
 }
 
 .perfil-status.ok {
@@ -180,64 +184,135 @@
     color: #dc2626;
 }
 
+.perfil-subtitle {
+    margin: 1.25rem 0 0.75rem;
+    color: var(--azul-escuro);
+    font-size: 0.95rem;
+    font-weight: 800;
+}
+
 .device-card {
     display: flex;
     align-items: center;
     gap: 1rem;
-    padding: 1rem;
-    border: 1px solid rgba(22, 163, 74, 0.45);
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--border-color);
     border-radius: 10px;
-    background: #dcfce7;
-    margin-bottom: 0.65rem;
+    background: transparent;
+    margin-bottom: 0.5rem;
+    transition: border-color 0.15s;
 }
-
-.device-info {
-    min-width: 0;
-    flex: 1;
-}
-
-.device-info h4,
-.device-detail {
-    overflow-wrap: anywhere;
+.device-card:last-child {
+    margin-bottom: 0;
 }
 
 .device-card > i {
-    color: #15803d;
-    font-size: 1.5rem;
+    flex-shrink: 0;
+    color: var(--text-muted);
+    font-size: 1.4rem;
 }
 
-.device-card span,
-.device-card small {
+.device-info {
+    flex: 1;
+    min-width: 0;
+}
+.device-info h4 {
+    font-size: 0.92rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--azul-escuro);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+.device-info span,
+.device-info small {
     display: block;
     color: var(--text-muted);
-    font-size: 0.82rem;
+    font-size: 0.78rem;
+    margin-top: 0.1rem;
+}
+.device-detail {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.device-card em {
-    margin-left: auto;
-    padding: 0.2rem 0.55rem;
+/* Current device — subtle highlight via border and background */
+.device-current {
+    border-color: #16a34a;
+    background: rgba(22, 163, 74, 0.05);
+}
+
+body .device-badge-atual {
+    display: inline-block;
+    padding: 0.1rem 0.55rem;
     border-radius: 50px;
     background: #16a34a;
-    color: var(--branco);
-    font-size: 0.72rem;
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 700;
     font-style: normal;
-    font-weight: 500;
+    line-height: 1.4;
+    vertical-align: middle;
 }
 
+/* Revoke button */
+.device-revoke-form {
+    flex-shrink: 0;
+    margin: 0;
+}
 .device-revoke-btn {
-    flex: 0 0 auto;
-    padding: 0.4rem 0.75rem;
-    border: 1px solid #dc2626;
-    border-radius: 7px;
-    background: var(--branco);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid rgba(220, 38, 38, 0.3);
+    border-radius: 50%;
+    background: transparent;
     color: #dc2626;
-    font-size: 0.8rem;
-    font-weight: 600;
+    font-size: 0.85rem;
     cursor: pointer;
+    transition: all 0.15s;
+}
+.device-revoke-btn:hover {
+    background: #dc2626;
+    color: #fff;
+    border-color: #dc2626;
 }
 
-.device-revoke-btn:hover {
-    background: #fee2e2;
+/* ── Dark mode ── */
+body.theme-dark .device-card {
+    border-color: var(--border-color);
+}
+body.theme-dark .device-card > i {
+    color: #9ca3af;
+}
+body.theme-dark .device-info h4 {
+    color: #ffffff;
+}
+body.theme-dark .device-info .device-detail,
+body.theme-dark .device-info small {
+    color: #d1d5db;
+}
+body.theme-dark .device-current {
+    border-color: #4ade80;
+    background: rgba(74, 222, 128, 0.08);
+}
+body.theme-dark .device-badge-atual {
+    background: #22c55e;
+    color: #ffffff;
+}
+body.theme-dark .device-revoke-btn {
+    border-color: rgba(248, 113, 113, 0.4);
+    color: #f87171;
+}
+body.theme-dark .device-revoke-btn:hover {
+    background: #ef4444;
+    color: #fff;
+    border-color: #ef4444;
 }
 
 .font-segmented {
@@ -275,11 +350,17 @@
     color: var(--branco);
 }
 
+.perfil-side {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
 .perfil-side-card {
     padding: 1.5rem;
 }
 
-.perfil-side-card h4 {
+.perfil-side-card h5 {
     margin: 0 0 1rem;
     color: var(--azul-escuro);
     font-size: 1rem;
@@ -309,18 +390,12 @@
     font-size: 0.86rem;
 }
 
-.perfil-form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
-}
-
-.perfil-modal-card {
-    width: min(760px, 100%);
-}
-
 @media (max-width: 992px) {
     .perfil-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .perfil-summary-grid {
         grid-template-columns: 1fr;
     }
 }
@@ -341,9 +416,5 @@
     .perfil-setting-row {
         align-items: flex-start;
         flex-direction: column;
-    }
-
-    .perfil-form-grid {
-        grid-template-columns: 1fr;
     }
 }

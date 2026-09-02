@@ -128,6 +128,51 @@ public class EmployeeService {
         return employeeMapper.toEmployeeDetailsResponseDTO(employee);
     }
 
+    @Transactional
+    public Employee update(UUID id, com.fiap.hackgov.cityhall_management.internal.DTOs.Employee.UpdateEmployeeDTO dto, Employee actor) {
+        Employee target = employeeRepository.findByIdWithDetails(id).orElseThrow(() -> new ResourceNotFoundException("Employee not found: " + id));
+        if (!target.getCityHallId().getId().equals(actor.getCityHallId().getId()))
+            throw new BusinessException("Funcionario deve pertencer a mesma prefeitura");
+        // ponytail: Django can_manage = is_city_admin or platform_admin or has_perm; aqui ADMIN pode editar
+        if (!com.fiap.hackgov.auth.internal.entities.enums.Roles.ADMIN.equals(actor.getRole()))
+            throw new BusinessException("Sem permissao para editar funcionarios");
+        if (dto.firstName() != null && !dto.firstName().isBlank()) target.setFirstName(dto.firstName().trim());
+        if (dto.lastName() != null) {
+            String ln = dto.lastName().trim();
+            if (!ln.isBlank()) target.setLastName(ln);
+        }
+        if (dto.email() != null && !dto.email().isBlank()) target.setEmail(dto.email().trim().toLowerCase());
+        if (dto.cpf() != null && !dto.cpf().isBlank()) target.setCpf(dto.cpf().replaceAll("\\D", ""));
+        if (dto.phone() != null && !dto.phone().isBlank()) target.setPhone(dto.phone().replaceAll("\\D", ""));
+        if (dto.registrationNumber() != null && !dto.registrationNumber().isBlank()) target.setRegistrationNumber(dto.registrationNumber().trim());
+        if (dto.sectorId() != null) {
+            Sector s = sectorRepository.findByIdAndCityHall_Id(dto.sectorId(), target.getCityHallId().getId()).orElseThrow(() -> new ResourceNotFoundException("Sector not found"));
+            target.setSectorId(s);
+        }
+        if (dto.occupationId() != null) {
+            Occupation o = occupationRepository.findById(dto.occupationId()).orElseThrow(() -> new ResourceNotFoundException("Occupation not found"));
+            target.setOccupationId(o);
+        }
+        if (dto.salary() != null) target.setSalary(dto.salary());
+        if (dto.hoursWorked() != null) target.setHoursWorked(dto.hoursWorked());
+        if (dto.admissionDate() != null) target.setAdmissionDate(dto.admissionDate());
+        if (dto.dismissalDate() != null) target.setDismissalDate(dto.dismissalDate());
+        if (dto.status() != null) target.setStatus(dto.status());
+        if (dto.isAdminCidade() != null) target.setRole(dto.isAdminCidade() ? com.fiap.hackgov.auth.internal.entities.enums.Roles.ADMIN : com.fiap.hackgov.auth.internal.entities.enums.Roles.EMPLOYEE);
+        return employeeRepository.save(target);
+    }
+
+    @Transactional
+    public Employee toggle(UUID id, Employee actor) {
+        Employee target = employeeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Employee not found: " + id));
+        if (!target.getCityHallId().getId().equals(actor.getCityHallId().getId()))
+            throw new BusinessException("Funcionario deve pertencer a mesma prefeitura");
+        if (!com.fiap.hackgov.auth.internal.entities.enums.Roles.ADMIN.equals(actor.getRole()))
+            throw new BusinessException("Sem permissao para alterar status");
+        target.setStatus(!Boolean.TRUE.equals(target.getStatus()));
+        return employeeRepository.save(target);
+    }
+
     public Employee findByEmail(String email) {
         return employeeRepository.findByEmail(email).orElseThrow(() -> {
             auditLog.with(log).event("find_employee_by_email_failed").reason("employee_not_found").level(AuditLog.Level.WARN).log();

@@ -3,6 +3,7 @@ package com.fiap.hackgov.cityhall_management.internal.controllers;
 import com.fiap.hackgov.cityhall_management.internal.DTOs.Employee.CreateEmployeeDTO;
 import com.fiap.hackgov.cityhall_management.internal.DTOs.Employee.EmployeeDetailsResponseDTO;
 import com.fiap.hackgov.cityhall_management.internal.DTOs.Employee.EmployeeResponseDTO;
+import com.fiap.hackgov.cityhall_management.internal.DTOs.Employee.UpdateEmployeeDTO;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.cityhall_management.internal.mapper.EmployeeMapper;
 import com.fiap.hackgov.cityhall_management.internal.services.EmployeeService;
@@ -58,6 +59,18 @@ public class EmployeeController {
     @GetMapping("/{id}")
     public ResponseEntity<EmployeeResponseDTO> getEmployeeById(@PathVariable UUID id) {
         return ResponseEntity.ok(employeeMapper.toEmployeeDTO(employeeService.findById(id)));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<EmployeeResponseDTO> update(@PathVariable UUID id, @RequestBody UpdateEmployeeDTO dto, @AuthenticationPrincipal Employee actor) {
+        Employee updated = employeeService.update(id, dto, actor);
+        return ResponseEntity.ok(employeeMapper.toEmployeeDTO(updated));
+    }
+
+    @PostMapping("/{id}/toggle")
+    public ResponseEntity<EmployeeResponseDTO> toggle(@PathVariable UUID id, @AuthenticationPrincipal Employee actor) {
+        Employee updated = employeeService.toggle(id, actor);
+        return ResponseEntity.ok(employeeMapper.toEmployeeDTO(updated));
     }
 
     @Operation(summary = "Authenticated employee details", description = "Return authenticated employee details", security = @SecurityRequirement(name = "bearer-key"))

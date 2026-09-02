@@ -132,6 +132,19 @@ button {
   flex-shrink: 0;
 }
 
+/* ponytail: Django tarefas.css estiliza .modal-body input com width:100% — isola checkbox/radio */
+.react-modal-backdrop .modal-body input[type="checkbox"],
+.react-modal-backdrop .modal-body input[type="radio"],
+.react-modal-backdrop .form-check-input {
+  width: 1em;
+  height: 1em;
+  min-height: auto;
+  min-width: auto;
+  padding: 0;
+  border-radius: 0.25em;
+  flex: 0 0 1em;
+}
+
 .react-modal-backdrop .modal-body {
   padding: 1rem 1.25rem;
   overflow-y: auto;

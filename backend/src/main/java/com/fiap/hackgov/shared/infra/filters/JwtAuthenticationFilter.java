@@ -64,12 +64,20 @@ public class JwtAuthenticationFilter extends BaseSecurityFilter {
                 SecurityContextHolder.getContext().setAuthentication(auth);
 
             } catch (TokenInvalidException e) {
-                writeError(response, request, HttpStatus.UNAUTHORIZED, "Unauthorized", "Token expired");
-                return;
+                if (isPublicPath(request)) {
+                    SecurityContextHolder.clearContext();
+                } else {
+                    writeError(response, request, HttpStatus.UNAUTHORIZED, "Unauthorized", "Token expired");
+                    return;
+                }
 
             } catch (JWTVerificationException e) {
-                writeError(response, request, HttpStatus.UNAUTHORIZED, "Unauthorized", "Invalid token");
-                return;
+                if (isPublicPath(request)) {
+                    SecurityContextHolder.clearContext();
+                } else {
+                    writeError(response, request, HttpStatus.UNAUTHORIZED, "Unauthorized", "Invalid token");
+                    return;
+                }
 
             } catch (Exception e) {
                 writeError(response, request, HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", "Authentication error");
@@ -82,6 +90,11 @@ public class JwtAuthenticationFilter extends BaseSecurityFilter {
 
     private void writeError(HttpServletResponse response, HttpServletRequest request, HttpStatus status, String title, String detail) throws IOException {
         filterErrorWriter.write(response, request, status, title, detail);
+    }
+
+    private boolean isPublicPath(HttpServletRequest request) {
+        String p = request.getRequestURI();
+        return p.startsWith("/api/auth/") || p.startsWith("/h2-console") || p.startsWith("/v3/api-docs") || p.startsWith("/swagger-ui");
     }
 
     private String getToken(HttpServletRequest request) {

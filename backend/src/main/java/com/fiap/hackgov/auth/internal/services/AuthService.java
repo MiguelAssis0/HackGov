@@ -160,6 +160,12 @@ public class AuthService {
         }
     }
 
+    public void resendTwoFactorCode(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new InvalidCredentialsException("Invalid credentials"));
+        if (!user.getTwoFactor()) throw new InvalidCredentialsException("Two-factor not enabled for this account");
+        twoFactorAuthService.sendTwoFactorCode(user.getEmail(), user.getFullName());
+    }
+
     public TwoFactorResponseDTO verifyTwoFactor(TwoFactorRequestDTO twoFactorRequest, String clientIp, String userAgent) {
         loginAttemptService.checkTwoFactorBlocked(clientIp);
         Optional<User> userOpt = userRepository.findByEmail(twoFactorRequest.email());

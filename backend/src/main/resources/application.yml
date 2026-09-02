@@ -61,6 +61,22 @@ spring:
     username: sa
     password: ""
 
+  mail:
+    host: ${SPRING_EMAIL_HOST:localhost}
+    port: ${SPRING_EMAIL_PORT:1025}
+    username: ${SPRING_EMAIL:}
+    password: ${SPRING_EMAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+            required: false
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
   flyway:
     enabled: false
 
@@ -83,9 +99,9 @@ spring:
     livereload:
       enabled: true
 
-hackgov:
-  mock-data:
-    enabled: true
+  hackgov:
+    mock-data:
+      enabled: true
 
 logging:
   level:

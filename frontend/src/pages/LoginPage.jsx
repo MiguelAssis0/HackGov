@@ -17,6 +17,11 @@ export default function LoginPage() {
 
     try {
       const response = await api.login(form.email.trim(), form.password);
+      if (response.requiresTwoFactor) {
+        localStorage.setItem("hackgov.pending2FA", form.email.trim());
+        navigate(`/verify-2fa?email=${encodeURIComponent(form.email.trim())}`);
+        return;
+      }
       await saveSession(response, form.email.trim());
       navigate("/dashboard");
     } catch (error) {
