@@ -1,21 +1,31 @@
 package com.fiap.hackgov.shared.infra.config.mocks.task;
 
+import com.fiap.hackgov.cityhall_management.internal.entities.CityHall;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
+import com.fiap.hackgov.cityhall_management.internal.repositories.EmployeeRepository;
 import com.fiap.hackgov.shared.infra.config.mocks.util.MockContext;
 import com.fiap.hackgov.tasks.internal.entities.Board;
 import com.fiap.hackgov.tasks.internal.entities.Task;
+import com.fiap.hackgov.tasks.internal.repositories.BoardRepository;
 import com.fiap.hackgov.tasks.internal.repositories.TaskReporitory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
 public class TaskMock {
+    private static final String PREDICTIVE_PREFIX = "MOCK-PREDICTIVE-";
 
     private final TaskReporitory repository;
+    private final BoardRepository boardRepository;
+    private final EmployeeRepository employeeRepository;
 
     public void load(MockContext ctx) {
         LocalDateTime now = LocalDateTime.now();
@@ -112,7 +122,76 @@ public class TaskMock {
                 now.plusDays(1)
         );
 
-        repository.saveAll(List.of(task1, task2, task3, task4, task5, task6, task7, task8, task9, task10));
+        List<Task> tasks = new ArrayList<>(List.of(task1, task2, task3, task4, task5, task6, task7, task8, task9, task10));
+        tasks.addAll(predictiveTasks(ctx, now));
+        repository.saveAll(tasks);
+    }
+
+    public void loadPredictiveData(CityHall cityHall) {
+        if (repository.existsByProtocolStartingWithAndBoard_CityHall_Id(PREDICTIVE_PREFIX, cityHall.getId())) return;
+
+        List<Board> boards = boardRepository.findAllByCityHall_Id(cityHall.getId());
+        Map<String, Board> boardsByName = boards.stream().collect(Collectors.toMap(Board::getName, Function.identity()));
+        MockContext ctx = new MockContext();
+        ctx.admin = employee("admin.sp@prefeitura.gov.br");
+        ctx.joao = employee("joao@sp.gov.br");
+        ctx.maria = employee("maria@sp.gov.br");
+        ctx.ana = employee("ana.compras@sp.gov.br");
+        ctx.roberto = employee("roberto.financeiro@sp.gov.br");
+        ctx.fernanda = employee("fernanda.contratos@sp.gov.br");
+        ctx.paula = employee("paula.juridico@sp.gov.br");
+        ctx.tiBoardSP = board(boardsByName, "Quadro TI SP");
+        ctx.comprasBoardSP = board(boardsByName, "Quadro Compras SP");
+        ctx.financeiroBoardSP = board(boardsByName, "Quadro Financeiro SP");
+        ctx.contratosBoardSP = board(boardsByName, "Quadro Contratos SP");
+        ctx.juridicoBoardSP = board(boardsByName, "Quadro Juridico SP");
+        repository.saveAll(predictiveTasks(ctx, LocalDateTime.now()));
+    }
+
+    private List<Task> predictiveTasks(MockContext ctx, LocalDateTime now) {
+        return List.of(
+                completedTask("Publicar painel de transparencia", ctx.joao, ctx.admin, ctx.tiBoardSP, completedAt(now, 8, 8), 18, "01"),
+                completedTask("Revisar documentos da compra anual", ctx.maria, ctx.admin, ctx.comprasBoardSP, completedAt(now, 7, 12), 24, "02"),
+                completedTask("Atualizar relatorio de arrecadacao", ctx.roberto, ctx.admin, ctx.financeiroBoardSP, completedAt(now, 6, 9), 20, "03"),
+                completedTask("Validar medicao do contrato de limpeza", ctx.fernanda, ctx.admin, ctx.contratosBoardSP, completedAt(now, 5, 17), 32, "04"),
+                completedTask("Emitir parecer do processo prioritario", ctx.paula, ctx.admin, ctx.juridicoBoardSP, completedAt(now, 4, 14), 28, "05"),
+                completedTask("Implantar melhoria no portal", ctx.joao, ctx.admin, ctx.tiBoardSP, completedAt(now, 3, 6), 35, "06"),
+                completedTask("Conferir propostas habilitadas", ctx.maria, ctx.admin, ctx.comprasBoardSP, completedAt(now, 2, 11), 38, "07"),
+                completedTask("Fechar conciliacao mensal", ctx.roberto, ctx.admin, ctx.financeiroBoardSP, completedAt(now, 1, 15), 42, "08"),
+                completedTask("Atualizar plano de fiscalizacao", ctx.fernanda, ctx.admin, ctx.contratosBoardSP, completedAt(now, 0, 1), 45, "09"),
+                completedTask("Concluir analise de risco", ctx.paula, ctx.admin, ctx.juridicoBoardSP, completedAt(now, 0, 2), 30, "10"),
+                completedTask("Corrigir integracao de servicos", ctx.joao, ctx.admin, ctx.tiBoardSP, completedAt(now, 0, 4), 48, "11"),
+                completedTask("Homologar mapa comparativo", ctx.maria, ctx.admin, ctx.comprasBoardSP, completedAt(now, 0, 5), 52, "12"),
+                completedTask("Registrar fechamento orcamentario", ctx.roberto, ctx.admin, ctx.financeiroBoardSP, completedAt(now, 0, 6), 40, "13"),
+                completedTask("Revisar minuta contratual", ctx.fernanda, ctx.admin, ctx.contratosBoardSP, completedAt(now, 0, 7), 36, "14")
+        );
+    }
+
+    private Task completedTask(String title, Employee responsible, Employee createdBy, Board board,
+                               LocalDateTime completedAt, int points, String key) {
+        Task task = createTask(title, "Dado demonstrativo para indicadores e análise preditiva.", responsible,
+                createdBy, board, completedAt.minusDays(3), completedAt);
+        task.setStatus(Task.Status.COMPLETED);
+        task.setBusinessPoints(points);
+        task.setCompletedAt(completedAt);
+        task.setProtocol(PREDICTIVE_PREFIX + key);
+        return task;
+    }
+
+    private LocalDateTime completedAt(LocalDateTime now, int monthsAgo, int day) {
+        LocalDateTime base = now.minusMonths(monthsAgo);
+        int latestDay = monthsAgo == 0 ? now.getDayOfMonth() : base.toLocalDate().lengthOfMonth();
+        return base.withDayOfMonth(Math.min(day, latestDay)).withHour(10).withMinute(0).withSecond(0).withNano(0);
+    }
+
+    private Employee employee(String email) {
+        return employeeRepository.findByEmail(email).orElseThrow();
+    }
+
+    private Board board(Map<String, Board> boards, String name) {
+        Board board = boards.get(name);
+        if (board == null) throw new IllegalStateException("Mock de quadro não encontrado: " + name);
+        return board;
     }
 
     private Task createTask(String title, String description, Employee responsible, Employee createdBy, Board board,

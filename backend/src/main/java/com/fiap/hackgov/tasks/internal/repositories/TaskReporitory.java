@@ -14,6 +14,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface TaskReporitory extends JpaRepository<Task, UUID> {
+    boolean existsByProtocolStartingWithAndBoard_CityHall_Id(String protocol, UUID cityHallId);
+
     @EntityGraph(attributePaths = {"board", "board.sector"})
     @Query("""
             select distinct task from Task task

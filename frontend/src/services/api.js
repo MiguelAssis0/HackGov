@@ -1,5 +1,5 @@
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "/api";
+  import.meta.env?.VITE_API_URL || "/api";
 const API_ROOT_URL = API_BASE_URL.replace(/\/api\/?$/, "");
 
 /**
@@ -463,6 +463,11 @@ export const api = {
     const query = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => { if (value !== undefined && value !== null && value !== "") query.set(key, value); });
     return request(`/management${query.toString() ? `?${query}` : ""}`);
+  },
+  getManagementPrediction: (params = {}) => {
+    const query = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => { if (value !== undefined && value !== null && value !== "") query.set(key, value); });
+    return request(`/management/predictive${query.toString() ? `?${query}` : ""}`);
   },
 
   // FERRAMENTAS E FAVORITOS

@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
 public interface BoardRepository extends JpaRepository<Board, UUID> {
@@ -14,6 +15,8 @@ public interface BoardRepository extends JpaRepository<Board, UUID> {
     Page<Board> findAll(Pageable pageable);
 
     Page<Board> findAllByCityHall_Id(UUID cityHallId, Pageable pageable);
+
+    List<Board> findAllByCityHall_Id(UUID cityHallId);
 
     Optional<Board> findById(UUID id);
 

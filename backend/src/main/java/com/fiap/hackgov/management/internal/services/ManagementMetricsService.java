@@ -1,5 +1,6 @@
 package com.fiap.hackgov.management.internal.services;
 
+import com.fiap.hackgov.AI.services.AiService;
 import com.fiap.hackgov.auth.internal.entities.enums.Roles;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.cityhall_management.internal.entities.Sector;
@@ -22,6 +23,8 @@ import com.fiap.hackgov.tools.internal.services.ToolPermissionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -34,6 +37,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ManagementMetricsService {
+    private static final Logger log = LoggerFactory.getLogger(ManagementMetricsService.class);
     private static final String NO_SECTOR = "Sem setor";
     private static final Map<String, String> PERIOD_LABELS = Map.of(
             "semana", "Semana", "mes", "Mês", "ano", "Ano", "personalizado", "Período personalizado");
@@ -43,6 +47,7 @@ public class ManagementMetricsService {
     private final CityHallRepository cityHallRepository;
     private final TaskReporitory taskRepository;
     private final ToolPermissionService toolPermissionService;
+    private final AiService aiService;
 
     @Transactional(readOnly = true)
     public ManagementResponse find(Employee employee, String periodValue, UUID sectorId,
@@ -141,6 +146,111 @@ public class ManagementMetricsService {
                 tasks.stream().filter(item -> responsibles(item).isEmpty()).count());
     }
 
+    @Transactional(readOnly = true)
+    public ManagementResponse.PredictiveResponse predictive(Employee employee, String periodValue, UUID sectorId,
+                                                             LocalDate customStart, LocalDate customEnd) {
+        ManagementResponse metrics = find(employee, periodValue, sectorId, customStart, customEnd);
+        ManagementResponse.Forecast forecast = forecast(metrics);
+        List<ManagementResponse.Signal> signals = signals(metrics, forecast);
+        String recommendations;
+        boolean aiGenerated;
+        try {
+            recommendations = aiService.generatePredictiveRecommendations(predictionData(metrics, forecast, signals));
+            aiGenerated = recommendations != null && !recommendations.isBlank();
+            if (!aiGenerated) recommendations = fallbackRecommendations(signals);
+        } catch (RuntimeException exception) {
+            log.warn("Recomendações da IA indisponíveis: {}", exception.getMessage());
+            recommendations = fallbackRecommendations(signals);
+            aiGenerated = false;
+        }
+        return new ManagementResponse.PredictiveResponse(
+                metrics.period(), forecast, signals, recommendations, aiGenerated);
+    }
+
+    static ManagementResponse.Forecast forecast(ManagementResponse metrics) {
+        List<ManagementResponse.TemporalPoint> series = metrics.temporalSeries();
+        long observedTasks = metrics.indicators().totalTasks();
+        long observedPoints = metrics.indicators().totalPoints();
+        int sampleSize = Math.max(1, (series.size() + 2) / 3);
+        double firstAverage = average(series.stream().limit(sampleSize).mapToLong(ManagementResponse.TemporalPoint::value).sum(), sampleSize);
+        double recentAverage = average(series.stream().skip(Math.max(0, series.size() - sampleSize)).mapToLong(ManagementResponse.TemporalPoint::value).sum(), sampleSize);
+        double trendPercent = firstAverage == 0 ? (recentAverage > 0 ? 100 : 0)
+                : Math.round(((recentAverage - firstAverage) / firstAverage) * 10000.0) / 100.0;
+        // ponytail: damped moving average; replace with a validated time-series model when history is sufficient.
+        double dampedTrend = Math.max(-0.5, Math.min(0.5, trendPercent / 100.0)) * 0.25;
+        long projectedTasks = Math.max(0, Math.round(recentAverage * Math.max(1, series.size()) * (1 + dampedTrend)));
+        long projectedPoints = observedTasks == 0 ? 0 : Math.max(0,
+                Math.round(projectedTasks * (observedPoints / (double) observedTasks)));
+        String trend = trendPercent > 8 ? "alta" : trendPercent < -8 ? "queda" : "estável";
+        String confidence = series.size() >= 12 && observedTasks >= 10 ? "média"
+                : series.size() >= 4 && observedTasks >= 3 ? "baixa" : "insuficiente";
+        long nextValue = Math.max(0, Math.round(recentAverage * (1 + dampedTrend)));
+        List<ManagementResponse.TemporalPoint> nextPeriods = List.of(
+                new ManagementResponse.TemporalPoint("Próx. 1", nextValue),
+                new ManagementResponse.TemporalPoint("Próx. 2", nextValue),
+                new ManagementResponse.TemporalPoint("Próx. 3", nextValue));
+        return new ManagementResponse.Forecast(observedTasks, projectedTasks, observedPoints, projectedPoints,
+                trendPercent, trend, confidence, nextPeriods);
+    }
+
+    private List<ManagementResponse.Signal> signals(ManagementResponse metrics, ManagementResponse.Forecast forecast) {
+        List<ManagementResponse.Signal> result = new ArrayList<>();
+        if (forecast.confidence().equals("insuficiente")) {
+            result.add(new ManagementResponse.Signal("info", "Histórico insuficiente",
+                    "Há poucos períodos ou entregas para uma previsão confiável."));
+        }
+        if (forecast.trendPercent() < -10) {
+            result.add(new ManagementResponse.Signal("warning", "Ritmo de entregas em queda",
+                    "A média do trecho mais recente está abaixo do início do período."));
+        } else if (forecast.trendPercent() > 10) {
+            result.add(new ManagementResponse.Signal("positive", "Ritmo de entregas em alta",
+                    "A média do trecho mais recente está acima do início do período."));
+        }
+        if (metrics.tasksWithoutResponsible() > 0) {
+            result.add(new ManagementResponse.Signal("warning", "Tarefas sem responsável",
+                    metrics.tasksWithoutResponsible() + " entrega(s) concluída(s) não pode(m) ser atribuída(s) a uma pessoa."));
+        }
+        metrics.sectors().stream().findFirst().filter(item -> item.participation() >= 70).ifPresent(item ->
+                result.add(new ManagementResponse.Signal("info", "Concentração por setor",
+                        item.name() + " representa " + number(item.participation()) + "% das entregas do período.")));
+        if (result.isEmpty()) {
+            result.add(new ManagementResponse.Signal("positive", "Operação estável",
+                    "Não foram identificados sinais fortes de queda ou concentração nos dados selecionados."));
+        }
+        return result;
+    }
+
+    private String predictionData(ManagementResponse metrics, ManagementResponse.Forecast forecast,
+                                  List<ManagementResponse.Signal> signals) {
+        StringBuilder data = new StringBuilder("DADOS_AGREGADOS\n");
+        data.append("Período: ").append(metrics.period().label()).append(" (")
+                .append(metrics.period().start()).append(" a ").append(metrics.period().end()).append(")\n")
+                .append("Tarefas concluídas: ").append(metrics.indicators().totalTasks()).append('\n')
+                .append("Pontos totais: ").append(metrics.indicators().totalPoints()).append('\n')
+                .append("Funcionários com entregas: ").append(metrics.indicators().employeesWithDeliveries()).append('\n')
+                .append("Tarefas sem responsável: ").append(metrics.tasksWithoutResponsible()).append('\n')
+                .append("Série de entregas: ").append(metrics.temporalSeries().stream()
+                        .map(item -> item.label() + "=" + item.value()).toList()).append('\n')
+                .append("Setores: ").append(metrics.sectors().stream()
+                        .map(item -> item.name() + " (entregas=" + item.tasks() + ", pontos=" + item.points()
+                                + ", participação=" + item.participation() + "%)").toList()).append('\n')
+                .append("Previsão calculada: tendência=").append(forecast.trend())
+                .append(", confiança=").append(forecast.confidence())
+                .append(", próximas tarefas estimadas=").append(forecast.projectedTasks()).append('\n')
+                .append("Sinais: ").append(signals.stream().map(ManagementResponse.Signal::title).toList());
+        return data.toString();
+    }
+
+    private String fallbackRecommendations(List<ManagementResponse.Signal> signals) {
+        return signals.stream().map(signal -> "- " + signal.title() + ": " + signal.detail()
+                + " Ação sugerida: revisar o indicador no próximo período e registrar um responsável.")
+                .collect(Collectors.joining("\n"));
+    }
+
+    private String number(double value) {
+        return String.format(Locale.forLanguageTag("pt-BR"), "%.2f", value);
+    }
+
     private EmployeePerformance employeeMetric(Employee employee, List<Task> tasks, long total, LocalDate start, LocalDate end) {
         long points = tasks.stream().mapToLong(item -> item.getBusinessPoints()).sum();
         return new EmployeePerformance(employee.getId(), employee.getFullName(), employee.getSectorId() == null ? NO_SECTOR : employee.getSectorId().getName(),
@@ -176,7 +286,7 @@ public class ManagementMetricsService {
         return points.stream().map(point -> new TemporalPoint(point.format(formatter), counts.getOrDefault(point, 0L))).toList();
     }
 
-    private double average(long total, long count) { return count == 0 ? 0 : Math.round(total * 100.0 / count) / 100.0; }
+    private static double average(long total, long count) { return count == 0 ? 0 : Math.round(total * 100.0 / count) / 100.0; }
     private double percentage(long part, long total) { return total == 0 ? 0 : Math.round(part * 10000.0 / total) / 100.0; }
 
     private Employee require(Employee employee) {

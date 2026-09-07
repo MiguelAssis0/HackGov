@@ -24,4 +24,25 @@ public record ManagementResponse(
                                     double averageTasks, double averagePoints, double participation) {}
     public record TemporalPoint(String label, long value) {}
     public record EmployeeComparison(String name, String sector, long tasks, long points) {}
+
+    public record PredictiveResponse(
+            Period period,
+            Forecast forecast,
+            List<Signal> signals,
+            String recommendations,
+            boolean aiGenerated
+    ) {}
+
+    public record Forecast(
+            long observedTasks,
+            long projectedTasks,
+            long observedPoints,
+            long projectedPoints,
+            double trendPercent,
+            String trend,
+            String confidence,
+            List<TemporalPoint> nextPeriods
+    ) {}
+
+    public record Signal(String severity, String title, String detail) {}
 }

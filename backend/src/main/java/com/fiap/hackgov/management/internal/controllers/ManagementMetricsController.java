@@ -27,4 +27,13 @@ public class ManagementMetricsController {
                                           @AuthenticationPrincipal Employee employee) {
         return service.find(employee, period, sectorId, start, end);
     }
+
+    @GetMapping("/predictive")
+    public ManagementResponse.PredictiveResponse predictive(@RequestParam(defaultValue = "mes") String period,
+                                                             @RequestParam(required = false) UUID sectorId,
+                                                             @RequestParam(required = false) LocalDate start,
+                                                             @RequestParam(required = false) LocalDate end,
+                                                             @AuthenticationPrincipal Employee employee) {
+        return service.predictive(employee, period, sectorId, start, end);
+    }
 }

@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { api } from "../services/api";
+import { getChatbotAccess, getLocalChatbotResponse } from "../services/chatbot";
+import { Link } from "./RouterContext.jsx";
 import "../../public/css/messages.css";
 
 const markdownComponents = {
@@ -18,14 +20,23 @@ function MessageText({ message }) {
   }
 
   return (
-    <div className="chat-markdown">
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        components={markdownComponents}
-      >
-        {message.text}
-      </ReactMarkdown>
-    </div>
+    <>
+      <div className="chat-markdown">
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={markdownComponents}
+        >
+          {message.text}
+        </ReactMarkdown>
+      </div>
+      {message.cards?.length > 0 && <div className="chat-route-cards">
+        {message.cards.map((card) => <Link className="chat-route-card" to={card.path} key={card.path}>
+          <span className="chat-route-card-icon"><i className={`bi ${card.icon}`}></i></span>
+          <span className="chat-route-card-copy"><strong>{card.title}</strong><small>{card.description}</small></span>
+          <i className="bi bi-arrow-up-right chat-route-card-arrow" aria-hidden="true"></i>
+        </Link>)}
+      </div>}
+    </>
   );
 }
 
@@ -42,6 +53,10 @@ export default function Chatbot() {
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
+
+  useEffect(() => {
+    getChatbotAccess();
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -61,6 +76,20 @@ export default function Chatbot() {
     setMessages((prev) => [...prev, userMessage]);
     setMessage("");
     setLoading(true);
+
+    const access = await getChatbotAccess();
+    const localResponse = getLocalChatbotResponse(userMessage.text, access);
+    if (localResponse) {
+      setMessages((prev) => [...prev, {
+        id: Date.now() + 1,
+        from: "bot",
+        ...localResponse,
+        time: new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }),
+      }]);
+      setLoading(false);
+      inputRef.current?.focus();
+      return;
+    }
 
     try {
       const result = await api.requestAI(userMessage.text);

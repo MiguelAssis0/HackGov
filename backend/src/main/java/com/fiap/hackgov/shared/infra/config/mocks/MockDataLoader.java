@@ -46,6 +46,7 @@ public class MockDataLoader implements CommandLineRunner {
     @Override
     public void run(String... args) {
         if (cityHallRepository.findByCnpj(SEED_CITY_HALL_CNPJ).isPresent()) {
+            cityHallRepository.findByCnpj(SEED_CITY_HALL_CNPJ).ifPresent(taskMock::loadPredictiveData);
             log.info("Mocks já carregados; carga inicial ignorada.");
             return;
         }
