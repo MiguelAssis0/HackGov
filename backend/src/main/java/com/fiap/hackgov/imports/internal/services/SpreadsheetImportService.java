@@ -130,7 +130,9 @@ public class SpreadsheetImportService {
         Map<String, Integer> indexes = new HashMap<>();
         for (int i = 0; i < headers.size(); i++) indexes.put(headers.get(i), i);
         int created = 0, updated = 0, failed = 0;
-        for (Row row : readRows(batch)) {
+        Queue<Row> pendingRows = new ArrayDeque<>(readRows(batch));
+        while (!pendingRows.isEmpty()) {
+            Row row = pendingRows.remove();
             try {
                 Map<String, String> values = new HashMap<>();
                 mapping.forEach((field, header) -> values.put(field, value(row, indexes.get(header))));
