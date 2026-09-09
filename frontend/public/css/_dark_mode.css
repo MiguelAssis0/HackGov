@@ -4,22 +4,22 @@
 
 /* ── Variáveis ── */
 body.theme-dark {
-    --cinza-claro: #0f1726;
-    --branco: #182438;
+    --cinza-claro: #17191c;
+    --branco: #232629;
     --line: rgba(148,163,184,.12);
-    --border-color: rgba(148,163,184,.2);
+    --border-color: rgba(214,220,226,.16);
     --border1: 1px solid var(--border-color);
 
-    --azul: #60a5fa;
-    --azul-claro: rgba(96,165,250,.16);
-    --secondary: #3b82f6;
+    --azul: #78a9d8;
+    --azul-claro: rgba(120,169,216,.14);
+    --secondary: #557fa8;
 
-    --azul-escuro: #edf4ff;
+    --azul-escuro: #eef0f2;
     --preto: #f8fafc;
-    --text-muted: #9eafc3;
-    --dark-input: #0b1322;
-    --dark-raised: #1e2d43;
-    --dark-hover: #243750;
+    --text-muted: #a8adb3;
+    --dark-input: #121416;
+    --dark-raised: #2a2e33;
+    --dark-hover: #30343a;
     --tool-icon-bg-1: color-mix(in srgb, var(--tool-icon-fg-1) 20%, transparent);
     --tool-icon-bg-2: color-mix(in srgb, var(--tool-icon-fg-2) 20%, transparent);
     --tool-icon-bg-3: color-mix(in srgb, var(--tool-icon-fg-3) 20%, transparent);
@@ -29,7 +29,7 @@ body.theme-dark {
     --tool-icon-bg-7: color-mix(in srgb, var(--tool-icon-fg-7) 20%, transparent);
     --tool-icon-bg-8: color-mix(in srgb, var(--tool-icon-fg-8) 20%, transparent);
 
-    --bs-body-bg: #0f1726;
+    --bs-body-bg: #17191c;
 
     background: var(--cinza-claro);
     color: var(--preto);
@@ -114,6 +114,20 @@ body.theme-dark .form-check-input:checked {
     border-color: #3b82f6;
 }
 
+body.theme-dark .perfil-switch-track {
+    border-color: #66707a;
+    background: #30353b;
+}
+
+body.theme-dark .perfil-switch input:checked + .perfil-switch-track {
+    border-color: #6f92b4;
+    background: #6f92b4;
+}
+
+body.theme-dark .perfil-switch input:checked + .perfil-switch-track::after {
+    background: #17191c;
+}
+
 /* ── Fundo geral ── */
 body.theme-dark,
 body.theme-dark .dashboard {
@@ -122,24 +136,35 @@ body.theme-dark .dashboard {
 
 /* ── Sidebar, Navbar, Hero ── */
 body.theme-dark .sidebar {
-    background: linear-gradient(180deg, #091322 0%, #12213b 100%);
+    background: linear-gradient(180deg, #111315 0%, #1d2024 100%);
+}
+
+body.theme-dark .sidebar-cityhall-card,
+body.theme-dark .sidebar-cityhall-select,
+body.theme-dark .sidebar-cityhall-name {
+    color: #f5f6f7;
+}
+
+body.theme-dark .sidebar-cityhall-select option {
+    background: #1d2024;
+    color: #f5f6f7;
 }
 
 body.theme-dark .navbar-custom {
-    background: #172554;
+    background: #24272b;
 }
 
 body.theme-dark .equipe-card,
 body.theme-dark .dash-hero,
 body.theme-dark .docs-header-card,
 body.theme-dark .inbox-header-card {
-    background: linear-gradient(135deg, #071525 0%, #0d2647 100%);
+    background: linear-gradient(135deg, #151719 0%, #252a2f 100%);
 }
 
 body.theme-dark .sidebar-item.active,
 body.theme-dark .menu-item.active,
 body.theme-dark .nav-link.active {
-    background: #2563eb;
+    background: #3e6f9d;
     color: white;
 }
 
@@ -1043,14 +1068,14 @@ body.theme-dark .document-table-wrap {
 }
 
 body.theme-dark .document-page > .d-flex.align-items-center.justify-content-between {
-    background: linear-gradient(135deg, #091a31 0%, #16365e 100%) !important;
-    border-color: rgba(96,165,250,.18) !important;
+    background: linear-gradient(135deg, #151719 0%, #252a2f 100%) !important;
+    border-color: rgba(120,169,216,.18) !important;
 }
 
 body.theme-dark .document-header-actions .btn-primary {
     background: var(--azul) !important;
     border-color: var(--azul) !important;
-    color: #071525 !important;
+    color: #111315 !important;
 }
 
 body.theme-dark .document-folder {

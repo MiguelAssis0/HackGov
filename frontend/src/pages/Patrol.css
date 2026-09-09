@@ -47,6 +47,12 @@
 .patrol-field-heading a { color: var(--azul); font-size: .73rem; font-weight: 700; text-decoration: none; }
 .patrol-field-heading a:hover { text-decoration: underline; }
 .patrol-calculation-hint { min-height: 1.1rem; }
+.patrol-catalog-modal { max-width: 540px; }
+.patrol-catalog-description { color: var(--text-muted); font-size: .85rem; margin-bottom: 1.1rem; }
+.patrol-catalog-modal .form-label { color: var(--azul-escuro); font-size: .78rem; font-weight: 700; }
+.patrol-catalog-modal .form-control { border: var(--border1-5); border-radius: 9px; min-height: 42px; }
+.patrol-catalog-existing { align-items: center; background: var(--cinza-claro); border-radius: 9px; color: var(--text-muted); display: flex; font-size: .78rem; justify-content: space-between; margin-top: 1rem; padding: .7rem .8rem; }
+.patrol-catalog-existing strong { color: var(--azul-escuro); font-size: 1rem; }
 .patrol-form-fields.is-donation .payment-field { opacity: .5; }
 .patrol-form-fields.is-donation .payment-field .form-control,
 .patrol-form-fields.is-donation .payment-field .form-select { background: var(--cinza-claro); cursor: not-allowed; }

@@ -160,11 +160,11 @@ export default function ProfilePage(){
               <div className="perfil-card-body">
                 <div className="perfil-setting-row">
                   <div><h4 className="mb-0">Modo escuro</h4><p>Ativa o tema escuro na plataforma.</p></div>
-                  <div className="form-check form-switch"><input className="form-check-input" type="checkbox" role="switch" checked={settings.darkMode} onChange={e=> toggleSetting("darkMode", e.target.checked)} /></div>
+                  <label className="perfil-switch"><input type="checkbox" role="switch" aria-label="Ativar modo escuro" checked={settings.darkMode} onChange={e=> toggleSetting("darkMode", e.target.checked)} /><span className="perfil-switch-track" aria-hidden="true"></span></label>
                 </div>
                 <div className="perfil-setting-row">
                   <div><h4 className="mb-0">Notificações do sistema</h4><p>Receba avisos importantes sobre processos e tarefas.</p></div>
-                  <div className="form-check form-switch"><input className="form-check-input" type="checkbox" role="switch" checked={settings.notifications} onChange={e=> toggleSetting("notifications", e.target.checked)} /></div>
+                  <label className="perfil-switch"><input type="checkbox" role="switch" aria-label="Ativar notificações do sistema" checked={settings.notifications} onChange={e=> toggleSetting("notifications", e.target.checked)} /><span className="perfil-switch-track" aria-hidden="true"></span></label>
                 </div>
               </div>
             </div>
@@ -176,7 +176,7 @@ export default function ProfilePage(){
                   <div><h4 className="mb-0">Autenticação de 2 fatores</h4><p>Campo preparado para ativar uma camada extra de segurança.</p></div>
                   <div className="d-flex align-items-center gap-2">
                     <span className={`perfil-status ${twoFactor? "ok":"off"}`} id="twoFactorStatus">{twoFactor? "Ativado":"Desativado"}</span>
-                    <div className="form-check form-switch"><input className="form-check-input" type="checkbox" role="switch" checked={twoFactor} onChange={e=> toggleSetting("twoFactor", e.target.checked)} /></div>
+                    <label className="perfil-switch"><input type="checkbox" role="switch" aria-label="Ativar autenticação de 2 fatores" checked={twoFactor} onChange={e=> toggleSetting("twoFactor", e.target.checked)} /><span className="perfil-switch-track" aria-hidden="true"></span></label>
                   </div>
                 </div>
               </div>
@@ -223,7 +223,7 @@ export default function ProfilePage(){
               <div className="perfil-card-body">
                 <div className="perfil-setting-row">
                   <div><h4 className="mb-0">V-Libras</h4><p>Tradutor de Libras para português.</p></div>
-                  <div className="form-check form-switch"><input className="form-check-input" type="checkbox" role="switch" checked={settings.vlibras} onChange={e=> toggleSetting("vlibras", e.target.checked)} /></div>
+                  <label className="perfil-switch"><input type="checkbox" role="switch" aria-label="Ativar V-Libras" checked={settings.vlibras} onChange={e=> toggleSetting("vlibras", e.target.checked)} /><span className="perfil-switch-track" aria-hidden="true"></span></label>
                 </div>
                 <div className="perfil-font-block">
                   <h4 className="mb-0">Tamanho da fonte</h4><p>Ajuste o tamanho do texto em todo o sistema.</p>
@@ -248,7 +248,10 @@ export default function ProfilePage(){
             <div className="perfil-side-card">
               <h4 className="mb-3">Precisa de ajuda?</h4>
               <p>Suporte: {email}</p>
-              <Link className="btn btn-outline-primary btn-sm" to="/contato">Enviar mensagem</Link>
+              <Link className="perfil-message-button" to="/contato">
+                <i className="bi bi-send-fill" aria-hidden="true"></i>
+                <span>Enviar mensagem</span>
+              </Link>
             </div>
           </aside>
         </div>

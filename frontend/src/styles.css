@@ -25,6 +25,19 @@ button {
   cursor: pointer;
 }
 
+/* Botões outline do dashboard precisam contrastar com os painéis claros. */
+.dashboard .btn-outline-primary:not(.btn-outline-primary2) {
+  background: var(--branco);
+  border: 1.5px solid var(--azul);
+  color: var(--azul);
+}
+
+.dashboard .btn-outline-primary:not(.btn-outline-primary2):hover {
+  background: var(--azul-claro);
+  border-color: var(--azul);
+  color: var(--azul);
+}
+
 .route-loading {
   min-height: 100vh;
   display: flex;

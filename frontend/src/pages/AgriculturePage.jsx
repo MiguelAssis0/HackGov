@@ -87,6 +87,9 @@ export default function AgriculturePage(){
   const [selectedControlId,setSelectedControlId]=useState(new URLSearchParams(window.location.search).get("controle")||"");
   const [showNovo,setShowNovo]=useState(false);
   const [editingId,setEditingId]=useState(null);
+  const [catalogModal,setCatalogModal]=useState(null);
+  const [catalogName,setCatalogName]=useState("");
+  const [catalogSaving,setCatalogSaving]=useState(false);
   const [form,setForm]=useState({numero_protocolo:"",status:"PENDING",clienteId:"",data_agendada:"",tipo_servicoId:"",horas_solicitadas:"",endereco:"",e_doacao:false,origem_doacao:"",data_pagamento:"",id_funder:"",tipo_comprovanteId:"",valor_funder:"",comprovante:null});
   const [controlForm,setControlForm]=useState({maquinarioId:"",tratoristaId:"",horimetro_inicial:"",horimetro_final:""});
   const [message,setMessage]=useState(null);
@@ -120,6 +123,19 @@ export default function AgriculturePage(){
       setShowNovo(false); setEditingId(null);
       load();
     }catch(err){ setMessage({type:"error", text:err.message}); }
+  }
+
+  async function submitCatalog(e){
+    e.preventDefault();
+    if(!catalogModal || !catalogName.trim()) return;
+    setCatalogSaving(true);
+    try{
+      await api.addAgricultureCatalog(catalogModal, {name:catalogName.trim()});
+      setMessage({type:"success", text:`${catalogModal === "MACHINERY" ? "Maquinário" : "Tratorista"} cadastrado com sucesso`});
+      setCatalogModal(null); setCatalogName("");
+      await load();
+    }catch(err){ setMessage({type:"error", text:err.message}); }
+    finally{ setCatalogSaving(false); }
   }
 
   return (
@@ -192,7 +208,7 @@ export default function AgriculturePage(){
                   <input id="operational-search" name="q" value={controlQuery} onChange={e=> setControlQuery(e.target.value)} placeholder="Protocolo, cliente, maquinário ou tratorista" />
                   <button className="btn btn-primary" type="submit">Buscar</button>
                 </form>
-                {canManage && <div className="operational-toolbar-actions"><button className="btn btn-outline-primary" onClick={()=>{ const n=prompt("Nome do maquinário"); if(n) api.addAgricultureCatalog("MACHINERY",{name:n}).then(load); }}><i className="bi bi-truck-front"></i> Maquinários</button><button className="btn btn-outline-primary" onClick={()=>{ const n=prompt("Nome do tratorista"); if(n) api.addAgricultureCatalog("DRIVER",{name:n}).then(load); }}><i className="bi bi-person-gear"></i> Tratoristas</button></div>}
+                {canManage && <div className="operational-toolbar-actions"><button type="button" className="btn btn-outline-primary" onClick={()=>{setCatalogModal("MACHINERY"); setCatalogName("");}}><i className="bi bi-truck-front"></i> Maquinários</button><button type="button" className="btn btn-outline-primary" onClick={()=>{setCatalogModal("DRIVER"); setCatalogName("");}}><i className="bi bi-person-gear"></i> Tratoristas</button></div>}
               </section>
               <section className="operational-layout">
                 <div className="operational-list-panel">
@@ -251,6 +267,26 @@ export default function AgriculturePage(){
                 <div className="modal-footer"><button type="button" className="btn btn-outline-secondary" onClick={()=> {setShowNovo(false); setEditingId(null);}}>Cancelar</button><button className="btn btn-primary" type="submit">{editingId? "Salvar alterações":"Cadastrar serviço"}</button></div>
               </form>
             </div>
+          </div>
+        </div>
+      )}
+
+      {catalogModal && (
+        <div className="react-modal-backdrop" role="presentation" onMouseDown={()=>{if(!catalogSaving){setCatalogModal(null); setCatalogName("");}}}>
+          <div className="react-modal-card patrol-catalog-modal" role="dialog" aria-modal="true" aria-labelledby="patrol-catalog-title" onMouseDown={e=>e.stopPropagation()}>
+            <form onSubmit={submitCatalog}>
+              <div className="modal-header">
+                <div><p className="eyebrow dark mb-1">Patrulha Agrícola</p><h5 className="modal-title" id="patrol-catalog-title">Novo {catalogModal === "MACHINERY" ? "maquinário" : "tratorista"}</h5></div>
+                <button type="button" className="btn-close" aria-label="Fechar" onClick={()=>{setCatalogModal(null); setCatalogName("");}} disabled={catalogSaving}></button>
+              </div>
+              <div className="modal-body">
+                <p className="patrol-catalog-description">Cadastre um item para usar no controle operacional dos serviços.</p>
+                <label className="form-label" htmlFor="patrol-catalog-name">Nome</label>
+                <input id="patrol-catalog-name" className="form-control" autoFocus required maxLength="180" value={catalogName} onChange={e=>setCatalogName(e.target.value)} placeholder={catalogModal === "MACHINERY" ? "Ex.: Trator municipal" : "Ex.: João da Silva"} disabled={catalogSaving} />
+                <div className="patrol-catalog-existing"><span>Já cadastrados</span><strong>{(catalogModal === "MACHINERY" ? catalog.machinery : catalog.drivers).length}</strong></div>
+              </div>
+              <div className="modal-footer"><button type="button" className="btn btn-outline-secondary" onClick={()=>{setCatalogModal(null); setCatalogName("");}} disabled={catalogSaving}>Cancelar</button><button type="submit" className="btn btn-primary" disabled={catalogSaving}>{catalogSaving ? "Salvando..." : "Cadastrar"}</button></div>
+            </form>
           </div>
         </div>
       )}
