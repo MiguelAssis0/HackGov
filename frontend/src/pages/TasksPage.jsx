@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { DashboardLayout } from "../components/DashboardLayout.jsx";
+import { Link } from "../components/RouterContext.jsx";
 import { api, getSelectedCityHall, getStoredUser } from "../services/api.js";
 import { TaskDetailPanel } from "../components/TaskDetailPanel.jsx";
 
@@ -41,9 +43,13 @@ function toDatetimeLocal(v){ if(!v) return ""; const d=new Date(v); if(isNaN(d))
 function toDateInput(v){ if(!v) return ""; return v.slice(0,10); }
 
 export default function TasksPage(){
+  const location=useLocation();
   const user=getStoredUser();
   const cityHall=getSelectedCityHall()||{name:user?.prefeitura||"Prefeitura"};
   const isAdmin=["admin_cidade","admin_equipe"].includes(user?.tipoUsuario||user?.role);
+  const taskQuery=new URLSearchParams(location.search);
+  const requestedTaskId=taskQuery.get("task");
+  const requestedSectorId=taskQuery.get("setor");
   const [tasks,setTasks]=useState([]);
   const [boards,setBoards]=useState([]);
   const [sectors,setSectors]=useState([]);
@@ -56,7 +62,7 @@ export default function TasksPage(){
   const [query, setQuery]=useState("");
   const [detailTask,setDetailTask]=useState(null);
   // modals
-  const [showNova,setShowNova]=useState(new URLSearchParams(window.location.search).get("nova")==="1");
+  const [showNova,setShowNova]=useState(taskQuery.get("nova")==="1");
   const [showDemanda,setShowDemanda]=useState(false);
   const [showDelegar,setShowDelegar]=useState(null);
   const [delegarIds,setDelegarIds]=useState([]);
@@ -79,10 +85,16 @@ export default function TasksPage(){
     const det=d.status==="fulfilled"?d.value:null;
     const me = det && (det.id? det : det.employee || det.user) || ne.find(emp=> String(emp.email).toLowerCase()===String(user?.email||"").toLowerCase()) || ne.find(emp=> String(emp.id)===String(user?.id)) || null;
     if(me) setCurrentEmployee(me);
-    if(ns.length && !setorAtivo) setSetorAtivo(ns[0].id);
+    if(requestedTaskId) setDetailTask(hydrated.find(task=> String(task.id)===String(requestedTaskId)) || null);
+    if(ns.length && !setorAtivo) setSetorAtivo(ns.some(sector=> String(sector.id)===String(requestedSectorId)) ? requestedSectorId : ns[0].id);
     setLoading(false);
     if(t.status==="rejected"||b.status==="rejected") setMessage({type:"warning", text:"Alguns dados não carregaram do backend."});
   })(); return()=>{m=false;}; },[]);
+
+  useEffect(()=>{
+    if(!requestedTaskId){ setDetailTask(null); return; }
+    if(tasks.length) setDetailTask(tasks.find(task=> String(task.id)===String(requestedTaskId)) || null);
+  },[requestedTaskId,tasks]);
 
   const membrosSetor=useMemo(()=>{
     const sid=setorAtivo;
@@ -157,6 +169,9 @@ export default function TasksPage(){
   const semResp=tarefasFiltradas.filter(t=> !(t.responsibles||[]).length && !t.responsible).length;
   const emAndamento=tarefasFiltradas.filter(t=> t.status==="IN_PROGRESS").length;
   const concluidas=tarefasFiltradas.filter(t=> t.status==="COMPLETED").length;
+  const currentEmployeeId=currentEmployee?.id || user?.id;
+  const canManageTask=task=> isAdmin || (task.responsibles||[]).some(person=> String(person.id)===String(currentEmployeeId)) || String(task.responsible?.id)===String(currentEmployeeId);
+  const canDeleteTask=task=> isAdmin || ((task.responsibles||[]).length===1 && String(task.responsibles[0]?.id || task.responsible?.id)===String(currentEmployeeId));
 
   const kanbanColumns=[
     {status:"TODO", label:"A fazer", django:"a_fazer"},
@@ -224,7 +239,7 @@ export default function TasksPage(){
   const setorQuadro=sectors.find(s=> String(s.id)===String(setorAtivo))|| {nome: sectorName(boards.find(b=> String(b.id)===String(setorAtivo))?.sector)||"Setor"};
 
   return (
-    <DashboardLayout styles={["/css/tarefas.css"]}>
+    <DashboardLayout styles={["/css/tarefas.css", "/css/tarefa_detalhe.css"]}>
       <main className="dashboard task-dashboard">
         <div className="container task-page">
         <div className="task-header">
@@ -279,7 +294,7 @@ export default function TasksPage(){
                         {situacao==="concluida" && <><i className="bi bi-check2-circle"></i> Concluída</>}
                         {situacao==="sem_prazo" && <><i className="bi bi-calendar2-minus"></i> Sem prazo definido</>}
                       </div>
-                      <h4><button className="task-title-link" onClick={()=> setDetailTask(tarefa)}>{tarefa.title}</button></h4>
+                      <h4><Link className="task-title-link" to={`/tarefas?task=${encodeURIComponent(tarefa.id)}`}>{tarefa.title}</Link></h4>
                       {tarefa.description && <p>{String(tarefa.description).slice(0,150)}</p>}
                       <div className="task-tags">
                         {tarefa.startDate && <span><i className="bi bi-play-circle"></i> Início {new Date(tarefa.startDate).toLocaleDateString("pt-BR", {day:"2-digit", month:"2-digit"})}</span>}
@@ -332,7 +347,7 @@ export default function TasksPage(){
       {/* Excluir */}
       {showExcluir && <div className="react-modal-backdrop" onMouseDown={()=> setShowExcluir(null)}><div className="modal-dialog modal-dialog-centered" style={{maxWidth:560, width:"95%", margin:"1.2rem auto"}} onMouseDown={e=> e.stopPropagation()}><div className="modal-content"><div className="modal-header"><h5 className="modal-title">Excluir tarefa</h5><button type="button" className="btn-close" onClick={()=> setShowExcluir(null)} aria-label="Fechar"></button></div><div className="modal-body"><div className="task-delete-confirmation"><i className="bi bi-exclamation-triangle-fill"></i><div><strong>{showExcluir.title}</strong><p>A tarefa, seus comentários, anexos, checklist e apontamentos serão removidos. O registro permanecerá na auditoria.</p></div></div></div><div className="modal-footer"><button type="button" className="btn btn-outline-secondary" onClick={()=> setShowExcluir(null)}>Cancelar</button><button type="button" className="btn btn-danger" onClick={()=> excluir(showExcluir)}><i className="bi bi-trash3"></i> Excluir tarefa</button></div></div></div></div>}
 
-      {detailTask && <TaskDetailPanel task={detailTask} onClose={()=> setDetailTask(null)} onMessage={setMessage} />}
+      {detailTask && <TaskDetailPanel task={detailTask} canManage={canManageTask(detailTask)} canDelete={canDeleteTask(detailTask)} onClose={()=> setDetailTask(null)} onMessage={setMessage} onEdit={()=> { setDetailTask(null); openEditar(detailTask); }} onDelete={()=> { setDetailTask(null); setShowExcluir(detailTask); }} />}
     </DashboardLayout>
   );
 }
