@@ -25,7 +25,7 @@
 .document-page > .d-flex.align-items-center.justify-content-between .eyebrow,
 .document-page > .d-flex.align-items-center.justify-content-between .management-title { color: #fff !important; }
 .document-page > .d-flex.align-items-center.justify-content-between .eyebrow { opacity: .7; }
-.document-page > .d-flex.align-items-center.justify-content-between .btn-outline-primary { border-color: rgba(255,255,255,.55); color: #fff; }
+.document-page > .d-flex.align-items-center.justify-content-between .btn-outline-primary { background: transparent; border-color: rgba(255,255,255,.55); color: #fff; }
 .document-page > .d-flex.align-items-center.justify-content-between .btn-outline-primary:hover { background: rgba(255,255,255,.12); color: #fff; }
 .document-page > .d-flex.align-items-center.justify-content-between .btn-primary { background: #fff; color: var(--azul-escuro); }
 .document-intro { display: none; }

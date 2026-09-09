@@ -607,6 +607,94 @@ body.theme-dark .chat-compose button {
     color: #ffffff;
 }
 
+body.theme-dark .chat-wrapper {
+    background: var(--branco);
+    color: var(--preto);
+}
+
+body.theme-dark .chat-header {
+    background: linear-gradient(135deg, #151719 0%, #252a2f 100%);
+    border-bottom: 1px solid var(--border-color);
+}
+
+body.theme-dark .chat-header-avatar,
+body.theme-dark .bubble-avatar {
+    background: #6f92b4;
+    border-color: rgba(220, 226, 232, 0.35);
+    color: #111315;
+}
+
+body.theme-dark .chat-messages {
+    background: var(--cinza-claro);
+}
+
+body.theme-dark .chat-messages::-webkit-scrollbar-thumb {
+    background: #59616a;
+}
+
+body.theme-dark .bubble-bot {
+    background: var(--branco);
+    border: 1px solid var(--border-color);
+    color: #f5f6f7;
+}
+
+body.theme-dark .bubble-user {
+    background: #557fa8;
+    border-color: #557fa8;
+    color: #ffffff;
+}
+
+body.theme-dark .bubble-typing span {
+    background: #9dbddd;
+}
+
+body.theme-dark .chat-route-card {
+    background: var(--dark-raised);
+    border-color: var(--border-color);
+    color: #eef0f2;
+}
+
+body.theme-dark .chat-route-card:hover,
+body.theme-dark .chat-route-card:focus-visible {
+    background: var(--dark-hover);
+    border-color: #6f92b4;
+}
+
+body.theme-dark .chat-route-card-icon {
+    background: rgba(120, 169, 216, 0.18);
+    color: #9dbddd;
+}
+
+body.theme-dark .chat-route-card-copy small,
+body.theme-dark .chat-route-card-arrow {
+    color: #b8c3ce;
+}
+
+body.theme-dark .chat-input-bar {
+    background: var(--branco);
+    border-top-color: var(--border-color);
+}
+
+body.theme-dark .chat-input-bar textarea,
+body.theme-dark .chat-input-bar textarea:focus {
+    background: var(--dark-input);
+    border-color: var(--border-color);
+    color: #f5f6f7;
+}
+
+body.theme-dark .chat-input-bar textarea:focus {
+    border-color: #6f92b4;
+}
+
+body.theme-dark .chat-input-bar button {
+    background: #6f92b4;
+    color: #111315;
+}
+
+body.theme-dark .chat-input-bar button:hover:not(:disabled) {
+    background: #8db3d8;
+}
+
 /* ════════════════════════════════════════════
    DOCUMENTOS
    ════════════════════════════════════════════ */
