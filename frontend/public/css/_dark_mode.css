@@ -4,19 +4,22 @@
 
 /* ── Variáveis ── */
 body.theme-dark {
-    --cinza-claro: #313135;
-    --branco: #29292D;
-    --line: rgba(255,255,255,.06);
-    --border-color: rgba(255,255,255,.08);
+    --cinza-claro: #0f1726;
+    --branco: #182438;
+    --line: rgba(148,163,184,.12);
+    --border-color: rgba(148,163,184,.2);
     --border1: 1px solid var(--border-color);
 
-    --azul: #3b82f6;
-    --azul-claro: #1d4ed8;
-    --secondary: #1d4ed8;
+    --azul: #60a5fa;
+    --azul-claro: rgba(96,165,250,.16);
+    --secondary: #3b82f6;
 
-    --azul-escuro: #ffffff;
-    --preto: #ffffff;
-    --text-muted: #d1d5db;
+    --azul-escuro: #edf4ff;
+    --preto: #f8fafc;
+    --text-muted: #9eafc3;
+    --dark-input: #0b1322;
+    --dark-raised: #1e2d43;
+    --dark-hover: #243750;
     --tool-icon-bg-1: color-mix(in srgb, var(--tool-icon-fg-1) 20%, transparent);
     --tool-icon-bg-2: color-mix(in srgb, var(--tool-icon-fg-2) 20%, transparent);
     --tool-icon-bg-3: color-mix(in srgb, var(--tool-icon-fg-3) 20%, transparent);
@@ -26,10 +29,10 @@ body.theme-dark {
     --tool-icon-bg-7: color-mix(in srgb, var(--tool-icon-fg-7) 20%, transparent);
     --tool-icon-bg-8: color-mix(in srgb, var(--tool-icon-fg-8) 20%, transparent);
 
-    --bs-body-bg: #29292D;
+    --bs-body-bg: #0f1726;
 
-    background: #313135;
-    color: #ffffff;
+    background: var(--cinza-claro);
+    color: var(--preto);
 }
 
 /* ── Tipografia ── */
@@ -44,15 +47,6 @@ body.theme-dark label,
 body.theme-dark .user-avatar i,
 body.theme-dark .funcionarios-title,
 body.theme-dark .audit-title {
-    color: #ffffff;
-}
-
-body.theme-dark p,
-body.theme-dark span,
-body.theme-dark div,
-body.theme-dark td,
-body.theme-dark th,
-body.theme-dark li {
     color: #ffffff;
 }
 
@@ -77,7 +71,7 @@ body.theme-dark select,
 body.theme-dark textarea,
 body.theme-dark .form-control,
 body.theme-dark .form-select {
-    background: #1f1f24 !important;
+    background: var(--dark-input) !important;
     border-color: var(--border-color);
     color: #ffffff !important;
 }
@@ -97,7 +91,7 @@ body.theme-dark input[type="search"],
 body.theme-dark input[type="search"]:focus,
 body.theme-dark .form-control[type="search"],
 body.theme-dark .form-control[type="search"]:focus {
-    background-color: #29292D !important;
+    background-color: var(--dark-input) !important;
     color: #ffffff !important;
     border-color: var(--border-color) !important;
 }
@@ -105,7 +99,7 @@ body.theme-dark .form-control[type="search"]:focus {
 body.theme-dark .inbox-sector-filter select,
 body.theme-dark .docs-sector-filter select,
 body.theme-dark .inbox-sector-filter .form-select {
-    background-color: #29292D !important;
+    background-color: var(--dark-input) !important;
     color: #ffffff !important;
     border-color: var(--border-color) !important;
 }
@@ -123,12 +117,12 @@ body.theme-dark .form-check-input:checked {
 /* ── Fundo geral ── */
 body.theme-dark,
 body.theme-dark .dashboard {
-    background: #313135;
+    background: var(--cinza-claro);
 }
 
 /* ── Sidebar, Navbar, Hero ── */
 body.theme-dark .sidebar {
-    background: linear-gradient(180deg, #0f172a 0%, #16213e 100%);
+    background: linear-gradient(180deg, #091322 0%, #12213b 100%);
 }
 
 body.theme-dark .navbar-custom {
@@ -213,7 +207,7 @@ body.theme-dark .inbox-detail-meta div,
 body.theme-dark .perfil-card,
 body.theme-dark .setor-card,
 body.theme-dark .alert {
-    background: #29292D;
+    background: var(--branco);
     border-color: var(--border-color);
     color: #ffffff;
 }
@@ -234,7 +228,7 @@ body.theme-dark .docs-open-folder-card:hover,
 body.theme-dark .inbox-message-item:hover,
 body.theme-dark .ferr-item:hover,
 body.theme-dark .setor-card:hover {
-    background: #323238;
+    background: var(--dark-hover);
     border-color: rgba(59,130,246,.35);
     transition: all .2s ease;
 }
@@ -945,4 +939,146 @@ body.theme-dark .chat-conversation {
 
 body.theme-dark .chat-widget-body {
     background: #1f1f24;
+}
+
+/* ── Acabamento global: superfícies em camadas e contraste previsível ── */
+body.theme-dark .card,
+body.theme-dark .panel,
+body.theme-dark .stat-card,
+body.theme-dark .favorite-card,
+body.theme-dark .task-card,
+body.theme-dark .kanban-column,
+body.theme-dark .perfil-card,
+body.theme-dark .perfil-side-card,
+body.theme-dark .perfil-hero,
+body.theme-dark .inbox-mailbox,
+body.theme-dark .inbox-detail-card,
+body.theme-dark .document-page,
+body.theme-dark .document-table-wrap,
+body.theme-dark .processo-card,
+body.theme-dark .stepper-wrap,
+body.theme-dark .stepper-content,
+body.theme-dark .ferr-card,
+body.theme-dark .setor-card,
+body.theme-dark .task-request-panel,
+body.theme-dark .task-summary,
+body.theme-dark .task-filters {
+    background: var(--branco) !important;
+    border-color: var(--border-color) !important;
+}
+
+body.theme-dark .form-control,
+body.theme-dark .form-select,
+body.theme-dark .field-input,
+body.theme-dark input,
+body.theme-dark select,
+body.theme-dark textarea {
+    background: var(--dark-input) !important;
+    border-color: var(--border-color) !important;
+    color: var(--preto) !important;
+}
+
+body.theme-dark .form-control:focus,
+body.theme-dark .form-select:focus,
+body.theme-dark .field-input:focus,
+body.theme-dark input:focus,
+body.theme-dark select:focus,
+body.theme-dark textarea:focus {
+    border-color: var(--azul) !important;
+    box-shadow: 0 0 0 3px rgba(96,165,250,.16) !important;
+}
+
+body.theme-dark .text-muted,
+body.theme-dark .text-secondary,
+body.theme-dark .task-card p,
+body.theme-dark .perfil-setting-row p,
+body.theme-dark .perfil-font-block p,
+body.theme-dark .device-info small,
+body.theme-dark .device-detail {
+    color: var(--text-muted) !important;
+}
+
+body.theme-dark .table,
+body.theme-dark .table > :not(caption) > * > *,
+body.theme-dark .funcionarios-table,
+body.theme-dark .audit-table,
+body.theme-dark .document-table {
+    --bs-table-bg: var(--branco);
+    --bs-table-color: var(--preto);
+    --bs-table-border-color: var(--border-color);
+    background-color: var(--branco) !important;
+    color: var(--preto) !important;
+}
+
+body.theme-dark .btn-outline-secondary,
+body.theme-dark .btn-outline-primary,
+body.theme-dark .pagination-btn,
+body.theme-dark .icon-btn {
+    border-color: var(--border-color);
+    color: var(--preto);
+}
+
+body.theme-dark .btn-outline-secondary:hover,
+body.theme-dark .btn-outline-primary:hover,
+body.theme-dark .pagination-btn:hover,
+body.theme-dark .icon-btn:hover {
+    background: var(--dark-hover);
+    border-color: var(--azul);
+    color: #fff;
+}
+
+body.theme-dark .hero-p {
+    color: #cbd5e1 !important;
+}
+
+body.theme-dark .document-intro,
+body.theme-dark .document-folders,
+body.theme-dark .document-list-heading,
+body.theme-dark .document-filters,
+body.theme-dark .document-table,
+body.theme-dark .document-table-wrap {
+    background: var(--branco) !important;
+    border-color: var(--border-color) !important;
+    color: var(--preto) !important;
+}
+
+body.theme-dark .document-page > .d-flex.align-items-center.justify-content-between {
+    background: linear-gradient(135deg, #091a31 0%, #16365e 100%) !important;
+    border-color: rgba(96,165,250,.18) !important;
+}
+
+body.theme-dark .document-header-actions .btn-primary {
+    background: var(--azul) !important;
+    border-color: var(--azul) !important;
+    color: #071525 !important;
+}
+
+body.theme-dark .document-folder {
+    background: var(--dark-input) !important;
+    border-color: var(--border-color) !important;
+    color: var(--preto) !important;
+}
+
+body.theme-dark .document-folder-heading {
+    background: transparent !important;
+}
+
+body.theme-dark .document-folder:hover,
+body.theme-dark .document-folder:focus-visible {
+    background: var(--dark-hover) !important;
+    border-color: var(--azul) !important;
+}
+
+body.theme-dark .document-folder strong,
+body.theme-dark .document-folder small,
+body.theme-dark .document-folder-heading h3,
+body.theme-dark .document-list-heading > span,
+body.theme-dark .document-table th,
+body.theme-dark .document-table td {
+    color: var(--preto) !important;
+}
+
+body.theme-dark .document-folder-heading p,
+body.theme-dark .document-filters label {
+    color: var(--text-muted) !important;
 }

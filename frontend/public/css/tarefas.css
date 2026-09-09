@@ -171,7 +171,10 @@
     background: #f8fafc;
     border: var(--border1-5);
     border-radius: 12px;
-    min-height: 520px;
+    display: flex;
+    flex-direction: column;
+    height: clamp(360px, calc(100vh - 360px), 620px);
+    min-height: 0;
     overflow: hidden;
 }
 
@@ -203,9 +206,37 @@
 
 .kanban-list {
     display: flex;
+    flex: 1 1 auto;
     flex-direction: column;
     gap: 0.7rem;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 0.75rem;
+    scrollbar-gutter: stable;
+    scrollbar-color: #94a3b8 transparent;
+    scrollbar-width: thin;
+}
+
+.kanban-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.kanban-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.kanban-list::-webkit-scrollbar-thumb {
+    background: #94a3b8;
+    border-radius: 999px;
+}
+
+body.theme-dark .kanban-list {
+    scrollbar-color: #476789 transparent;
+}
+
+body.theme-dark .kanban-list::-webkit-scrollbar-thumb {
+    background: #476789;
 }
 
 .task-card {
