@@ -79,6 +79,17 @@ export default function ProfilePage(){
     setSettings(next);
   }
   async function toggleSetting(key, value){
+    if(key==="notifications" && value){
+      if(!("Notification" in window)){
+        setMessage({type:"error", text:"Este navegador não suporta notificações."});
+        return;
+      }
+      const permission=Notification.permission==="granted" ? "granted" : await Notification.requestPermission();
+      if(permission!=="granted"){
+        setMessage({type:"error", text:"Permita as notificações do navegador para ativar este recurso."});
+        return;
+      }
+    }
     const next={...settings, [key]:value};
     saveSettings(next);
     try{
@@ -126,6 +137,7 @@ export default function ProfilePage(){
 
   return (
     <DashboardLayout styles={["/css/perfil.css"]}>
+      <main className="dashboard">
       <div className="container perfil-page">
         {message && <div className={`auth-message ${message.type} mb-3`}>{message.text}</div>}
         <section className="perfil-hero">
@@ -263,6 +275,7 @@ export default function ProfilePage(){
           </div>
         )}
       </div>
+      </main>
     </DashboardLayout>
   );
 }

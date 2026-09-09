@@ -102,6 +102,35 @@ export function DashboardLayout({ children, styles = [] }) {
     return () => document.body.classList.remove("dashboard-body");
   }, []);
 
+  useEffect(() => {
+    let previousUnread = null;
+
+    async function checkInboxNotifications() {
+      let settings;
+      try { settings = JSON.parse(localStorage.getItem("hackgov.profileSettings") || "{}"); } catch { settings = {}; }
+      if (settings.notifications === false || !("Notification" in window) || Notification.permission !== "granted") {
+        previousUnread = null;
+        return;
+      }
+
+      try {
+        const counts = await api.getInboxCounts();
+        const unread = Number(counts?.minhasNaoLidas || 0);
+        if (previousUnread !== null && unread > previousUnread) {
+          new Notification("Nova mensagem na caixa de entrada", {
+            body: unread === 1 ? "Você tem 1 mensagem não lida." : `Você tem ${unread} mensagens não lidas.`,
+            icon: "/favicon.ico",
+          });
+        }
+        previousUnread = unread;
+      } catch { /* a notificação não pode interromper a navegação */ }
+    }
+
+    checkInboxNotifications();
+    const interval = window.setInterval(checkInboxNotifications, 15000);
+    return () => window.clearInterval(interval);
+  }, []);
+
   // 1:1 Django: body {% if modo_escuro %}theme-dark{% endif %} em todas as páginas — aplica globalmente, não só no perfil
   useEffect(() => {
     function apply(s){
