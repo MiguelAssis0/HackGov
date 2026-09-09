@@ -43,6 +43,7 @@ const routes = [
   { path: "/documentos", element: <DocumentsPage /> },
   { path: "/auditoria", element: <AuditPage /> },
   { path: "/importacao", element: <SpreadsheetImportPage /> },
+  { path: "/importacao/historico", element: <SpreadsheetImportPage /> },
   { path: "/perfil", element: <ProfilePage /> },
   { path: "/verify-2fa", element: <Verify2FAPage /> },
   { path: "/setores", element: <SectorsPage /> },

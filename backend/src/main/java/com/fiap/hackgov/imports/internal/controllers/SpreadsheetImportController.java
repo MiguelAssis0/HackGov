@@ -6,9 +6,13 @@ import com.fiap.hackgov.imports.internal.DTOs.ImportDTOs.Preview;
 import com.fiap.hackgov.imports.internal.DTOs.ImportDTOs.ValidateRequest;
 import com.fiap.hackgov.imports.internal.DTOs.ImportDTOs.ValidationReport;
 import com.fiap.hackgov.imports.internal.services.SpreadsheetImportService;
+import com.fiap.hackgov.imports.internal.services.SpreadsheetImportService.DownloadFile;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,5 +44,25 @@ public class SpreadsheetImportController {
     @GetMapping("/history")
     public List<BatchResponse> history(@AuthenticationPrincipal Employee e) {
         return service.history(e);
+    }
+
+    @GetMapping("/templates/{target}")
+    public ResponseEntity<byte[]> template(@PathVariable String target, @AuthenticationPrincipal Employee e) {
+        return file(service.template(target, e), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    }
+
+    @GetMapping("/exports/{target}")
+    public ResponseEntity<byte[]> export(@PathVariable String target, @AuthenticationPrincipal Employee e) {
+        return file(service.export(target, e), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    }
+
+    @GetMapping("/{id}/download")
+    public ResponseEntity<byte[]> download(@PathVariable UUID id, @AuthenticationPrincipal Employee e) {
+        return file(service.original(id, e), MediaType.APPLICATION_OCTET_STREAM_VALUE);
+    }
+
+    private ResponseEntity<byte[]> file(DownloadFile file, String contentType) {
+        ContentDisposition disposition = ContentDisposition.attachment().filename(file.filename()).build();
+        return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType)).contentLength(file.content().length).header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString()).body(file.content());
     }
 }

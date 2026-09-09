@@ -69,6 +69,16 @@ async function request(path, options = {}) {
   return requestFrom(API_BASE_URL, path, options);
 }
 
+async function downloadFile(path, filename) {
+  const blob = await request(path, { responseType: "blob" });
+  const url = URL.createObjectURL(blob);
+  const anchor = window.document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
 async function requestTaskPath(path, options = {}) {
   try {
     return await requestFrom(API_ROOT_URL, path, options);
@@ -488,6 +498,9 @@ export const api = {
   validateImport: (id, payload) => request(`/imports/${id}/validate`, { method: "POST", body: JSON.stringify(payload) }),
   executeImport: (id) => request(`/imports/${id}/execute`, { method: "POST" }),
   getImportHistory: () => request("/imports/history"),
+  downloadImportTemplate: (target) => downloadFile(`/imports/templates/${target}`, `${target}_import_template.xlsx`),
+  downloadImportExport: (target) => downloadFile(`/imports/exports/${target}`, `${target}_current_data.xlsx`),
+  downloadImport: (id) => downloadFile(`/imports/${id}/download`, "planilha_importada.xlsx"),
 
   // AI (integrado no mesmo client)
   requestAI: (message) =>

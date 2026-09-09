@@ -1,1 +1,322 @@
-.import-upload{display:grid;grid-template-columns:220px 1fr auto;gap:1rem;align-items:end}.import-mapping{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem}.import-stats{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}.import-stats strong{background:#eef5ff;color:var(--azul);padding:.65rem 1rem;border-radius:10px}.panel .table th,.panel .table td{padding:.75rem .55rem;vertical-align:middle}.panel .table th{white-space:nowrap}@media(max-width:760px){.import-upload{grid-template-columns:1fr}}
+.spreadsheet-page {
+    padding-bottom: 5rem;
+}
+
+.spreadsheet-title {
+    font-size: 1.4rem;
+    color: var(--azul-escuro);
+}
+
+.spreadsheet-upload {
+    margin-bottom: 1rem;
+}
+
+.upload-form-grid {
+    align-items: start;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: minmax(220px, .9fr) minmax(320px, 1.2fr) minmax(180px, .7fr);
+}
+
+.upload-field {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.upload-field .form-label {
+    color: var(--azul-escuro);
+    font-size: .88rem;
+    font-weight: 600;
+    margin-bottom: .4rem;
+}
+
+.upload-field .form-control,
+.upload-field .form-select {
+    min-height: 42px;
+}
+
+.upload-action {
+    align-self: start;
+    padding-top: 1.95rem;
+}
+
+.template-panel {
+    margin-bottom: 1rem;
+}
+
+.template-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .75rem;
+}
+
+.template-card {
+    align-items: center;
+    background: var(--branco);
+    border: var(--border1);
+    border-radius: 8px;
+    color: var(--azul-escuro);
+    display: flex;
+    gap: .65rem;
+    min-height: 52px;
+    padding: .8rem 1rem;
+    text-decoration: none;
+}
+
+.template-card:hover {
+    border-color: rgba(0, 123, 255, .35);
+    color: var(--azul);
+}
+
+.template-card i {
+    color: var(--azul);
+    font-size: 1.1rem;
+}
+
+.spreadsheet-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .75rem;
+    margin-bottom: 1rem;
+}
+
+.spreadsheet-summary div,
+.selected-mapping div {
+    background: var(--branco);
+    border: var(--border1);
+    border-radius: 8px;
+    padding: .9rem 1rem;
+}
+
+.spreadsheet-summary span,
+.selected-mapping span {
+    display: block;
+    color: var(--text-muted);
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.spreadsheet-summary strong,
+.selected-mapping strong {
+    display: block;
+    color: var(--azul-escuro);
+    font-size: .95rem;
+    overflow-wrap: anywhere;
+}
+
+.spreadsheet-muted {
+    font-size: .9rem;
+}
+
+.spreadsheet-table-wrap {
+    max-height: 360px;
+}
+
+.spreadsheet-table th {
+    white-space: nowrap;
+    color: var(--azul-escuro);
+    font-size: .78rem;
+    text-transform: uppercase;
+}
+
+.spreadsheet-table td {
+    min-width: 130px;
+    max-width: 260px;
+    overflow-wrap: anywhere;
+}
+
+.mapping-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .85rem;
+}
+
+.mapping-row {
+    display: grid;
+    gap: .35rem;
+}
+
+.mapping-row label {
+    color: var(--azul-escuro);
+    font-size: .82rem;
+    font-weight: 700;
+}
+
+.mapping-row label span {
+    color: var(--vermelho);
+    font-size: .7rem;
+    margin-left: .35rem;
+}
+
+.selected-mapping {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .75rem;
+}
+
+.quality-summary {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: .75rem;
+    margin-bottom: 1rem;
+}
+
+.quality-summary div {
+    background: var(--branco);
+    border: var(--border1);
+    border-radius: 8px;
+    padding: .9rem 1rem;
+}
+
+.quality-summary span {
+    display: block;
+    color: var(--text-muted);
+    font-size: .7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.quality-summary strong {
+    color: var(--azul-escuro);
+    font-size: 1.35rem;
+}
+
+.quality-list {
+    border: var(--border1);
+    border-radius: 8px;
+    padding: .85rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.quality-list.warning {
+    border-color: rgba(220, 53, 69, .28);
+    background: rgba(220, 53, 69, .06);
+}
+
+.quality-list strong {
+    display: block;
+    color: var(--azul-escuro);
+    margin-bottom: .5rem;
+}
+
+.quality-list div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .45rem;
+}
+
+.quality-list span {
+    background: var(--cinza-claro);
+    border-radius: 999px;
+    color: var(--azul-escuro);
+    font-size: .78rem;
+    padding: .25rem .6rem;
+}
+
+.quality-errors-table td:first-child {
+    min-width: 70px;
+}
+
+.import-confirm-check {
+    display: flex;
+    gap: .55rem;
+    align-items: center;
+    min-height: 38px;
+}
+
+.import-confirm-check span {
+    color: var(--azul-escuro);
+    font-weight: 600;
+}
+
+.import-summary {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.insight-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.insight-block {
+    border-top: var(--border1);
+    padding-top: 1rem;
+    margin-top: 1rem;
+}
+
+.insight-block > strong {
+    color: var(--azul-escuro);
+    display: block;
+    margin-bottom: .75rem;
+}
+
+.insight-chip-grid,
+.insight-category-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .75rem;
+}
+
+.insight-chip,
+.insight-category {
+    background: var(--branco);
+    border: var(--border1);
+    border-radius: 8px;
+    padding: .8rem 1rem;
+}
+
+.insight-chip span,
+.insight-category > span {
+    color: var(--text-muted);
+    display: block;
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.insight-chip strong {
+    color: var(--azul-escuro);
+    display: block;
+    margin-top: .25rem;
+}
+
+.insight-category div {
+    color: var(--azul-escuro);
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: .35rem;
+}
+
+.audit-json {
+    background: transparent;
+    border: 0;
+    color: var(--azul-escuro);
+    font-size: .75rem;
+    margin: 0;
+    max-width: 320px;
+    white-space: pre-wrap;
+}
+
+.spreadsheet-empty {
+    min-height: 260px;
+}
+
+.spreadsheet-empty.compact {
+    min-height: auto;
+    padding: 1rem;
+}
+
+@media (max-width: 992px) {
+    .spreadsheet-summary,
+    .upload-form-grid,
+    .mapping-grid,
+    .selected-mapping,
+    .quality-summary,
+    .template-grid,
+    .insight-chip-grid,
+    .insight-category-grid {
+        grid-template-columns: 1fr;
+    }
+}

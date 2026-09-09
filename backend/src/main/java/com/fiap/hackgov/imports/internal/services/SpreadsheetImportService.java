@@ -17,6 +17,7 @@ import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -43,7 +45,7 @@ public class SpreadsheetImportService {
     private final OccupationRepository occupationRepository;
     private final PasswordEncoder passwordEncoder;
     private final ObjectMapper json;
-    private static final Map<String, List<Field>> TARGETS = Map.of("departments", List.of(new Field("nome", true, List.of("setor", "departamento", "secretaria")), new Field("descricao", false, List.of("descricao", "observacao", "detalhes")), new Field("ativo", false, List.of("status", "situacao"))), "employees", List.of(new Field("nome", true, List.of("nome completo", "servidor", "funcionario")), new Field("email", true, List.of("email institucional", "e-mail", "mail")), new Field("cpf", false, List.of("documento", "cpf servidor")), new Field("numero_de_registro", false, List.of("matricula", "registro")), new Field("setor", false, List.of("departamento", "secretaria", "lotacao")), new Field("cargo", false, List.of("funcao", "ocupacao")), new Field("carga_horaria", false, List.of("horas", "jornada")), new Field("salario", false, List.of("remuneracao", "vencimento")), new Field("admissao", false, List.of("data admissao", "contratacao"))));
+    private static final Map<String, List<Field>> TARGETS = Map.of("departments", List.of(new Field("nome", true, List.of("setor", "departamento", "secretaria")), new Field("slug", false, List.of("identificador", "codigo")), new Field("descricao", false, List.of("descricao", "observacao", "detalhes")), new Field("ativo", false, List.of("status", "situacao"))), "employees", List.of(new Field("nome", true, List.of("nome completo", "servidor", "funcionario")), new Field("email", true, List.of("email institucional", "e-mail", "mail")), new Field("cpf", false, List.of("documento", "cpf servidor")), new Field("numero_de_registro", false, List.of("matricula", "registro")), new Field("setor", false, List.of("departamento", "secretaria", "lotacao")), new Field("cargo", false, List.of("funcao", "ocupacao")), new Field("carga_horaria", false, List.of("horas", "jornada")), new Field("salario", false, List.of("remuneracao", "vencimento")), new Field("admissao", false, List.of("data admissao", "contratacao"))));
 
     @Transactional
     public Preview preview(String target, MultipartFile file, Employee employee) {
@@ -157,6 +159,99 @@ public class SpreadsheetImportService {
         return batchRepository.findTop100ByCityHall_IdOrderByCreatedAtDesc(city(current)).stream().map(this::response).toList();
     }
 
+    @Transactional(readOnly = true)
+    public DownloadFile template(String target, Employee employee) {
+        admin(employee);
+        List<Field> fields = fields(target);
+        try (Workbook workbook = new XSSFWorkbook()) {
+            org.apache.poi.ss.usermodel.Sheet data = workbook.createSheet("Dados");
+            org.apache.poi.ss.usermodel.Row header = data.createRow(0);
+            for (int i = 0; i < fields.size(); i++) header.createCell(i).setCellValue(label(fields.get(i).name()));
+            org.apache.poi.ss.usermodel.Row example = data.createRow(1);
+            Map<String, String> examples = target.equals("employees")
+                    ? Map.of("nome", "Ana Souza", "email", "ana.souza@prefeitura.gov.br", "cpf", "123.456.789-00", "numero_de_registro", "MAT-001", "setor", "RH", "cargo", "Analista", "carga_horaria", "40", "salario", "3500,00", "admissao", "2026-06-20")
+                    : Map.of("nome", "Recursos Humanos", "slug", "rh", "descricao", "Gestao de pessoas", "ativo", "sim");
+            for (int i = 0; i < fields.size(); i++) example.createCell(i).setCellValue(examples.getOrDefault(fields.get(i).name(), ""));
+            data.createFreezePane(0, 1);
+            org.apache.poi.ss.usermodel.Sheet instructions = workbook.createSheet("Instrucoes");
+            instructions.createRow(0).createCell(0).setCellValue("Preencha a aba Dados e mantenha os nomes das colunas.");
+            instructions.createRow(1).createCell(0).setCellValue("Valide a planilha no sistema antes de confirmar a importacao.");
+            return workbook(workbook, target + "_import_template.xlsx");
+        } catch (Exception exception) {
+            throw new BusinessException("Nao foi possivel gerar o modelo de importacao");
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public DownloadFile export(String target, Employee employee) {
+        Employee current = admin(employee);
+        List<Field> fields = fields(target);
+        try (Workbook workbook = new XSSFWorkbook()) {
+            org.apache.poi.ss.usermodel.Sheet data = workbook.createSheet("Dados");
+            org.apache.poi.ss.usermodel.Row header = data.createRow(0);
+            for (int i = 0; i < fields.size(); i++) header.createCell(i).setCellValue(label(fields.get(i).name()));
+            if (target.equals("departments")) {
+                int rowIndex = 1;
+                for (Sector sector : sectorRepository.findAllByCityHall_Id(city(current))) {
+                    org.apache.poi.ss.usermodel.Row row = data.createRow(rowIndex++);
+                    exportValue(row, fields, exportValues("nome", sector.getName(), "slug", sector.getSlug(), "descricao", sector.getDescription(), "ativo", sector.isActive() ? "sim" : "nao"));
+                }
+            } else {
+                int rowIndex = 1;
+                for (Employee item : employeeRepository.findAllByCityHallId_IdAndStatusTrueOrderByFirstNameAscLastNameAsc(city(current))) {
+                    org.apache.poi.ss.usermodel.Row row = data.createRow(rowIndex++);
+                    exportValue(row, fields, exportValues("nome", item.getFullName(), "email", item.getEmail(), "cpf", item.getCpf(), "numero_de_registro", item.getRegistrationNumber(), "setor", item.getSectorId() == null ? "" : item.getSectorId().getName(), "cargo", item.getOccupationId() == null ? "" : item.getOccupationId().getName(), "carga_horaria", item.getHoursWorked(), "salario", item.getSalary(), "admissao", item.getAdmissionDate() == null ? "" : item.getAdmissionDate().toLocalDate().toString()));
+                }
+            }
+            data.createFreezePane(0, 1);
+            workbook.createSheet("Instrucoes").createRow(0).createCell(0).setCellValue("Edite a aba Dados e envie este arquivo novamente na Importacao de planilhas.");
+            return workbook(workbook, target + "_current_data.xlsx");
+        } catch (Exception exception) {
+            throw new BusinessException("Nao foi possivel exportar os dados atuais");
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public DownloadFile original(UUID id, Employee employee) {
+        ImportBatch batch = scoped(id, admin(employee));
+        return new DownloadFile(batch.getOriginalFile(), batch.getOriginalFileName());
+    }
+
+    private List<Field> fields(String target) {
+        List<Field> fields = TARGETS.get(target);
+        if (fields == null) throw new BusinessException("Modulo de importacao indisponivel");
+        return fields;
+    }
+
+    private String label(String field) {
+        return switch (field) {
+            case "nome" -> "Nome";
+            case "email" -> "E-mail";
+            case "numero_de_registro" -> "Numero de registro";
+            case "carga_horaria" -> "Carga horaria";
+            default -> field.substring(0, 1).toUpperCase(Locale.ROOT) + field.substring(1);
+        };
+    }
+
+    private void exportValue(org.apache.poi.ss.usermodel.Row row, List<Field> fields, Map<String, ?> values) {
+        for (int i = 0; i < fields.size(); i++) {
+            Object value = values.get(fields.get(i).name());
+            row.createCell(i).setCellValue(value == null ? "" : String.valueOf(value));
+        }
+    }
+
+    private Map<String, Object> exportValues(Object... pairs) {
+        Map<String, Object> values = new HashMap<>();
+        for (int i = 0; i + 1 < pairs.length; i += 2) values.put(String.valueOf(pairs[i]), pairs[i + 1] == null ? "" : pairs[i + 1]);
+        return values;
+    }
+
+    private DownloadFile workbook(Workbook workbook, String filename) throws Exception {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        workbook.write(output);
+        return new DownloadFile(output.toByteArray(), filename);
+    }
+
     private boolean saveDepartment(Map<String, String> v, ImportBatch.Mode mode, Employee e) {
         String name = req(v, "nome");
         Optional<Sector> found = sectorRepository.findByNameAndCityHall_Id(name, city(e));
@@ -165,6 +260,7 @@ public class SpreadsheetImportService {
         Sector s = found.orElseGet(Sector::new);
         boolean created = s.getId() == null;
         s.setName(name);
+        s.setSlug(v.getOrDefault("slug", "").trim());
         s.setDescription(v.getOrDefault("descricao", "").trim());
         s.setActive(bool(v.getOrDefault("ativo", "true")));
         s.setCityHall(e.getCityHallId());
@@ -425,6 +521,9 @@ public class SpreadsheetImportService {
     }
 
     private record Parsed(List<String> headers, List<Row> rows, int ignored) {
+    }
+
+    public record DownloadFile(byte[] content, String filename) {
     }
 
     private record Field(String name, boolean required, List<String> aliases) {
