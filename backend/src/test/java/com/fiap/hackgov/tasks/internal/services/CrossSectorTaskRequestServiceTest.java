@@ -3,7 +3,10 @@ package com.fiap.hackgov.tasks.internal.services;
 import com.fiap.hackgov.cityhall_management.internal.entities.CityHall;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.cityhall_management.internal.entities.Sector;
+import com.fiap.hackgov.cityhall_management.internal.repositories.CityHallRepository;
+import com.fiap.hackgov.cityhall_management.internal.repositories.EmployeeRepository;
 import com.fiap.hackgov.cityhall_management.internal.repositories.SectorRepository;
+import com.fiap.hackgov.inbox.internal.services.InboxService;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.tasks.internal.DTOs.CrossSectorRequestDTOs.Create;
 import com.fiap.hackgov.tasks.internal.entities.Task;
@@ -28,9 +31,15 @@ class CrossSectorTaskRequestServiceTest {
     @Mock
     SectorRepository sectorRepository;
     @Mock
+    CityHallRepository cityHallRepository;
+    @Mock
+    EmployeeRepository employeeRepository;
+    @Mock
     BoardRepository boardRepository;
     @Mock
     TaskReporitory taskRepository;
+    @Mock
+    InboxService inboxService;
 
     @Test
     void createRejectsDestinationEqualToOriginSector() {
@@ -44,7 +53,7 @@ class CrossSectorTaskRequestServiceTest {
         employee.setCityHallId(city);
         employee.setSectorId(sector);
         when(sectorRepository.findByIdAndCityHall_Id(sector.getId(), city.getId())).thenReturn(Optional.of(sector));
-        CrossSectorTaskRequestService service = new CrossSectorTaskRequestService(repository, sectorRepository, boardRepository, taskRepository, null);
+        CrossSectorTaskRequestService service = new CrossSectorTaskRequestService(repository, sectorRepository, cityHallRepository, employeeRepository, boardRepository, taskRepository, inboxService);
 
         assertThrows(BusinessException.class, () -> service.create(
                 new Create(sector.getId(), "Demanda", "Descricao", Task.Priority.NORMAL, null), employee));
