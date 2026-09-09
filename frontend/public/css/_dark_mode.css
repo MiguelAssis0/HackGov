@@ -1166,6 +1166,107 @@ body.theme-dark .document-header-actions .btn-primary {
     color: #111315 !important;
 }
 
+body.theme-dark .document-page .document-new-button,
+body.theme-dark .document-page .document-new-button:hover,
+body.theme-dark .document-page .document-new-button:focus-visible {
+    background: var(--dark-raised) !important;
+    border-color: var(--border-color) !important;
+    color: var(--preto) !important;
+    -webkit-text-fill-color: var(--preto) !important;
+}
+
+body.theme-dark .document-page .document-new-button:hover,
+body.theme-dark .document-page .document-new-button:focus-visible {
+    background: var(--dark-hover) !important;
+    border-color: var(--azul) !important;
+}
+
+body.theme-dark .document-page .document-new-button > span {
+    color: var(--preto) !important;
+    -webkit-text-fill-color: var(--preto) !important;
+}
+
+body.theme-dark .document-modal,
+body.theme-dark .document-modal .task-modal-header,
+body.theme-dark .document-modal-body,
+body.theme-dark .document-modal-footer {
+    background: var(--branco) !important;
+    border-color: var(--border-color) !important;
+    color: var(--preto) !important;
+}
+
+body.theme-dark .document-modal-heading h3,
+body.theme-dark .document-modal-body .field-label,
+body.theme-dark .document-modal-body .recipient-picker h4,
+body.theme-dark .document-modal-body .official-fields h4,
+body.theme-dark .docs-modal-section-head strong,
+body.theme-dark .drag-drop-zone > strong {
+    color: var(--preto) !important;
+}
+
+body.theme-dark .document-modal .btn-acao {
+    color: var(--text-muted) !important;
+}
+
+body.theme-dark .document-modal .btn-acao:hover {
+    background: var(--dark-hover) !important;
+    color: var(--preto) !important;
+}
+
+body.theme-dark .docs-modal-steps {
+    border-color: var(--border-color) !important;
+}
+
+body.theme-dark .docs-step-indicator,
+body.theme-dark .docs-step-indicator.completed {
+    color: var(--text-muted) !important;
+}
+
+body.theme-dark .docs-step-indicator > span,
+body.theme-dark .docs-modal-section-head > i {
+    background: var(--dark-raised) !important;
+    color: var(--preto) !important;
+}
+
+body.theme-dark .docs-step-indicator.active {
+    color: #fff !important;
+}
+
+body.theme-dark .docs-step-indicator.active > span {
+    background: var(--azul) !important;
+    color: #111315 !important;
+}
+
+body.theme-dark .document-modal-body input:not([type="checkbox"]):not([type="radio"]),
+body.theme-dark .document-modal-body select,
+body.theme-dark .document-modal-body textarea {
+    background: var(--dark-input) !important;
+    border-color: var(--border-color) !important;
+    color: var(--preto) !important;
+}
+
+body.theme-dark .document-modal-body input::placeholder,
+body.theme-dark .document-modal-body textarea::placeholder,
+body.theme-dark .document-modal-body .recipient-columns > div > strong,
+body.theme-dark .document-modal-body .recipient-option small,
+body.theme-dark .docs-modal-section-head small,
+body.theme-dark .drag-drop-zone > small {
+    color: var(--text-muted) !important;
+}
+
+body.theme-dark .document-modal-body .recipient-picker,
+body.theme-dark .document-modal-body .official-fields,
+body.theme-dark .document-modal-body .recipient-columns > div,
+body.theme-dark .drag-drop-zone {
+    background: var(--dark-raised) !important;
+    border-color: var(--border-color) !important;
+    color: var(--preto) !important;
+}
+
+body.theme-dark .document-modal-body .recipient-option:hover {
+    background: var(--dark-hover) !important;
+}
+
 body.theme-dark .document-folder {
     background: var(--dark-input) !important;
     border-color: var(--border-color) !important;
