@@ -1,4 +1,4 @@
-.gestao-page { padding: 2rem 1.5rem 4rem; max-width: 1600px; }
+.gestao-page { padding: 2rem 1.5rem 4rem; max-width: 100%; width: 100%; }
 .gestao-header, .gestao-section-heading, .gestao-report-header, .gestao-sector-title { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .gestao-header { margin-bottom: 1.5rem; }
 .gestao-tabs { display: flex; gap: .5rem; border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem; }
