@@ -84,11 +84,11 @@
 .gestao-report-row { display: flex; justify-content: space-between; gap: 1rem; padding: .6rem 0; border-bottom: var(--border1); }
 .gestao-report-row strong { text-align: right; }
 .gestao-report-footnote { color: var(--text-muted); font-size: .8rem; margin-top: 1rem; }
-.gestao-predictive-hero { border-top: 4px solid #7c3aed; }
+.gestao-predictive-hero { border-top: 4px solid var(--azul); }
 .gestao-predictive-intro { color: var(--text-muted); margin: -.35rem 0 1rem; }
 .gestao-predictive-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
 .gestao-ai-badge, .gestao-ai-scope, .gestao-trend { border-radius: 999px; background: var(--cinza-claro); color: var(--text-muted); padding: .4rem .7rem; font-size: .78rem; font-weight: 700; }
-.gestao-ai-badge.is-live { background: #ede9fe; color: #6d28d9; }
+.gestao-ai-badge.is-live { background: var(--azul-claro); color: var(--azul-escuro); }
 .gestao-trend-alta { background: #dcfce7; color: #166534; }
 .gestao-trend-queda { background: #fee2e2; color: #991b1b; }
 .gestao-trend-estável { background: var(--azul-claro); color: var(--azul-escuro); }
@@ -99,10 +99,10 @@
 .gestao-signal.is-positive > i { color: var(--verde); }
 .gestao-signal strong, .gestao-signal span { display: block; }
 .gestao-signal span { color: var(--text-muted); font-size: .82rem; margin-top: .15rem; }
-.gestao-recommendations { border-left: 4px solid #7c3aed; }
+.gestao-recommendations { border-left: 4px solid var(--azul); }
 .gestao-recommendations-text { white-space: pre-wrap; line-height: 1.7; color: var(--azul-escuro); }
 .gestao-predictive-empty { min-height: 260px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .45rem; color: var(--text-muted); text-align: center; }
-.gestao-predictive-empty i { color: #7c3aed; font-size: 2rem; }
+.gestao-predictive-empty i { color: var(--azul); font-size: 2rem; }
 body.theme-dark .gestao-filter-panel, body.theme-dark .gestao-panel, body.theme-dark .gestao-report, body.theme-dark .gestao-kpi-card, body.theme-dark .gestao-sector-card, body.theme-dark .gestao-table th { background: var(--branco); }
 body.theme-dark .gestao-period-summary, body.theme-dark .gestao-filter-chip, body.theme-dark .gestao-rank { background: var(--azul-meio-escuro); color: var(--branco); }
 body.theme-dark .chart-point { fill: var(--branco); }
