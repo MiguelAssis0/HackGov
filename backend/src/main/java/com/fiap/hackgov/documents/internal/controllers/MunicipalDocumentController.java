@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -43,6 +44,11 @@ public class MunicipalDocumentController {
                                @RequestParam(required = false) String tags,
                                @AuthenticationPrincipal Employee employee) {
         return service.list(query, type, number, year, dateStart, dateEnd, related, tags, employee);
+    }
+
+    @GetMapping("/counts")
+    public Map<String, Long> counts(@AuthenticationPrincipal Employee employee) {
+        return service.counts(employee);
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

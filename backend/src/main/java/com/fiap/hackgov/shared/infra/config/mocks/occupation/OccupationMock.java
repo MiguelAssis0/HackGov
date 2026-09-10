@@ -79,7 +79,8 @@ public class OccupationMock {
         assessorJuridico.setLevel(LevelOccupation.SENIOR);
         assessorJuridico.setSectorId(ctx.juridicoSectorSP);
 
-        repository.saveAll(List.of(
+        // ponytail: cityHall obrigatório — getAllOccupations filtra por prefeitura
+        var occupations = List.of(
                 administradorMunicipal,
                 analista,
                 gerente,
@@ -89,7 +90,9 @@ public class OccupationMock {
                 analistaFinanceiro,
                 gestorContratos,
                 assessorJuridico
-        ));
+        );
+        occupations.forEach(occupation -> occupation.setCityHall(ctx.cityHallSP));
+        repository.saveAll(occupations);
         ctx.administradorMunicipal = administradorMunicipal;
         ctx.analista = analista;
         ctx.gerente = gerente;

@@ -82,6 +82,16 @@ public class MunicipalDocumentService {
                 .map(this::toResponse).toList();
     }
 
+    @Transactional(readOnly = true)
+    public Map<String, Long> counts(Employee employee) {
+        Employee current = require(employee);
+        return repository.findDistinctByCityHall_IdOrderByCreatedAtDesc(cityId(current)).stream()
+                .filter(document -> canView(document, current))
+                .collect(java.util.stream.Collectors.groupingBy(
+                        document -> document.getDocumentType() == null ? "OTHER" : document.getDocumentType(),
+                        java.util.stream.Collectors.counting()));
+    }
+
     @Transactional
     public Response upload(String title, String documentType, String description,
                            MunicipalDocument.Visibility visibility, Set<UUID> destinationIds,

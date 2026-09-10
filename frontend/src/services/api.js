@@ -406,6 +406,8 @@ export const api = {
 
   // DOCUMENTOS
   getDocuments: ({ query = "", type = "", number = "", year = "", dateStart = "", dateEnd = "", related = "", tags = "" } = {}) => request(`/documents?query=${encodeURIComponent(query)}&type=${encodeURIComponent(type)}&number=${encodeURIComponent(number)}&year=${encodeURIComponent(year)}&dateStart=${encodeURIComponent(dateStart)}&dateEnd=${encodeURIComponent(dateEnd)}&related=${encodeURIComponent(related)}&tags=${encodeURIComponent(tags)}`),
+
+  getDocumentCounts: () => request("/documents/counts"),
   uploadDocument: (payload) => {
     const body = new FormData();
     body.append("title", payload.title); body.append("documentType", payload.documentType);
