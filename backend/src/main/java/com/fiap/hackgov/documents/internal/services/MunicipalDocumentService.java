@@ -13,6 +13,7 @@ import com.fiap.hackgov.documents.internal.DTOs.DocumentDTOs.Response;
 import com.fiap.hackgov.documents.internal.DTOs.DocumentDTOs.SignatureRequest;
 import com.fiap.hackgov.documents.internal.entities.MunicipalDocument;
 import com.fiap.hackgov.documents.internal.repositories.MunicipalDocumentRepository;
+import com.fiap.hackgov.inbox.internal.services.InboxService;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
 import com.fiap.hackgov.shared.infra.exceptions.UnauthorizedException;
@@ -49,6 +50,7 @@ public class MunicipalDocumentService {
     );
 
     private final MunicipalDocumentRepository repository;
+    private final InboxService inboxService;
     private final EmployeeRepository employeeRepository;
     private final SectorRepository sectorRepository;
     private final OccupationRepository occupationRepository;
@@ -196,7 +198,9 @@ public class MunicipalDocumentService {
         Employee current = require(employee);
         MunicipalDocument document = scoped(id, current);
         requireOwnerOrAdmin(document, current);
-        return toResponse(repository.save(copy(document, destinations(request.destinationIds(), current), current)));
+        MunicipalDocument copy = repository.save(copy(document, destinations(request.destinationIds(), current), current));
+        copy.getDestinations().forEach(destination -> inboxService.notifyDocument(copy, destination, current));
+        return toResponse(copy);
     }
 
     @Transactional
@@ -331,8 +335,9 @@ public class MunicipalDocumentService {
 
     private boolean canView(MunicipalDocument document, Employee employee) {
         if (Roles.ADMIN.equals(employee.getRole()) || document.getOwner().getId().equals(employee.getId())) return true;
-        if (document.getSignatureStatus() == MunicipalDocument.SignatureStatus.PENDING) return false;
+        // ponytail: destinatário vê mesmo PENDENTE (só dono/admin assina) — senão encaminhado some
         if (document.getDestinations().stream().anyMatch(item -> item.getId().equals(employee.getId()))) return true;
+        if (document.getSignatureStatus() == MunicipalDocument.SignatureStatus.PENDING) return false;
         if (document.getRelatedEmployees().stream().anyMatch(item -> item.getId().equals(employee.getId()))) return true;
         if (employee.getSectorId() != null && document.getRelatedSectors().stream().anyMatch(item -> item.getId().equals(employee.getSectorId().getId()))) return true;
         if (employee.getOccupationId() != null && document.getRelatedOccupations().stream().anyMatch(item -> item.getId().equals(employee.getOccupationId().getId()))) return true;

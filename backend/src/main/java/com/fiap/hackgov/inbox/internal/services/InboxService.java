@@ -4,6 +4,7 @@ import com.fiap.hackgov.auth.internal.entities.enums.Roles;
 import com.fiap.hackgov.bidding.internal.entities.Requisition;
 import com.fiap.hackgov.bidding.internal.entities.enums.ProcessStage;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
+import com.fiap.hackgov.documents.internal.entities.MunicipalDocument;
 import com.fiap.hackgov.inbox.internal.DTOs.InboxDTOs;
 import com.fiap.hackgov.inbox.internal.DTOs.InboxDTOs.Response;
 import com.fiap.hackgov.inbox.internal.entities.InboxEntry;
@@ -217,6 +218,29 @@ public class InboxService {
                 && requisition.getProcurementResponsible() != null
                 ? requisition.getProcurementResponsible()
                 : requisition.getResponsible();
+    }
+
+    @Transactional
+    public InboxEntry notifyDocument(MunicipalDocument document, Employee destination, Employee actor) {
+        if (document == null || document.getCityHall() == null || destination == null) return null;
+        UUID cityId = document.getCityHall().getId();
+        String key = "document:" + document.getId() + ":employee:" + destination.getId();
+        InboxEntry entry = repository.findByCityHall_IdAndKey(cityId, key).orElseGet(InboxEntry::new);
+        entry.setCityHall(document.getCityHall());
+        entry.setTitle("Documento encaminhado: " + document.getTitle());
+        entry.setDescription(document.getDescription() == null ? "" : document.getDescription());
+        entry.setType(InboxEntry.Type.DOCUMENT);
+        entry.setPriority(InboxEntry.Priority.NORMAL);
+        entry.setDestinationEmployee(destination);
+        entry.setDestinationSector(destination.getSectorId());
+        entry.setToolSlug("documentos");
+        entry.setObjectType("document");
+        entry.setObjectId(document.getId());
+        entry.setUrl("/documentos");
+        entry.setKey(key);
+        entry.setCreatedBy(actor);
+        entry.setStatus(InboxEntry.Status.NEW);
+        return repository.save(entry);
     }
 
     @Transactional
