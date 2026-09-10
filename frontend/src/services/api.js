@@ -528,6 +528,8 @@ export async function saveSession(loginResponse, email) {
   if (refreshToken) {
     localStorage.setItem("hackgov.refreshToken", refreshToken);
   }
+  // ponytail: descarta permissões do usuário anterior para a navbar não herdar acessos
+  localStorage.removeItem("hackgov.allowedTools");
 
   const tokenPayload = decodeJwtPayload(accessToken);
   const role = loginResponse.role || tokenPayload?.role || "";
@@ -588,6 +590,7 @@ export function clearSession() {
   localStorage.removeItem("hackgov.refreshToken");
   localStorage.removeItem("hackgov.user");
   localStorage.removeItem("hackgov.selectedCityHall");
+  localStorage.removeItem("hackgov.allowedTools");
 }
 
 /**

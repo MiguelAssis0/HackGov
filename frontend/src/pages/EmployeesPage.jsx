@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "../components/DashboardLayout.jsx";
+import { AccessDenied } from "../components/DashboardShared.jsx";
 import { api, getSelectedCityHall, getStoredUser, getUserType } from "../services/api.js";
 
 function pageItems(payload) { if (Array.isArray(payload)) return payload; return payload?.content || payload?.items || []; }
@@ -17,6 +18,16 @@ export default function EmployeesPage(){
   const [sectors,setSectors]=useState([]);
   const [occupations,setOccupations]=useState([]);
   const [employees,setEmployees]=useState([]);
+  const [hasToolAccess,setHasToolAccess]=useState(()=>{
+    if (canManage) return true;
+    try {
+      const raw=JSON.parse(localStorage.getItem("hackgov.allowedTools")||"null");
+      const slugs=Array.isArray(raw?.slugs)?raw.slugs:[];
+      const routes=Array.isArray(raw?.routes)?raw.routes:[];
+      if (!slugs.length && !routes.length) return null;
+      return slugs.includes("funcionarios")||routes.includes("/funcionarios");
+    } catch { return null; }
+  });
   const [loading,setLoading]=useState(true);
   const [message,setMessage]=useState(null);
   const [search,setSearch]=useState("");
@@ -38,6 +49,19 @@ export default function EmployeesPage(){
     }catch(e){ setMessage({type:"error", text:e.message}); } finally{ setLoading(false); }
   }
   useEffect(()=>{ load(); },[page]);
+  // ponytail: esconde rota direta quando /tools não lista funcionarios; erro mantém cache
+  useEffect(()=>{
+    if (canManage) { setHasToolAccess(true); return; }
+    let mounted=true;
+    api.getTools()
+      .then((tools)=>{
+        if(!mounted) return;
+        const items=Array.isArray(tools)?tools:[];
+        setHasToolAccess(items.some((t)=>t?.id==="funcionarios"||t?.route==="/funcionarios"));
+      })
+      .catch(()=>{ if(mounted) setHasToolAccess((current)=>current ?? true); });
+    return ()=>{ mounted=false; };
+  },[]);
   // filter cargos por setor selecionado (como funcionarios.js)
   const cargosNovo=useMemo(()=>{ if(!formNovo.setor) return occupations; return occupations.filter(o=> String(o.sectorId)===String(formNovo.setor) || String(o.sector?.id)===String(formNovo.setor)); },[occupations, formNovo.setor]);
   const cargosEdit=useMemo(()=>{ if(!formEdit.setor) return occupations; return occupations.filter(o=> String(o.sectorId)===String(formEdit.setor) || String(o.sector?.id)===String(formEdit.setor)); },[occupations, formEdit.setor]);
@@ -120,6 +144,14 @@ export default function EmployeesPage(){
   }
   async function handleToggle(emp){
     try{ await api.toggleEmployee(emp.id); load(); }catch(err){ setMessage({type:"error", text:err.message}); }
+  }
+
+  if (hasToolAccess===false) {
+    return (
+      <DashboardLayout styles={["/css/management.css"]}>
+        <main className="dashboard"><div className="container"><AccessDenied /></div></main>
+      </DashboardLayout>
+    );
   }
 
   return (

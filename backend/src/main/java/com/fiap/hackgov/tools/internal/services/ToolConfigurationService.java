@@ -70,7 +70,8 @@ public class ToolConfigurationService {
         if (ADMIN_ONLY.contains(item.getSlug()) || (!item.isEnabled() && !item.isMandatory())) return false;
         boolean explicitAccess = permissionService.canAccess(item.getSlug(), employee);
         if (item.isRestricted()) return explicitAccess;
-        if ("funcionarios".equals(item.getSlug()) || FIXED_VISIBLE.contains(item.getSlug())) return true;
+        // ponytail: funcionarios exige regra explícita como relatorios/auditoria; antes era sempre visível e a navbar nunca escondia
+        if (FIXED_VISIBLE.contains(item.getSlug())) return true;
         if (Set.of("tarefas", "agenda").contains(item.getSlug())) return employee.getSectorId() != null;
         return explicitAccess;
     }

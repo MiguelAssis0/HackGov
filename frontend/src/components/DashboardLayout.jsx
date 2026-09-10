@@ -38,6 +38,17 @@ const demoUser = {
 };
 
 const SIDEBAR_COLLAPSED_KEY = "hackgov.sidebarCollapsed";
+const TOOLS_CACHE_KEY = "hackgov.allowedTools";
+
+function readCachedTools() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(TOOLS_CACHE_KEY) || "null");
+    if (raw && Array.isArray(raw.routes) && Array.isArray(raw.slugs)) {
+      return { routes: new Set(raw.routes), slugs: new Set(raw.slugs) };
+    }
+  } catch { /* sem cache: mostra tudo até carregar */ }
+  return null;
+}
 
 function initials(name) {
   if (!name) return "";
@@ -88,6 +99,7 @@ export function DashboardLayout({ children, styles = [] }) {
   const [chatOpen, setChatOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("chats");
   const [cityHalls, setCityHalls] = useState([]);
+  const [allowedTools, setAllowedTools] = useState(readCachedTools);
   const [selectedCityHall, setSelectedCityHall] = useState(() => getSelectedCityHall());
   const user = getStoredUser() || demoUser;
   const displayName = getUserDisplayName(user);
@@ -160,6 +172,31 @@ export function DashboardLayout({ children, styles = [] }) {
     window.addEventListener("storage", onStorage);
     return ()=> window.removeEventListener("storage", onStorage);
   }, []);
+
+  // ponytail: navbar respeita /tools com cache síncrono (sem pisca); erro mantém cache, nunca volta a null
+  useEffect(() => {
+    let mounted = true;
+    api.getTools()
+      .then((tools) => {
+        if (!mounted) return;
+        const routes = [];
+        const slugs = [];
+        (Array.isArray(tools) ? tools : []).forEach((tool) => {
+          if (tool?.route) routes.push(tool.route);
+          if (tool?.id) slugs.push(tool.id);
+        });
+        try { localStorage.setItem(TOOLS_CACHE_KEY, JSON.stringify({ routes, slugs })); } catch { /* cache opcional */ }
+        setAllowedTools({ routes: new Set(routes), slugs: new Set(slugs) });
+      })
+      .catch(() => {});
+    return () => { mounted = false; };
+  }, []);
+
+  function hasAccess(route, ...slugs) {
+    if (!allowedTools) return true;
+    if (allowedTools.routes.has(route)) return true;
+    return slugs.some((slug) => allowedTools.slugs.has(slug));
+  }
 
   useEffect(() => {
     if (!isTeamAdmin) {
@@ -301,39 +338,53 @@ export function DashboardLayout({ children, styles = [] }) {
           >
             <i className="bi bi-grid-1x2-fill"></i> Ferramentas
           </Link>
-          <Link
-            className={`nav-item ${isActive("/tarefas") ? "active" : ""}`}
-            to="/tarefas"
-          >
-            <i className="bi bi-check2-square"></i> Tarefas
-          </Link>
-          <Link
-            className={`nav-item ${isActive("/agenda") ? "active" : ""}`}
-            to="/agenda"
-          >
-            <i className="bi bi-calendar3"></i> Agenda
-          </Link>
-          <Link className={`nav-item ${isActive("/caixa-entrada") ? "active" : ""}`} to="/caixa-entrada">
-            <i className="bi bi-inbox-fill"></i> Caixa de Entrada
-          </Link>
-          <Link className={`nav-item ${isActive("/documentos") ? "active" : ""}`} to="/documentos">
-            <i className="bi bi-folder2-open"></i> Documentos
-          </Link>
-          <Link
-            className={`nav-item ${isActive("/funcionarios") ? "active" : ""}`}
-            to="/funcionarios"
-          >
-            <i className="bi bi-people-fill"></i> Funcionários
-          </Link>
-          <Link className={`nav-item ${isActive("/auditoria") ? "active" : ""}`} to="/auditoria">
-            <i className="bi bi-shield-check"></i> Auditoria
-          </Link>
-          <Link
-            className={`nav-item ${isActive("/gestao") ? "active" : ""}`}
-            to="/gestao"
-          >
-            <i className="bi bi-graph-up-arrow"></i> Gest&atilde;o
-          </Link>
+          {hasAccess("/tarefas", "tarefas") && (
+            <Link
+              className={`nav-item ${isActive("/tarefas") ? "active" : ""}`}
+              to="/tarefas"
+            >
+              <i className="bi bi-check2-square"></i> Tarefas
+            </Link>
+          )}
+          {hasAccess("/agenda", "agenda") && (
+            <Link
+              className={`nav-item ${isActive("/agenda") ? "active" : ""}`}
+              to="/agenda"
+            >
+              <i className="bi bi-calendar3"></i> Agenda
+            </Link>
+          )}
+          {hasAccess("/caixa-entrada", "caixa-entrada") && (
+            <Link className={`nav-item ${isActive("/caixa-entrada") ? "active" : ""}`} to="/caixa-entrada">
+              <i className="bi bi-inbox-fill"></i> Caixa de Entrada
+            </Link>
+          )}
+          {hasAccess("/documentos", "documentos") && (
+            <Link className={`nav-item ${isActive("/documentos") ? "active" : ""}`} to="/documentos">
+              <i className="bi bi-folder2-open"></i> Documentos
+            </Link>
+          )}
+          {hasAccess("/funcionarios", "funcionarios") && (
+            <Link
+              className={`nav-item ${isActive("/funcionarios") ? "active" : ""}`}
+              to="/funcionarios"
+            >
+              <i className="bi bi-people-fill"></i> Funcionários
+            </Link>
+          )}
+          {hasAccess("/auditoria", "auditoria") && (
+            <Link className={`nav-item ${isActive("/auditoria") ? "active" : ""}`} to="/auditoria">
+              <i className="bi bi-shield-check"></i> Auditoria
+            </Link>
+          )}
+          {hasAccess("/gestao", "relatorios", "gestao") && (
+            <Link
+              className={`nav-item ${isActive("/gestao") ? "active" : ""}`}
+              to="/gestao"
+            >
+              <i className="bi bi-graph-up-arrow"></i> Gest&atilde;o
+            </Link>
+          )}
 
           {isTeamAdmin && (
             <>
@@ -410,12 +461,14 @@ export function DashboardLayout({ children, styles = [] }) {
             >
               <i className="bi bi-wrench-adjustable"></i>Ferramentas
             </Link>
-            <Link
-              to="/tarefas"
-              className={`bnav-btn ${isActive("/tarefas") ? "active" : ""}`}
-            >
-              <i className="bi bi-check2-square"></i>Tarefas
-            </Link>
+            {hasAccess("/tarefas", "tarefas") && (
+              <Link
+                to="/tarefas"
+                className={`bnav-btn ${isActive("/tarefas") ? "active" : ""}`}
+              >
+                <i className="bi bi-check2-square"></i>Tarefas
+              </Link>
+            )}
             <Link
               to="/perfil"
               className={`bnav-btn ${isActive("/perfil") ? "active" : ""}`}
