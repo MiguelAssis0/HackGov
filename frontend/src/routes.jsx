@@ -1,30 +1,29 @@
-import { lazy, Suspense, useEffect } from "react";
+import { useEffect } from "react";
+import AgriculturePage from "./pages/AgriculturePage.jsx";
+import AgendaPage from "./pages/AgendaPage.jsx";
+import AuditPage from "./pages/AuditPage.jsx";
+import AccessControlPage from "./pages/AccessControlPage.jsx";
+import ClientsPage from "./pages/ClientsPage.jsx";
+import CityHallFormPage from "./pages/CityHallFormPage.jsx";
+import ContactPage from "./pages/ContactPage.jsx";
+import DashboardPage from "./pages/DashboardPage.jsx";
+import DocumentsPage from "./pages/DocumentsPage.jsx";
+import EmployeesPage from "./pages/EmployeesPage.jsx";
+import HomePage from "./pages/HomePage.jsx";
+import InboxDetailPage from "./pages/InboxDetailPage.jsx";
+import InboxPage from "./pages/InboxPage.jsx";
+import JobsPage from "./pages/JobsPage.jsx";
+import LoginPage from "./pages/LoginPage.jsx";
+import ManagementPage from "./pages/ManagementPage.jsx";
+import ProcessesPage from "./pages/ProcessesPage.jsx";
+import ProfilePage from "./pages/ProfilePage.jsx";
+import RegisterPage from "./pages/RegisterPage.jsx";
+import SectorsPage from "./pages/SectorsPage.jsx";
+import SpreadsheetImportPage from "./pages/SpreadsheetImportPage.jsx";
+import TasksPage from "./pages/TasksPage.jsx";
+import ToolsPage from "./pages/ToolsPage.jsx";
+import Verify2FAPage from "./pages/Verify2FAPage.jsx";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
-
-const HomePage = lazy(() => import("./pages/HomePage.jsx"));
-const LoginPage = lazy(() => import("./pages/LoginPage.jsx"));
-const RegisterPage = lazy(() => import("./pages/RegisterPage.jsx"));
-const ContactPage = lazy(() => import("./pages/ContactPage.jsx"));
-const DashboardPage = lazy(() => import("./pages/DashboardPage.jsx"));
-const ToolsPage = lazy(() => import("./pages/ToolsPage.jsx"));
-const ProcessesPage = lazy(() => import("./pages/ProcessesPage.jsx"));
-const ProfilePage = lazy(() => import("./pages/ProfilePage.jsx"));
-const Verify2FAPage = lazy(() => import("./pages/Verify2FAPage.jsx"));
-const TasksPage = lazy(() => import("./pages/TasksPage.jsx"));
-const SectorsPage = lazy(() => import("./pages/SectorsPage.jsx"));
-const JobsPage = lazy(() => import("./pages/JobsPage.jsx"));
-const EmployeesPage = lazy(() => import("./pages/EmployeesPage.jsx"));
-const ManagementPage = lazy(() => import("./pages/ManagementPage.jsx"));
-const AccessControlPage = lazy(() => import("./pages/AccessControlPage.jsx"));
-const CityHallFormPage = lazy(() => import("./pages/CityHallFormPage.jsx"));
-const AgendaPage = lazy(() => import("./pages/AgendaPage.jsx"));
-const InboxPage = lazy(() => import("./pages/InboxPage.jsx"));
-const InboxDetailPage = lazy(() => import("./pages/InboxDetailPage.jsx"));
-const ClientsPage = lazy(() => import("./pages/ClientsPage.jsx"));
-const AgriculturePage = lazy(() => import("./pages/AgriculturePage.jsx"));
-const DocumentsPage = lazy(() => import("./pages/DocumentsPage.jsx"));
-const AuditPage = lazy(() => import("./pages/AuditPage.jsx"));
-const SpreadsheetImportPage = lazy(() => import("./pages/SpreadsheetImportPage.jsx"));
 
 const routes = [
   { path: "/", element: <HomePage /> },
@@ -54,10 +53,6 @@ const routes = [
   { path: "/nova-prefeitura", element: <CityHallFormPage /> },
 ];
 
-function RouteLoading() {
-  return <div className="route-loading">Carregando...</div>;
-}
-
 function RouteScrollToTop() {
   const { pathname } = useLocation();
 
@@ -72,15 +67,13 @@ export function AppRoutes() {
   return (
     <>
       <RouteScrollToTop />
-      <Suspense fallback={<RouteLoading />}>
-        <Routes>
-          {routes.map((route) => (
-            <Route key={route.path} path={route.path} element={route.element} />
-          ))}
-          <Route path="/home" element={<Navigate to="/" replace />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Suspense>
+      <Routes>
+        {routes.map((route) => (
+          <Route key={route.path} path={route.path} element={route.element} />
+        ))}
+        <Route path="/home" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </>
   );
 }

@@ -1,7 +1,7 @@
 /* LAYOUT */
 .app-layout {
     display: flex;
-    overflow: hidden;
+    min-height: 100vh;
 }
 
 /* DASHBOARD */
@@ -10,7 +10,7 @@
     min-width: 0;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    min-height: 100vh;
     margin-left: var(--sidebar-w);
     background: var(--cinza-claro);
     padding-top: 1.5rem;

@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState } from "react";
+import { useLayoutEffect } from "react";
 
 const loadedStyles = new Set();
 const loadingStyles = new Map();
@@ -27,14 +27,12 @@ function isStylesheetLoaded(link, key) {
   if (!link) return false;
   if (loadedStyles.has(key) || link.dataset.reactStyleLoaded === "true") return true;
 
-  return false;
-}
+  if (link.sheet) {
+    markStylesheetLoaded(link, key);
+    return true;
+  }
 
-function areStylesLoaded(paths) {
-  return paths.every((href) => {
-    const key = styleKey(href);
-    return isStylesheetLoaded(findStylesheet(href), key);
-  });
+  return false;
 }
 
 function ensureStylesheet(href, group) {
@@ -89,31 +87,10 @@ function ensureStylesheet(href, group) {
 export function usePageStyles(paths, group = "page") {
   const stylePaths = Array.from(new Set(paths.filter(Boolean)));
   const signature = stylePaths.join("|");
-  const [ready, setReady] = useState(() => stylePaths.length === 0 || areStylesLoaded(stylePaths));
 
   useLayoutEffect(() => {
-    let cancelled = false;
-
-    if (stylePaths.length === 0) {
-      setReady(true);
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    setReady(false);
-
-    Promise.all(stylePaths.map((href) => ensureStylesheet(href, group))).then(() => {
-      if (cancelled) return;
-      window.requestAnimationFrame(() => {
-        if (!cancelled) setReady(true);
-      });
-    });
-
-    return () => {
-      cancelled = true;
-    };
+    stylePaths.forEach((href) => ensureStylesheet(href, group));
   }, [signature, group]);
 
-  return ready;
+  return true;
 }
