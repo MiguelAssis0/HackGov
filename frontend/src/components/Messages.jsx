@@ -62,6 +62,47 @@ function sortMessages(items) {
   return [...items].sort((left, right) => new Date(left.sentAt) - new Date(right.sentAt));
 }
 
+function filterOptions(employees, field) {
+  return [...new Set(employees.map((employee) => employee[field]).filter(Boolean))]
+    .sort((left, right) => left.localeCompare(right, "pt-BR"));
+}
+
+function matchesEmployeeFilters(employee, filters) {
+  return (
+    (!filters.sector || employee.sectorName === filters.sector) &&
+    (!filters.occupation || employee.occupationName === filters.occupation)
+  );
+}
+
+function EmployeeFilters({ filters, onChange, sectors, occupations, prefix }) {
+  return (
+    <div className="msg-contact-filters" aria-label="Filtros de funcionários">
+      <label className="msg-contact-filter" htmlFor={`${prefix}-sector`}>
+        <span>Setor</span>
+        <select
+          id={`${prefix}-sector`}
+          value={filters.sector}
+          onChange={(event) => onChange((current) => ({ ...current, sector: event.target.value }))}
+        >
+          <option value="">Todos os setores</option>
+          {sectors.map((sector) => <option key={sector} value={sector}>{sector}</option>)}
+        </select>
+      </label>
+      <label className="msg-contact-filter" htmlFor={`${prefix}-occupation`}>
+        <span>Cargo</span>
+        <select
+          id={`${prefix}-occupation`}
+          value={filters.occupation}
+          onChange={(event) => onChange((current) => ({ ...current, occupation: event.target.value }))}
+        >
+          <option value="">Todos os cargos</option>
+          {occupations.map((occupation) => <option key={occupation} value={occupation}>{occupation}</option>)}
+        </select>
+      </label>
+    </div>
+  );
+}
+
 function mergeMessages(current, incoming) {
   const byId = new Map(current.map((message) => [String(message.id), message]));
 
@@ -105,6 +146,8 @@ export default function Messages({
   const [groupTitle, setGroupTitle] = useState("");
   const [groupParticipantIds, setGroupParticipantIds] = useState([]);
   const [groupSearch, setGroupSearch] = useState("");
+  const [contactFilters, setContactFilters] = useState({ sector: "", occupation: "" });
+  const [groupFilters, setGroupFilters] = useState({ sector: "", occupation: "" });
   const [sending, setSending] = useState(false);
   const [socketConnected, setSocketConnected] = useState(false);
   const [error, setError] = useState("");
@@ -208,8 +251,6 @@ export default function Messages({
 
   const filteredEmployees = useMemo(() => {
     const query = search.trim().toLowerCase();
-    if (!query) return employees;
-
     return employees.filter((employee) =>
       [
         employeeName(employee),
@@ -220,9 +261,14 @@ export default function Messages({
         .filter(Boolean)
         .join(" ")
         .toLowerCase()
-        .includes(query),
+        .includes(query) && matchesEmployeeFilters(employee, contactFilters),
     );
-  }, [employees, search]);
+  }, [employees, search, contactFilters]);
+
+  const employeeFilterOptions = useMemo(() => ({
+    sectors: filterOptions(employees, "sectorName"),
+    occupations: filterOptions(employees, "occupationName"),
+  }), [employees]);
 
   const filteredChats = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -234,16 +280,14 @@ export default function Messages({
 
   const groupEmployees = useMemo(() => {
     const query = groupSearch.trim().toLowerCase();
-    if (!query) return employees;
-
     return employees.filter((employee) =>
       [employeeName(employee), employee.occupationName, employee.sectorName]
         .filter(Boolean)
         .join(" ")
         .toLowerCase()
-        .includes(query),
+        .includes(query) && matchesEmployeeFilters(employee, groupFilters),
     );
-  }, [employees, groupSearch]);
+  }, [employees, groupSearch, groupFilters]);
 
   async function openChat(chat) {
     setSelectedChat(chat);
@@ -296,6 +340,7 @@ export default function Messages({
     setGroupTitle("");
     setGroupParticipantIds([]);
     setGroupSearch("");
+    setGroupFilters({ sector: "", occupation: "" });
   }
 
   function toggleGroupParticipant(employeeId) {
@@ -448,6 +493,14 @@ export default function Messages({
           />
         </div>
 
+        <EmployeeFilters
+          filters={groupFilters}
+          onChange={setGroupFilters}
+          sectors={employeeFilterOptions.sectors}
+          occupations={employeeFilterOptions.occupations}
+          prefix="group"
+        />
+
         <div className="msg-group-contacts">
           {groupEmployees.map((employee) => {
             const name = employeeName(employee);
@@ -552,7 +605,7 @@ export default function Messages({
         <div className={`chat-widget-body ${activeTab === "ai" ? "chat-widget-body-ai" : ""}`}>
           <div className="chat-widget-fixed">
             {activeTab !== "ai" && !selectedChat && !groupFormOpen && (
-              <div className="msg-busca-wrap">
+              <div className={`msg-busca-wrap ${activeTab === "contacts" ? "msg-busca-wrap-contacts" : ""}`}>
                 <i className="bi bi-search"></i>
                 <input
                   type="text"
@@ -562,6 +615,15 @@ export default function Messages({
                   onChange={(event) => setSearch(event.target.value)}
                 />
               </div>
+            )}
+            {activeTab === "contacts" && !selectedChat && !groupFormOpen && (
+              <EmployeeFilters
+                filters={contactFilters}
+                onChange={setContactFilters}
+                sectors={employeeFilterOptions.sectors}
+                occupations={employeeFilterOptions.occupations}
+                prefix="contacts"
+              />
             )}
             {!selectedChat && !groupFormOpen && <div className="msg-tabs">
               {[
