@@ -37,6 +37,8 @@ const demoUser = {
   tipoUsuario: "usuario_comum",
 };
 
+const SIDEBAR_COLLAPSED_KEY = "hackgov.sidebarCollapsed";
+
 function initials(name) {
   if (!name) return "";
   return name
@@ -82,6 +84,7 @@ function userCityHall(user) {
 export function DashboardLayout({ children, styles = [] }) {
   const { path, navigate } = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "true");
   const [chatOpen, setChatOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("chats");
   const [cityHalls, setCityHalls] = useState([]);
@@ -215,6 +218,14 @@ export function DashboardLayout({ children, styles = [] }) {
         ? [activeCityHall]
         : [];
 
+  function toggleSidebar() {
+    setSidebarCollapsed((current) => {
+      const next = !current;
+      localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(next));
+      return next;
+    });
+  }
+
   if (!stylesReady) {
     return (
       <div className="route-loading" role="status" aria-live="polite">
@@ -224,13 +235,23 @@ export function DashboardLayout({ children, styles = [] }) {
   }
 
   return (
-    <section className="app-layout">
+    <section className={`app-layout ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}>
       <aside className={`sidebar ${sidebarOpen ? "open" : ""}`} id="sidebar">
         <div className="sidebar-brand">
           <Link to="/dashboard" className="brand-txt text-white">
             <i className="bi bi-file-earmark-fill"></i> Integra{" "}
             <span>Brasil</span>
           </Link>
+          <button
+            className="sidebar-collapse-toggle"
+            type="button"
+            onClick={toggleSidebar}
+            aria-label={sidebarCollapsed ? "Expandir menu lateral" : "Recolher menu lateral"}
+            aria-expanded={!sidebarCollapsed}
+            aria-controls="sidebar"
+          >
+            <i className={`bi ${sidebarCollapsed ? "bi-layout-sidebar-inset-reverse" : "bi-layout-sidebar-inset"}`}></i>
+          </button>
         </div>
 
         <div className="sidebar-cityhall">
