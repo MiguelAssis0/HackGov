@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   api,
   clearSession,
@@ -10,6 +10,7 @@ import {
   saveSelectedCityHall,
 } from "../services/api.js";
 import { usePageStyles } from "../hooks/usePageStyles.js";
+import { disableVLibras, enableVLibras } from "../services/vlibras.js";
 import { Link, useRouter } from "./RouterContext.jsx";
 import Messages from "./Messages.jsx";
 
@@ -99,6 +100,8 @@ export function DashboardLayout({ children, styles = [] }) {
   const [chatOpen, setChatOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("chats");
   const [cityHalls, setCityHalls] = useState([]);
+  // ponytail: toggle na mesma sessão vence o GET inicial em voo (vlibras/dark não voltam sozinhos)
+  const settingsDirty = useRef(false);
   const [allowedTools, setAllowedTools] = useState(readCachedTools);
   const [selectedCityHall, setSelectedCityHall] = useState(() => getSelectedCityHall());
   const user = getStoredUser() || demoUser;
@@ -155,22 +158,21 @@ export function DashboardLayout({ children, styles = [] }) {
       const f=(s.fontSize||"Médio").toLowerCase();
       document.body.classList.add(`font-${f}`);
       document.documentElement.style.fontSize= ({Pequeno:"14px", Médio:"16px", Grande:"18px"}[s.fontSize]||"16px");
-      const id="vlibras-plugin-script";
-      let el=document.getElementById(id);
-      if(s.vlibras){
-        if(!el){ el=document.createElement("script"); el.id=id; el.src="https://vlibras.gov.br/app/vlibras-plugin.js"; el.onload=()=>{ try{ window.VLibras && new window.VLibras.Widget('https://vlibras.gov.br/app'); }catch{} }; document.body.appendChild(el); }
-        if(!document.querySelector("[vw]")){ const w=document.createElement("div"); w.setAttribute("vw",""); w.className="enabled"; w.innerHTML='<div vw-access-button class="active"></div><div vw-plugin-wrapper><div class="vw-plugin-top-wrapper"></div></div>'; document.body.appendChild(w); }
-      } else { el?.remove(); document.querySelectorAll("[vw]").forEach(e=> e.remove()); }
+      if(s.vlibras) enableVLibras();
+      else disableVLibras();
     }
     try{ const cached=JSON.parse(localStorage.getItem("hackgov.profileSettings")||"null"); if(cached) apply(cached); }catch{}
     api.getProfileSettings().then(p=>{
+      if(settingsDirty.current) return;
       const s={darkMode:Boolean(p.modo_escuro??p.darkMode), notifications:p.notificacoes??p.notifications??true, vlibras:Boolean(p.vlibras), fontSize:(p.tamanho_fonte||p.fontSize||"medio").replace("medio","Médio").replace("grande","Grande").replace("pequeno","Pequeno"), twoFactor:Boolean(p.two_factor_auth??p.twoFactor)};
       localStorage.setItem("hackgov.profileSettings", JSON.stringify(s));
       apply(s);
     }).catch(()=>{});
     const onStorage=e=>{ if(e.key==="hackgov.profileSettings") try{ apply(JSON.parse(e.newValue)); }catch{} };
+    const onSettings=()=>{ settingsDirty.current=true; try{ const s=JSON.parse(localStorage.getItem("hackgov.profileSettings")||"null"); if(s) apply(s); }catch{} };
     window.addEventListener("storage", onStorage);
-    return ()=> window.removeEventListener("storage", onStorage);
+    window.addEventListener("hackgov:profileSettings", onSettings);
+    return ()=>{ window.removeEventListener("storage", onStorage); window.removeEventListener("hackgov:profileSettings", onSettings); };
   }, []);
 
   // ponytail: navbar respeita /tools com cache síncrono (sem pisca); erro mantém cache, nunca volta a null
@@ -243,6 +245,8 @@ export function DashboardLayout({ children, styles = [] }) {
 
   async function logout(event) {
     event.preventDefault();
+    // ponytail: avisa o backend para revogar a sessão; sem isso cada login empilhava um dispositivo
+    try { await api.logout(); } catch { /* offline/token expirado: sai mesmo assim */ }
     clearSession();
     navigate("/login");
   }

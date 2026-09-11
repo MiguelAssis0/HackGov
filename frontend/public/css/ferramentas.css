@@ -24,6 +24,12 @@
     top: 1rem;
     max-height: calc(100vh - 2rem);
     overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.ferramentas-nav::-webkit-scrollbar {
+    display: none;
 }
 
 .ferramentas-nav-header {

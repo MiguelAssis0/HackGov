@@ -194,7 +194,7 @@
 }
 
 .perfil-switch input:checked + .perfil-switch-track::after {
-    background: #17202a;
+    background: var(--azul-claro);
     transform: translate(1.4rem, -50%);
 }
 

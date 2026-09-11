@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DashboardLayout } from "../components/DashboardLayout.jsx";
 import { Link, useRouter } from "../components/RouterContext.jsx";
 import { api, clearSession, getStoredUser } from "../services/api.js";
+import { disableVLibras, enableVLibras } from "../services/vlibras.js";
 
 function initials(name){ return String(name||"").split(" ").filter(Boolean).slice(0,2).map(p=>p[0]).join("").toUpperCase(); }
 
@@ -16,9 +17,12 @@ export default function ProfilePage(){
   const [draft,setDraft]=useState({nome:"",email:"",cpf:"",celular:"",avatar:""});
   const [settings,setSettings]=useState(()=>{ try{ return JSON.parse(localStorage.getItem("hackgov.profileSettings"))||{darkMode:document.body.classList.contains("theme-dark"), notifications:true, vlibras:false, fontSize:"Médio"} }catch{ return {darkMode:false,notifications:true,vlibras:false,fontSize:"Médio"} }});
   const [twoFactor,setTwoFactor]=useState(false);
+  // ponytail: GET em voo não pode sobrescrever um toggle posterior (vlibras voltava sozinho)
+  const settingsSeq=useRef(0);
 
   async function load(){
     setLoading(true);
+    const seq=settingsSeq.current;
     try{
       const [details, sess, prefs]=await Promise.all([api.getEmployeeDetails(), api.getSessions().catch(()=>[]), api.getProfileSettings().catch(()=>null)]);
       setProfile(details);
@@ -28,6 +32,7 @@ export default function ProfilePage(){
       setSessions(list);
       const cur=list.find(s=>s.current)?.sessionKey || list.find(s=>s.current)?.id || "";
       setCurrentSessionKey(cur);
+      if(settingsSeq.current!==seq) return;
       // 1:1 Django: acessibilidade JSON {modo_escuro, vlibras, tamanho_fonte} + two_factor_auth
       if(prefs){
         const n={darkMode: Boolean(prefs.modo_escuro ?? prefs.darkMode), notifications: prefs.notificacoes ?? prefs.notifications ?? true, vlibras: Boolean(prefs.vlibras), fontSize: (prefs.tamanho_fonte||prefs.fontSize||"medio").replace("medio","Médio").replace("grande","Grande").replace("pequeno","Pequeno"), twoFactor: Boolean(prefs.two_factor_auth ?? details?.twoFactor)};
@@ -50,33 +55,17 @@ export default function ProfilePage(){
     document.body.classList.add(`font-${f}`);
   },[settings.darkMode, settings.vlibras, settings.fontSize]);
   useEffect(()=>{ const sz={Pequeno:"14px", Médio:"16px", Grande:"18px"}[settings.fontSize]||"16px"; document.documentElement.style.fontSize=sz; },[settings.fontSize]);
-  // V-Libras widget 1:1 Django (vlibras-plugin.js) — só quando ativado
+  // V-Libras widget (vlibras-plugin.js) — só quando ativado
   useEffect(()=>{
-    const id="vlibras-plugin-script";
-    let el=document.getElementById(id);
-    if(settings.vlibras){
-      if(!el){
-        el=document.createElement("script");
-        el.id=id;
-        el.src="https://vlibras.gov.br/app/vlibras-plugin.js";
-        el.onload=()=> { try{ window.VLibras && new window.VLibras.Widget('https://vlibras.gov.br/app'); }catch{} };
-        document.body.appendChild(el);
-      }
-      if(!document.querySelector("[vw]")){
-        const w=document.createElement("div");
-        w.setAttribute("vw",""); w.className="enabled";
-        w.innerHTML='<div vw-access-button class="active"></div><div vw-plugin-wrapper><div class="vw-plugin-top-wrapper"></div></div>';
-        document.body.appendChild(w);
-      }
-    } else {
-      el?.remove();
-      document.querySelectorAll("[vw]").forEach(e=> e.remove());
-    }
+    if(settings.vlibras) enableVLibras();
+    else disableVLibras();
   },[settings.vlibras]);
 
   function saveSettings(next){
+    settingsSeq.current+=1;
     localStorage.setItem("hackgov.profileSettings", JSON.stringify(next));
     setSettings(next);
+    window.dispatchEvent(new Event("hackgov:profileSettings"));
   }
   async function toggleSetting(key, value){
     if(key==="notifications" && value){
@@ -125,7 +114,13 @@ export default function ProfilePage(){
     if(!confirm("Remover este dispositivo? A sessão será encerrada e o usuário precisará fazer login novamente.")) return;
     try{ await api.revokeSession(key); setSessions(s=> s.filter(x=> (x.sessionKey||x.id)!==key)); }catch(err){ setMessage({type:"error", text:err.message}); }
   }
-  function logout(e){ e.preventDefault(); clearSession(); navigate("/login"); }
+  async function logout(e){
+    e.preventDefault();
+    // ponytail: avisa o backend para revogar a sessão; sem isso cada login empilhava um dispositivo
+    try { await api.logout(); } catch { /* offline/token expirado: sai mesmo assim */ }
+    clearSession();
+    navigate("/login");
+  }
 
   const user=getStoredUser();
   const prefeitura=profile?.cityhall || profile?.prefeitura || user?.prefeitura || "Sem prefeitura ativa";

@@ -82,7 +82,7 @@ public class UserSessionService {
     public List<Response> list(User user, UUID current) {
         // ponytail: Django filtra UserSession.objects.filter(user=request.user) e delete no revoke → só ativos aparecem
         return repository.findByUser_IdOrderByLastActivityDesc(user.getId()).stream()
-                .filter(s -> s.getRevokedAt() == null)
+                .filter(UserSession::active)
                 .map(s -> new Response(
                         s.getId(), s.getId().toString(), deviceIcon(s.getDeviceType()), s.getBrowser(), s.getBrowserVersion(), s.getOperatingSystem(), s.getDeviceType(),
                         s.getIpAddress(), s.getUserAgent(), s.getCreatedAt(), s.getLastActivity(), s.getExpiresAt(), s.getRevokedAt(), s.getId().equals(current), s.active()
