@@ -2,6 +2,7 @@ package com.fiap.hackgov.tools.internal.services;
 
 import com.fiap.hackgov.auth.internal.entities.enums.Roles;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
+import com.fiap.hackgov.cityhall_management.internal.entities.Occupation;
 import com.fiap.hackgov.cityhall_management.internal.entities.Sector;
 import com.fiap.hackgov.cityhall_management.internal.repositories.EmployeeRepository;
 import com.fiap.hackgov.cityhall_management.internal.repositories.OccupationRepository;
@@ -60,8 +61,10 @@ public class ToolPermissionService {
         if (dto.sectorId() != null)
             rule.setSector(sectorRepository.findByIdAndCityHall_Id(dto.sectorId(), city(current)).orElseThrow(() -> new BusinessException("Setor invalido")));
         if (dto.occupationId() != null)
-            rule.setOccupation(occupationRepository.findById(dto.occupationId()).filter(item -> item.getSectorId() != null && item.getSectorId().getCityHall().getId().equals(city(current))).orElseThrow(() -> new BusinessException("Cargo invalido")));
-        if (rule.getSector() != null && rule.getOccupation() != null && !rule.getOccupation().getSectorId().getId().equals(rule.getSector().getId()))
+            rule.setOccupation(occupationRepository.findById(dto.occupationId()).filter(item -> sameCity(item, city(current))).orElseThrow(() -> new BusinessException("Cargo invalido")));
+        // ponytail: cargo sem setor vale sozinho ou combinado (regra exige ambos); só barra setor divergente — antes dava 500/Cargo inválido
+        if (rule.getSector() != null && rule.getOccupation() != null && rule.getOccupation().getSectorId() != null
+                && !rule.getOccupation().getSectorId().getId().equals(rule.getSector().getId()))
             throw new BusinessException("O cargo precisa pertencer ao setor selecionado");
         if (dto.employeeId() != null)
             rule.setEmployee(employeeRepository.findByIdWithDetails(dto.employeeId()).filter(item -> item.getCityHallId() != null && item.getCityHallId().getId().equals(city(current))).orElseThrow(() -> new BusinessException("Funcionario invalido")));
@@ -109,6 +112,12 @@ public class ToolPermissionService {
 
     private boolean matches(ToolPermissionRule r, Employee e) {
         return (r.getSector() == null || e.getSectorId() != null && r.getSector().getId().equals(e.getSectorId().getId())) && (r.getOccupation() == null || e.getOccupationId() != null && r.getOccupation().getId().equals(e.getOccupationId().getId()));
+    }
+
+    private boolean sameCity(Occupation occupation, UUID cityId) {
+        if (occupation.getSectorId() != null && occupation.getSectorId().getCityHall() != null)
+            return occupation.getSectorId().getCityHall().getId().equals(cityId);
+        return occupation.getCityHall() != null && occupation.getCityHall().getId().equals(cityId);
     }
 
     private Employee admin(Employee e) {
