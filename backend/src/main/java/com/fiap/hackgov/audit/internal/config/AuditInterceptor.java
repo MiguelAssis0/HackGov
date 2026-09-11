@@ -20,12 +20,20 @@ public class AuditInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception exception) {
-        if (!MUTATING.contains(request.getMethod()) || response.getStatus() >= 400 || request.getRequestURI().startsWith("/api/auth/"))
-            return;
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof Employee employee) {
-            service.append(employee, request.getMethod(), request.getRequestURI(), response.getStatus(),
-                    request.getRemoteAddr(), request.getHeader("User-Agent"));
+        // ponytail: login/logout via AuthService (sem principal aqui); auditoria nunca pode quebrar a resposta
+        try {
+            String uri = request.getRequestURI();
+            if (uri.startsWith("/api/auth/")) return;
+            String method = request.getMethod();
+            String toolSlug = AuditEventService.toolSlugFor(uri);
+            if (!MUTATING.contains(method) && toolSlug == null) return;
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication != null && authentication.getPrincipal() instanceof Employee employee) {
+                String risk = service.riskFor(employee, toolSlug, method, response.getStatus());
+                service.append(employee, method, uri, response.getStatus(),
+                        request.getRemoteAddr(), request.getHeader("User-Agent"), risk);
+            }
+        } catch (Exception ignored) {
         }
     }
 }

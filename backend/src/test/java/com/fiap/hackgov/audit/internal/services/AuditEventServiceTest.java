@@ -6,6 +6,7 @@ import com.fiap.hackgov.auth.internal.entities.enums.Roles;
 import com.fiap.hackgov.cityhall_management.internal.entities.CityHall;
 import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.cityhall_management.internal.repositories.CityHallRepository;
+import com.fiap.hackgov.tools.internal.services.ToolConfigurationService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -27,13 +28,16 @@ class AuditEventServiceTest {
     @Mock
     CityHallRepository cityHallRepository;
 
+    @Mock
+    ToolConfigurationService toolConfigurationService;
+
     @Test
     void appendCreatesHashLinkedToPreviousEvent() {
         AuditEvent previous = new AuditEvent();
         previous.setEventHash("a".repeat(64));
         Employee employee = employee();
         when(repository.findTopByCityHallIdOrderByIdDesc(employee.getCityHallId().getId())).thenReturn(Optional.of(previous));
-        AuditEventService service = new AuditEventService(repository, cityHallRepository);
+        AuditEventService service = new AuditEventService(repository, cityHallRepository, toolConfigurationService);
 
         service.append(employee, "POST", "/api/tasks", 201, "127.0.0.1", "JUnit");
 

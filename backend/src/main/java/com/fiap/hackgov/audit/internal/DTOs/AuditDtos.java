@@ -14,6 +14,7 @@ public final class AuditDtos {
             String prefeitura,
             String modulo,
             String acao,
+            String risco,
             String resultado,
             String objeto,
             String descricao,

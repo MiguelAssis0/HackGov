@@ -9,6 +9,7 @@ import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.cityhall_management.internal.repositories.CityHallRepository;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.exceptions.UnauthorizedException;
+import com.fiap.hackgov.tools.internal.services.ToolConfigurationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -50,10 +51,55 @@ public class AuditEventService {
 
     private final AuditEventRepository repository;
     private final CityHallRepository cityHallRepository;
+    private final ToolConfigurationService toolConfigurationService;
+
+    public static final String RISK_LOW = "BAIXO";
+    public static final String RISK_MEDIUM = "MEDIO";
+    public static final String RISK_HIGH = "ALTO";
+
+    // ponytail: prefixo da API -> slug da ferramenta; decide o que conta como "acesso a ferramenta"
+    private static final List<Map.Entry<String, String>> TOOL_PATHS = List.of(
+            Map.entry("/api/task-requests", "tarefas"),
+            Map.entry("/api/boards", "tarefas"),
+            Map.entry("/api/tasks", "tarefas"),
+            Map.entry("/api/employee", "funcionarios"),
+            Map.entry("/api/sectors", "setores"),
+            Map.entry("/api/occupations", "cargos"),
+            Map.entry("/api/agenda", "agenda"),
+            Map.entry("/api/inbox", "caixa-entrada"),
+            Map.entry("/api/documents", "documentos"),
+            Map.entry("/api/management", "relatorios"),
+            Map.entry("/api/clients", "clientes-gerais"),
+            Map.entry("/api/agriculture", "patrulha-agricola"),
+            Map.entry("/api/requisitions", "compras-licitacoes"),
+            Map.entry("/api/licitation-processes", "compras-licitacoes"),
+            Map.entry("/api/contracts", "compras-licitacoes"),
+            Map.entry("/api/payments", "compras-licitacoes"),
+            Map.entry("/api/payment-declarations", "compras-licitacoes"),
+            Map.entry("/api/notices", "compras-licitacoes"),
+            Map.entry("/api/approvals", "compras-licitacoes"),
+            Map.entry("/api/analyses", "compras-licitacoes"),
+            Map.entry("/api/commitments", "compras-licitacoes"),
+            Map.entry("/api/execution-orders", "compras-licitacoes"),
+            Map.entry("/api/accountability-reports", "compras-licitacoes"),
+            Map.entry("/api/audit", "auditoria"),
+            Map.entry("/api/imports", "spreadsheet-import")
+    );
+
+    // ponytail: utilitários/polling não contam como uso da ferramenta
+    private static final List<String> NOISE_SUFFIXES = List.of(
+            "/counts", "/upcoming", "/capabilities", "/task-options", "/access", "/details"
+    );
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public synchronized void append(Employee employee, String method, String path, int status,
                                     String remoteAddress, String userAgent) {
+        append(employee, method, path, status, remoteAddress, userAgent, null);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public synchronized void append(Employee employee, String method, String path, int status,
+                                    String remoteAddress, String userAgent, String risk) {
         if (employee == null || employee.getCityHallId() == null) return;
         UUID cityId = employee.getCityHallId().getId();
         String previous = repository.findTopByCityHallIdOrderByIdDesc(cityId)
@@ -68,15 +114,47 @@ public class AuditEventService {
         event.setResponseStatus(status);
         event.setRemoteAddress(trim(remoteAddress, 80));
         event.setUserAgent(trim(userAgent, 400));
-        event.setPreviousHash(previous);
+        event.setRisk(risk);
+        // ponytail: occurredAt era calculado e descartado; createdAt null quebrava o hash (NPE) e nada era auditado
         event.setCreatedAt(occurredAt);
+        event.setPreviousHash(previous);
         event.setEventHash(sha256(canonical(event)));
         repository.save(event);
     }
 
+    public static String toolSlugFor(String path) {
+        if (path == null) return null;
+        for (Map.Entry<String, String> entry : TOOL_PATHS) {
+            if (path.startsWith(entry.getKey())
+                    && (path.length() == entry.getKey().length() || path.charAt(entry.getKey().length()) == '/')) {
+                String slug = entry.getValue();
+                for (String noise : NOISE_SUFFIXES) {
+                    if (path.endsWith(noise)) return null;
+                }
+                return slug;
+            }
+        }
+        return null;
+    }
+
+    public String riskFor(Employee employee, String toolSlug, String method, int status) {
+        if (status >= 400) return RISK_HIGH;
+        if (toolSlug == null) return isMutating(method) ? RISK_MEDIUM : RISK_LOW;
+        try {
+            if (!toolConfigurationService.hasAccess(toolSlug, employee)) return RISK_HIGH;
+        } catch (RuntimeException unattributable) {
+            return isMutating(method) ? RISK_MEDIUM : RISK_LOW;
+        }
+        return isMutating(method) ? RISK_MEDIUM : RISK_LOW;
+    }
+
+    private static boolean isMutating(String method) {
+        return "POST".equals(method) || "PUT".equals(method) || "PATCH".equals(method) || "DELETE".equals(method);
+    }
+
     @Transactional(readOnly = true)
     public AuditDtos.Page list(String scope, String cityHallId, String query, String type, String module,
-                               String action, String user, String start, String end, int page,
+                               String action, String risk, String user, String start, String end, int page,
                                Employee employee) {
         Employee current = requireAdmin(employee);
         boolean platform = isPlatformAdmin(current);
@@ -84,7 +162,7 @@ public class AuditEventService {
         UUID selectedCity = resolveCityHall(current, cityHallId, resolvedScope);
         List<AuditEvent> source = eventsFor(resolvedScope, selectedCity, false);
         Map<UUID, String> cityNames = cityNames(source);
-        List<AuditDtos.Row> rows = filter(source, query, type, module, action, user, start, end)
+        List<AuditDtos.Row> rows = filter(source, query, type, module, action, risk, user, start, end)
                 .map(event -> toRow(event, cityNames.getOrDefault(event.getCityHallId(), "-"), platform)).toList();
 
         int totalPages = rows.isEmpty() ? 0 : (rows.size() + PAGE_SIZE - 1) / PAGE_SIZE;
@@ -103,7 +181,7 @@ public class AuditEventService {
 
     @Transactional(readOnly = true)
     public String exportCsv(String scope, String cityHallId, String query, String type, String module,
-                            String action, String user, String start, String end, Employee employee) {
+                            String action, String risk, String user, String start, String end, Employee employee) {
         Employee current = requireAdmin(employee);
         boolean platform = isPlatformAdmin(current);
         String resolvedScope = platform && "global".equalsIgnoreCase(scope) ? "global" : "prefeitura";
@@ -111,8 +189,8 @@ public class AuditEventService {
         List<AuditEvent> source = eventsFor(resolvedScope, selectedCity, true);
         Map<UUID, String> cityNames = cityNames(source);
         StringBuilder csv = new StringBuilder("\uFEFF");
-        csv.append("data_hora,usuario,prefeitura,modulo,acao,resultado,objeto,descricao,ip,request_id\n");
-        filter(source, query, type, module, action, user, start, end)
+        csv.append("data_hora,usuario,prefeitura,modulo,acao,risco,resultado,objeto,descricao,ip,request_id\n");
+        filter(source, query, type, module, action, risk, user, start, end)
                 .map(event -> toRow(event, cityNames.getOrDefault(event.getCityHallId(), "-"), platform))
                 .map(this::csvRow).forEach(row -> csv.append(row).append('\n'));
         return csv.toString();
@@ -136,17 +214,19 @@ public class AuditEventService {
     }
 
     private Stream<AuditEvent> filter(List<AuditEvent> events, String query, String type, String module,
-                                      String action, String user, String start, String end) {
+                                      String action, String risk, String user, String start, String end) {
         String q = lower(query), selectedType = lower(type), selectedModule = lower(module);
         String selectedAction = lower(action), selectedUser = lower(user);
+        String selectedRisk = risk == null ? "" : risk.trim().toUpperCase(Locale.ROOT);
         LocalDate startDate = parseDate(start), endDate = parseDate(end);
         return events.stream().filter(event -> {
             AuditDtos.Row row = toRow(event, "", true);
             if (!q.isBlank() && !String.join(" ", row.descricao(), row.modulo(), row.objeto(), row.usuario()).toLowerCase(Locale.ROOT).contains(q)) return false;
             if ("manual".equals(selectedType)) return false;
             if (!selectedType.isBlank() && !"todos".equals(selectedType) && !"automatico".equals(selectedType)) return false;
-            if (!selectedModule.isBlank() && !row.modulo().toLowerCase(Locale.ROOT).contains(selectedModule)) return false;
+            if (!selectedModule.isBlank() && !"todos".equals(selectedModule) && !"automatico".equals(selectedModule)) return false;
             if (!selectedAction.isBlank() && !row.acao().equalsIgnoreCase(selectedAction)) return false;
+            if (!selectedRisk.isBlank() && !selectedRisk.equals(event.getRisk())) return false;
             if (!selectedUser.isBlank() && !row.usuario().toLowerCase(Locale.ROOT).contains(selectedUser)) return false;
             LocalDate date = event.getCreatedAt().toLocalDate();
             return (startDate == null || !date.isBefore(startDate)) && (endDate == null || !date.isAfter(endDate));
@@ -163,13 +243,24 @@ public class AuditEventService {
         String masked = maskEmail(email), path = event.getPath() == null ? "-" : event.getPath();
         String date = event.getCreatedAt() == null ? "-" : event.getCreatedAt().format(DATE_TIME);
         return new AuditDtos.Row(event.getId(), date, sensitive ? email : masked, masked, cityName,
-                module(path), action(event.getMethod()), event.getResponseStatus() < 400 ? "sucesso" : "erro",
+                module(path), action(event.getMethod(), event.getPath(), event.getResponseStatus(), event.getRisk()),
+                riskLabel(event.getRisk()), event.getResponseStatus() < 400 ? "sucesso" : "erro",
                 path, "Requisição " + event.getMethod() + " " + path,
                 sensitive ? value(event.getRemoteAddress()) : "restrito", "automatico", "-", event.getEventHash());
     }
 
+    private String riskLabel(String risk) {
+        if (risk == null) return "-";
+        return switch (risk) {
+            case RISK_LOW -> "Baixo";
+            case RISK_MEDIUM -> "Médio";
+            case RISK_HIGH -> "Alto";
+            default -> risk;
+        };
+    }
+
     private String csvRow(AuditDtos.Row row) {
-        return Stream.of(row.dataHora(), row.usuario(), row.prefeitura(), row.modulo(), row.acao(), row.resultado(),
+        return Stream.of(row.dataHora(), row.usuario(), row.prefeitura(), row.modulo(), row.acao(), row.risco(), row.resultado(),
                 row.objeto(), row.descricao(), row.ip(), row.requestId()).map(this::csv).collect(Collectors.joining(","));
     }
 
@@ -203,7 +294,15 @@ public class AuditEventService {
         return "admin@admin.com".equalsIgnoreCase(employee.getEmail());
     }
 
-    private String action(String method) {
+    private String action(String method, String path, int status, String risk) {
+        if (path != null) {
+            if (path.contains("/api/auth/login") || path.contains("/api/auth/2fa")) return "LOGIN";
+            if (path.contains("/api/auth/logout")) return "LOGOUT";
+        }
+        if (status == 401) return "AUTH_FAILURE";
+        if (status == 403) return "ACCESS_DENIED";
+        // ponytail: sem acesso à ferramenta (mesmo tolerado com 200) aparece em "Acesso negado"
+        if (RISK_HIGH.equals(risk) && status < 400 && toolSlugFor(path) != null) return "ACCESS_DENIED";
         return switch (String.valueOf(method).toUpperCase(Locale.ROOT)) {
             case "POST" -> "CREATE";
             case "PUT", "PATCH" -> "UPDATE";
@@ -249,8 +348,10 @@ public class AuditEventService {
     }
 
     private String canonical(AuditEvent event) {
-        return String.join("|", event.getPreviousHash(), event.getCityHallId().toString(), event.getActorId().toString(),
+        String base = String.join("|", event.getPreviousHash(), event.getCityHallId().toString(), event.getActorId().toString(),
                 event.getMethod(), event.getPath(), Integer.toString(event.getResponseStatus()), event.getCreatedAt().toString());
+        // ponytail: registros legados têm risco nulo e mantêm o hash original
+        return event.getRisk() == null ? base : base + "|" + event.getRisk();
     }
 
     private String trim(String value, int limit) {

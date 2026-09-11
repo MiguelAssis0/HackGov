@@ -38,6 +38,9 @@ public class AuditEvent {
     @Column(nullable = false)
     private int responseStatus;
 
+    @Column(length = 10)
+    private String risk;
+
     @Column(length = 80)
     private String remoteAddress;
 

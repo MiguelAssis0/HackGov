@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "../components/DashboardLayout.jsx";
 import { api, getSelectedCityHall, getStoredUser, getUserType } from "../services/api.js";
 
-const emptyFilters = { q: "", prefeitura: "", tipo: "todos", modulo: "", acao: "", usuario: "", dataInicial: "", dataFinal: "" };
+const emptyFilters = { q: "", prefeitura: "", tipo: "todos", modulo: "", acao: "", risco: "", usuario: "", dataInicial: "", dataFinal: "" };
 
 function pageLabel(count) {
   return `${count} registro${count === 1 ? "" : "s"} encontrado${count === 1 ? "" : "s"}.`;
@@ -15,10 +15,18 @@ function formatDate(value) {
 }
 
 function actionClass(action) {
-  if (action === "DELETE") return "text-bg-danger";
+  if (["DELETE", "AUTH_FAILURE", "ACCESS_DENIED"].includes(action)) return "text-bg-danger";
   if (action === "UPDATE") return "text-bg-warning";
-  if (["CREATE", "SEND"].includes(action)) return "text-bg-success";
+  if (["CREATE", "SEND", "LOGIN"].includes(action)) return "text-bg-success";
+  if (action === "LOGOUT") return "text-bg-secondary";
   return "text-bg-primary";
+}
+
+function riskClass(risk) {
+  if (risk === "Alto") return "text-bg-danger";
+  if (risk === "Médio") return "text-bg-warning";
+  if (risk === "Baixo") return "text-bg-success";
+  return "text-bg-light";
 }
 
 function Pagination({ page, totalPages, first, last, onChange }) {
@@ -85,6 +93,7 @@ export default function AuditPage() {
       <div className="col-12 col-md-4 col-lg-2"><label className="audit-filter-label mb-1" htmlFor="audit-type">Tipo</label><select id="audit-type" className="form-select" value={filters.tipo} onChange={(event) => setField("tipo", event.target.value)}><option value="todos">Todos</option><option value="manual">Evento manual</option><option value="automatico">Auditlog automático</option></select></div>
       <div className="col-12 col-md-4 col-lg-2"><label className="audit-filter-label mb-1" htmlFor="audit-module">Módulo</label><input id="audit-module" className="form-control" value={filters.modulo} onChange={(event) => setField("modulo", event.target.value)} placeholder="documentos" /></div>
       <div className="col-12 col-md-4 col-lg-2"><label className="audit-filter-label mb-1" htmlFor="audit-action">Ação</label><select id="audit-action" className="form-select" value={filters.acao} onChange={(event) => setField("acao", event.target.value)}><option value="">Todas</option>{actionOptions.map((action) => <option value={action.value} key={action.value}>{action.label}</option>)}</select></div>
+      <div className="col-12 col-md-4 col-lg-2"><label className="audit-filter-label mb-1" htmlFor="audit-risk">Risco</label><select id="audit-risk" className="form-select" value={filters.risco} onChange={(event) => setField("risco", event.target.value)}><option value="">Todos</option><option value="BAIXO">Baixo</option><option value="MEDIO">Médio</option><option value="ALTO">Alto</option></select></div>
       <div className="col-12 col-md-4 col-lg-3"><label className="audit-filter-label mb-1" htmlFor="audit-user">Usuário</label><input id="audit-user" className="form-control" value={filters.usuario} onChange={(event) => setField("usuario", event.target.value)} placeholder="Nome ou email" /></div>
       <div className="col-6 col-md-4 col-lg-2"><label className="audit-filter-label mb-1" htmlFor="audit-start">Data inicial</label><input id="audit-start" className="form-control" type="date" value={filters.dataInicial} onChange={(event) => setField("dataInicial", event.target.value)} /></div>
       <div className="col-6 col-md-4 col-lg-2"><label className="audit-filter-label mb-1" htmlFor="audit-end">Data final</label><input id="audit-end" className="form-control" type="date" value={filters.dataFinal} onChange={(event) => setField("dataFinal", event.target.value)} /></div>
@@ -93,6 +102,6 @@ export default function AuditPage() {
     </form>{selectedCityName && <small className="audit-selected-city"><i className="bi bi-building"></i> {selectedCityName}</small>}</section>
 
     {error && <div className="auth-message danger mb-3" role="alert">{error}</div>}
-    <section className="panel audit-records-panel"><div className="panel-heading"><div><h3><i className="bi bi-shield-check me-2 text-primary"></i>Registros</h3><p>{pageLabel(data?.totalElements || 0)}</p></div></div><div className="table-responsive audit-table-wrap"><table className="table align-middle audit-table"><thead><tr><th>Data/Hora</th><th>Usuário</th><th>Prefeitura</th><th>Módulo</th><th>Ação</th><th>Resultado</th><th>Objeto</th><th>Descrição</th><th>IP</th></tr></thead><tbody>{rows.map((row) => <tr key={row.id}><td className="audit-table-nowrap">{formatDate(row.dataHora)}</td><td>{sensitive ? row.usuario : row.usuarioMascarado}</td><td>{row.prefeitura}</td><td>{row.modulo}</td><td><span className={`badge ${actionClass(row.acao)}`}>{row.acao}</span></td><td>{row.resultado}</td><td>{row.objeto}</td><td className="audit-table-description">{row.descricao}</td><td className="audit-table-nowrap"><span className="badge text-bg-light">{row.tipo}</span><span className="ms-1">{sensitive ? row.ip : "restrito"}</span></td></tr>)}{!loading && rows.length === 0 && <tr><td colSpan="9" className="empty-state">Nenhum log encontrado para os filtros selecionados.</td></tr>}</tbody></table>{loading && <div className="audit-loading"><i className="bi bi-arrow-repeat"></i> Carregando registros...</div>}</div><Pagination page={data?.page || 0} totalPages={data?.totalPages || 0} first={data?.first} last={data?.last} onChange={(page) => setQuery((current) => ({ ...current, page }))} /></section>
+    <section className="panel audit-records-panel"><div className="panel-heading"><div><h3><i className="bi bi-shield-check me-2 text-primary"></i>Registros</h3><p>{pageLabel(data?.totalElements || 0)}</p></div></div><div className="table-responsive audit-table-wrap"><table className="table align-middle audit-table"><thead><tr><th>Data/Hora</th><th>Usuário</th><th>Prefeitura</th><th>Módulo</th><th>Ação</th><th>Risco</th><th>Resultado</th><th>Objeto</th><th>Descrição</th><th>IP</th></tr></thead><tbody>{rows.map((row) => <tr key={row.id}><td className="audit-table-nowrap">{formatDate(row.dataHora)}</td><td>{sensitive ? row.usuario : row.usuarioMascarado}</td><td>{row.prefeitura}</td><td>{row.modulo}</td><td><span className={`badge ${actionClass(row.acao)}`}>{row.acao}</span></td><td><span className={`badge ${riskClass(row.risco)}`}>{row.risco || "-"}</span></td><td>{row.resultado}</td><td>{row.objeto}</td><td className="audit-table-description">{row.descricao}</td><td className="audit-table-nowrap"><span className="badge text-bg-light">{row.tipo}</span><span className="ms-1">{sensitive ? row.ip : "restrito"}</span></td></tr>)}{!loading && rows.length === 0 && <tr><td colSpan="10" className="empty-state">Nenhum log encontrado para os filtros selecionados.</td></tr>}</tbody></table>{loading && <div className="audit-loading"><i className="bi bi-arrow-repeat"></i> Carregando registros...</div>}</div><Pagination page={data?.page || 0} totalPages={data?.totalPages || 0} first={data?.first} last={data?.last} onChange={(page) => setQuery((current) => ({ ...current, page }))} /></section>
   </div></main></DashboardLayout>;
 }

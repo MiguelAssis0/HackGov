@@ -67,6 +67,15 @@ public class ToolConfigurationService {
                 .toList();
     }
 
+    @Transactional
+    public boolean hasAccess(String slug, Employee employee) {
+        Employee current = require(employee);
+        ensure(current);
+        return repository.findByCityHall_IdAndSlug(city(current), slug)
+                .map(item -> visible(item, current))
+                .orElse(false);
+    }
+
     private boolean visible(ToolConfiguration item, Employee employee) {
         if (Roles.ADMIN.equals(employee.getRole())) return true;
         if (ADMIN_ONLY.contains(item.getSlug()) || (!item.isEnabled() && !item.isMandatory())) return false;

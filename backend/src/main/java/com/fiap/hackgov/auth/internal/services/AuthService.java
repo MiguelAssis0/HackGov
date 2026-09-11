@@ -8,6 +8,8 @@ import com.fiap.hackgov.auth.internal.DTOs.TwoFactorRequestDTO;
 import com.fiap.hackgov.auth.internal.DTOs.TwoFactorResponseDTO;
 import com.fiap.hackgov.auth.internal.entities.User;
 import com.fiap.hackgov.auth.internal.repositories.UserRepository;
+import com.fiap.hackgov.audit.internal.services.AuditEventService;
+import com.fiap.hackgov.cityhall_management.internal.repositories.EmployeeRepository;
 import com.fiap.hackgov.shared.infra.exceptions.InvalidCredentialsException;
 import com.fiap.hackgov.shared.infra.services.LoginAttemptService;
 import com.fiap.hackgov.shared.infra.services.TokenBlacklistService;
@@ -50,6 +52,12 @@ public class AuthService {
     @Autowired
     private UserSessionService userSessionService;
 
+    @Autowired
+    private AuditEventService auditEventService;
+
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
     private static final Logger log = LoggerFactory.getLogger(AuthService.class);
     private String dummyPasswordHash;
 
@@ -58,7 +66,7 @@ public class AuthService {
         dummyPasswordHash = passwordEncoder.encode("hackgov-invalid-login-dummy-password");
     }
 
-    public void logout(String token) {
+    public void logout(String token, String clientIp, String userAgent) {
         if (token == null) {
             auditLog.with(log).event("logout_failed").level(AuditLog.Level.ERROR).log();
             throw new InvalidCredentialsException("Invalid token");
@@ -71,6 +79,13 @@ public class AuthService {
         auditLog.with(log).event("logout").level(AuditLog.Level.INFO).log();
 
         tokenBlacklistService.blacklist(token, expiration);
+        // ponytail: auditoria mostra logout (só com vínculo de prefeitura atribuível)
+        try {
+            employeeRepository.findByEmail(tokenService.getSubject(token)).ifPresent(employee ->
+                    auditEventService.append(employee, "POST", "/api/auth/logout", 204,
+                            clientIp, userAgent, AuditEventService.RISK_LOW));
+        } catch (RuntimeException ignored) {
+        }
     }
 
     public RefreshTokenResponseDTO refreshToken(RefreshTokenRequestDTO request) {
@@ -116,6 +131,13 @@ public class AuthService {
                     .level(AuditLog.Level.ERROR)
                     .log();
             loginAttemptService.registerFailure(clientIp);
+            // ponytail: tentativa com email existente entra na auditoria como AUTH_FAILURE de risco alto
+            try {
+                userOpt.flatMap(user -> employeeRepository.findByEmail(user.getEmail())).ifPresent(employee ->
+                        auditEventService.append(employee, "POST", "/api/auth/login", 401,
+                                clientIp, userAgent, AuditEventService.RISK_HIGH));
+            } catch (RuntimeException ignored) {
+            }
             throw new InvalidCredentialsException("Invalid credentials");
         }
 
@@ -128,6 +150,12 @@ public class AuthService {
                     .reason("inactive_account")
                     .level(AuditLog.Level.ERROR)
                     .log();
+            try {
+                employeeRepository.findByEmail(user.getEmail()).ifPresent(employee ->
+                        auditEventService.append(employee, "POST", "/api/auth/login", 403,
+                                clientIp, userAgent, AuditEventService.RISK_HIGH));
+            } catch (RuntimeException ignored) {
+            }
             throw new InvalidCredentialsException("Account is inactive");
         }
 
@@ -147,6 +175,13 @@ public class AuthService {
         String refreshToken = issued.refreshToken();
 
         auditLog.with(log).event("login_success").email(user.getEmail()).level(AuditLog.Level.INFO).log();
+        // ponytail: auditoria mostra login
+        try {
+            employeeRepository.findByEmail(user.getEmail()).ifPresent(employee ->
+                    auditEventService.append(employee, "POST", "/api/auth/login", 200,
+                            clientIp, userAgent, AuditEventService.RISK_LOW));
+        } catch (RuntimeException ignored) {
+        }
 
         return new LoginResponseDTO(accessToken, refreshToken, false);
     }
@@ -189,6 +224,12 @@ public class AuthService {
         if (!isValid) {
             auditLog.with(log).event("2fa_verify_failed").email(twoFactorRequest.email()).level(AuditLog.Level.WARN).log();
             loginAttemptService.registerTwoFactorFailure(clientIp);
+            try {
+                employeeRepository.findByEmail(twoFactorRequest.email()).ifPresent(employee ->
+                        auditEventService.append(employee, "POST", "/api/auth/2fa/verify", 401,
+                                clientIp, userAgent, AuditEventService.RISK_HIGH));
+            } catch (RuntimeException ignored) {
+            }
             throw new InvalidCredentialsException("Invalid two-factor code");
         }
 
@@ -202,6 +243,12 @@ public class AuthService {
         String refreshToken = issued.refreshToken();
 
         auditLog.with(log).event("2fa_verify_success").email(twoFactorRequest.email()).level(AuditLog.Level.INFO).log();
+        try {
+            employeeRepository.findByEmail(user.getEmail()).ifPresent(employee ->
+                    auditEventService.append(employee, "POST", "/api/auth/2fa/verify", 200,
+                            clientIp, userAgent, AuditEventService.RISK_LOW));
+        } catch (RuntimeException ignored) {
+        }
 
         return new TwoFactorResponseDTO(accessToken, refreshToken, "Two-factor authentication successful");
     }

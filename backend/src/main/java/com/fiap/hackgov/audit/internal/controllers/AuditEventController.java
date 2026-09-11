@@ -27,12 +27,13 @@ public class AuditEventController {
                                @RequestParam(defaultValue = "todos") String tipo,
                                @RequestParam(defaultValue = "") String modulo,
                                @RequestParam(defaultValue = "") String acao,
+                               @RequestParam(defaultValue = "") String risco,
                                @RequestParam(defaultValue = "") String usuario,
                                @RequestParam(defaultValue = "") String dataInicial,
                                @RequestParam(defaultValue = "") String dataFinal,
                                @RequestParam(defaultValue = "0") int page,
                                @AuthenticationPrincipal Employee employee) {
-        return service.list(scope, prefeitura, q, tipo, modulo, acao, usuario, dataInicial, dataFinal, page, employee);
+        return service.list(scope, prefeitura, q, tipo, modulo, acao, risco, usuario, dataInicial, dataFinal, page, employee);
     }
 
     @GetMapping("/export")
@@ -42,11 +43,12 @@ public class AuditEventController {
                                          @RequestParam(defaultValue = "todos") String tipo,
                                          @RequestParam(defaultValue = "") String modulo,
                                          @RequestParam(defaultValue = "") String acao,
+                                         @RequestParam(defaultValue = "") String risco,
                                          @RequestParam(defaultValue = "") String usuario,
                                          @RequestParam(defaultValue = "") String dataInicial,
                                          @RequestParam(defaultValue = "") String dataFinal,
                                          @AuthenticationPrincipal Employee employee) {
-        byte[] csv = service.exportCsv(scope, prefeitura, q, tipo, modulo, acao, usuario, dataInicial, dataFinal, employee)
+        byte[] csv = service.exportCsv(scope, prefeitura, q, tipo, modulo, acao, risco, usuario, dataInicial, dataFinal, employee)
                 .getBytes(StandardCharsets.UTF_8);
         return ResponseEntity.ok().contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=auditoria.csv").body(csv);
