@@ -492,7 +492,8 @@ export const api = {
   },
 
   // FERRAMENTAS E FAVORITOS
-  getTools: () => request("/tools"),
+  // ponytail: slug "processos" sem rota (card morto "Indisponível") fora do frontend
+  getTools: () => request("/tools").then((tools) => (Array.isArray(tools) ? tools : []).filter((tool) => tool?.id !== "processos")),
   updateTool: (slug, payload) => request(`/tools/${slug}`, { method: "PATCH", body: JSON.stringify(payload) }),
   updateToolCategory: (slug, categoryId) => request(`/tools/${slug}/category`, { method: "PATCH", body: JSON.stringify({ categoryId }) }),
   toggleToolFavorite: (slug) => request(`/tools/${slug}/favorite`, { method: "POST" }),
