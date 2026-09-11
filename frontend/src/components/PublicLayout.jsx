@@ -61,7 +61,7 @@ export function PublicLayout({ children, styles = [] }) {
       <nav className="navbar-custom">
         <div className="container d-flex align-items-center justify-content-between">
           <Link className="brand-txt" to="/">
-            <i className="bi bi-file-earmark-fill"></i> Integra <span>Brasil</span>
+            <i className="bi bi-buildings-fill"></i> Integra <span>Brasil</span>
           </Link>
 
           <div className="gap-2 d-none d-md-flex">
@@ -94,7 +94,7 @@ export function PublicLayout({ children, styles = [] }) {
         <div className="container">
           <div className="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
             <span className="brand-txt">
-              <i className="bi bi-file-earmark-fill"></i> Integra <span>Brasil</span>
+              <i className="bi bi-buildings-fill"></i> Integra <span>Brasil</span>
             </span>
             <span>Todos os direitos reservados, © 2026.</span>
             <div className="d-flex gap-3">

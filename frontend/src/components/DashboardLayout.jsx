@@ -276,7 +276,7 @@ export function DashboardLayout({ children, styles = [] }) {
       <aside className={`sidebar ${sidebarOpen ? "open" : ""}`} id="sidebar">
         <div className="sidebar-brand">
           <Link to="/dashboard" className="brand-txt text-white">
-            <i className="bi bi-file-earmark-fill"></i> Integra{" "}
+            <i className="bi bi-buildings-fill"></i> Integra{" "}
             <span>Brasil</span>
           </Link>
           <button
