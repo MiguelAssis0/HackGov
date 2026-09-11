@@ -22,6 +22,63 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TaskMock {
     private static final String PREDICTIVE_PREFIX = "MOCK-PREDICTIVE-";
+    private static final String BULK_PREFIX = "MOCK-BULK-";
+
+    private static final String[][] BULK_TITLES = {
+            {"Digitalizar processos de alvará de construção", "Escanear, indexar e vincular os processos físicos de alvará ao protocolo digital."},
+            {"Revisar folha de pagamento dos temporários", "Conferir rubricas, descontos e encargos dos contratos temporários do mês."},
+            {"Atualizar cadastro de fornecedores habilitados", "Validar certidões vencidas e inativar cadastros irregulares."},
+            {"Elaborar relatório de merenda escolar", "Consolidar consumo, estoque e prestação de contas da merenda por escola."},
+            {"Vistoriar ponte do bairro rural", "Laudo técnico com fotos, medições e recomendação de intervenção."},
+            {"Organizar campanha de vacinação antirrábica", "Cronograma por bairro, equipe volante e controle de doses aplicadas."},
+            {"Revisar contrato de coleta de lixo", "Medir SLA de rotas, pesagem e aplicar glosas quando cabível."},
+            {"Capacitar equipe no novo protocolo digital", "Turmas por setor com material impresso e avaliação de aproveitamento."},
+            {"Levantar débitos de IPTU para cobrança", "Relatório de inadimplência por região para o programa de regularização."},
+            {"Reformar telhado da escola municipal", "Orçamento, cronograma de obra e plano de aulas durante a reforma."},
+            {"Auditar diárias e passagens do trimestre", "Amostrar processos, conferir comprovantes e relatar divergências."},
+            {"Implantar ponto eletrônico nas secretarias", "Instalar equipamentos, cadastrar biometrias e treinar gestores."},
+            {"Mapear nascentes para o plano de arborização", "Georreferenciar nascentes e priorizar áreas de plantio."},
+            {"Revisar frota de ambulâncias", "Checklist mecânico, documentação e escala de manutenção preventiva."},
+            {"Elaborar plano de contingência das chuvas", "Rotas de fuga, abrigos temporários e estoque de emergência."},
+            {"Digitalizar acervo da biblioteca pública", "Catalogar obras raras e disponibilizar consulta online."},
+            {"Negociar dívidas de precatórios", "Simular parcelamentos e submeter proposta ao jurídico."},
+            {"Revisar iluminação pública do centro", "Trocar lâmpadas queimadas e medir economia com LED."},
+            {"Cadastrar famílias no auxílio municipal", "Visitas domiciliares, comprovação de renda e inclusão no programa."},
+            {"Reformar quadra poliesportiva", "Piso, tabelas, alambrado e iluminação noturna."},
+            {"Atualizar plano diretor participativo", "Audiências públicas por região e consolidação das propostas."},
+            {"Fiscalizar feira livre de domingo", "Alvarás das barracas, higiene e ordenamento do trânsito local."},
+            {"Implantar coleta seletiva piloto", "Rota experimental em dois bairros com cooperativa parceira."},
+            {"Revisar convênio do transporte escolar", "Quilometragem, lotação e pontualidade das linhas rurais."},
+            {"Criar central de atendimento ao cidadão", "Guichê único com senhas, totens e pesquisa de satisfação."},
+            {"Pavimentar rua do distrito industrial", "Drenagem, base, asfalto e sinalização horizontal."},
+            {"Inventariar patrimônio da saúde", "Plaquetar equipamentos e baixar itens inservíveis."},
+            {"Organizar festa junina municipal", "Palco, barracas, segurança e alvará do corpo de bombeiros."},
+            {"Revisar estação de tratamento de água", "Análise laboratorial, dosagem de cloro e plano de manutenção."},
+            {"Elaborar cartilha de IPTU verde", "Descontos para calçada acessível, captação de chuva e energia solar."},
+    };
+
+    private static final String[][] BULK_OPEN = {
+            {"Concluir licitação da merenda", "Publicar edital, responder impugnações e homologar o pregão."},
+            {"Reparar buracos na avenida principal", "Operação tapa-buraco com massa asfáltica e sinalização."},
+            {"Implantar prontuário eletrônico no posto central", "Migrar fichas físicas e treinar recepção e enfermagem."},
+            {"Responder auditoria do tribunal de contas", "Juntar documentos dos apontamentos e redigir defesa prévia."},
+            {"Construir creche do bairro novo", "Fundação e alvenaria conforme cronograma da construtora."},
+            {"Atualizar site da transparência", "Publicar receitas, despesas e salários no prazo legal."},
+            {"Podar árvores da praça matriz", "Poda preventiva com interdição parcial e recolhimento de galhos."},
+            {"Contratar médicos plantonistas", "Edital de credenciamento para cobrir férias e licenças."},
+            {"Revisar guarda municipal", "Escala, armamento menos letal e curso de reciclagem."},
+            {"Drenar rua alagadiça do jardim", "Galeria pluvial e bocas de lobo antes do período de chuvas."},
+            {"Criar horta comunitária", "Preparar canteiros, doar mudas e organizar mutirão."},
+            {"Modernizar iluminação do estádio", "Refletores de LED e gerador reserva para jogos noturnos."},
+            {"Cadastrar artesãos na feira cultural", "Inscrições, curadoria e sorteio das barracas."},
+            {"Reformar centro de zoonoses", "Baias, centro cirúrgico e sala de pós-operatório."},
+            {"Implantar wi-fi na praça", "Link dedicado, totens e termo de uso."},
+            {"Recapear estrada vicinal", "Cascalhamento e compactação dos trechos críticos."},
+            {"Organizar mutirão de limpeza do rio", "Barcos, sacos e destinação de entulho com a cooperativa."},
+            {"Criar programa de estágio municipal", "Convênio com escolas técnicas e bolsa-auxílio."},
+            {"Revisar plano de cargos e salários", "Tabela, progressões e impacto orçamentário."},
+            {"Instalar câmeras no centro", "Pontos estratégicos com monitoramento 24h."},
+    };
 
     private final TaskReporitory repository;
     private final BoardRepository boardRepository;
@@ -146,6 +203,49 @@ public class TaskMock {
         ctx.contratosBoardSP = board(boardsByName, "Quadro Contratos SP");
         ctx.juridicoBoardSP = board(boardsByName, "Quadro Juridico SP");
         repository.saveAll(predictiveTasks(ctx, LocalDateTime.now()));
+    }
+
+    // ponytail: carga volumétrica idempotente p/ encher Tarefas/Gestão em qualquer prefeitura com quadros e equipe
+    public void loadBulkDemoData(CityHall cityHall) {
+        if (repository.existsByProtocolStartingWithAndBoard_CityHall_Id(BULK_PREFIX, cityHall.getId())) return;
+        List<Board> boards = boardRepository.findAllByCityHall_Id(cityHall.getId());
+        List<Employee> people = employeeRepository.findAllByCityHallId_IdAndStatusTrueOrderByFirstNameAscLastNameAsc(cityHall.getId());
+        if (boards.isEmpty() || people.isEmpty()) return;
+        LocalDateTime now = LocalDateTime.now();
+        List<Task> tasks = new ArrayList<>();
+        for (int i = 0; i < BULK_TITLES.length; i++) {
+            Board board = boards.get(i % boards.size());
+            Employee responsible = people.get((i * 5 + 1) % people.size());
+            Employee creator = people.get((i * 3) % people.size());
+            LocalDateTime doneAt = now.minusDays(6 + i * 5 + (i % 3)).withHour(10).withMinute(0).withSecond(0).withNano(0);
+            Task task = createTask(BULK_TITLES[i][0], BULK_TITLES[i][1], responsible, creator, board,
+                    doneAt.minusDays(2 + (i % 8)), doneAt);
+            task.setStatus(Task.Status.COMPLETED);
+            task.setBusinessPoints(8 + ((i * 13) % 51));
+            task.setCompletedAt(doneAt);
+            task.setProtocol(BULK_PREFIX + String.format("%03d", i + 1));
+            tasks.add(task);
+        }
+        for (int i = 0; i < BULK_OPEN.length; i++) {
+            int k = BULK_TITLES.length + i;
+            Board board = boards.get(k % boards.size());
+            Employee responsible = people.get((k * 5 + 1) % people.size());
+            Employee creator = people.get((k * 3) % people.size());
+            Task.Status[] flow = {Task.Status.TODO, Task.Status.IN_PROGRESS, Task.Status.IN_REVIEW};
+            boolean overdue = i % 4 == 3;
+            LocalDateTime end = overdue
+                    ? now.minusDays(1 + (i % 5)).withHour(17).withMinute(0).withSecond(0).withNano(0)
+                    : now.plusDays(2 + ((i * 3) % 12)).withHour(17).withMinute(0).withSecond(0).withNano(0);
+            Task task = createTask(BULK_OPEN[i][0], BULK_OPEN[i][1], responsible, creator, board,
+                    now.minusDays(i % 6).withHour(9).withMinute(0).withSecond(0).withNano(0), end);
+            task.setStatus(overdue ? Task.Status.IN_PROGRESS : flow[i % flow.length]);
+            Task.Priority[] priorities = {Task.Priority.NORMAL, Task.Priority.HIGH, Task.Priority.NORMAL, Task.Priority.LOW};
+            task.setPriority(i % 9 == 8 ? Task.Priority.URGENT : priorities[i % priorities.length]);
+            task.setBusinessPoints(5 + ((i * 7) % 40));
+            task.setProtocol(BULK_PREFIX + "ABERTA-" + String.format("%02d", i + 1));
+            tasks.add(task);
+        }
+        repository.saveAll(tasks);
     }
 
     private List<Task> predictiveTasks(MockContext ctx, LocalDateTime now) {

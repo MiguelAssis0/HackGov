@@ -173,24 +173,39 @@ public class ManagementMetricsService {
         List<ManagementResponse.TemporalPoint> series = metrics.temporalSeries();
         long observedTasks = metrics.indicators().totalTasks();
         long observedPoints = metrics.indicators().totalPoints();
-        int sampleSize = Math.max(1, (series.size() + 2) / 3);
-        double firstAverage = average(series.stream().limit(sampleSize).mapToLong(ManagementResponse.TemporalPoint::value).sum(), sampleSize);
-        double recentAverage = average(series.stream().skip(Math.max(0, series.size() - sampleSize)).mapToLong(ManagementResponse.TemporalPoint::value).sum(), sampleSize);
-        double trendPercent = firstAverage == 0 ? (recentAverage > 0 ? 100 : 0)
-                : Math.round(((recentAverage - firstAverage) / firstAverage) * 10000.0) / 100.0;
-        // ponytail: damped moving average; replace with a validated time-series model when history is sufficient.
+        int n = series.size();
+        // ponytail: mínimos quadrados sobre a série; terços de série esparsa explodiam para ±100% e zeravam a projeção
+        double sumY = 0, sumXY = 0;
+        for (int index = 0; index < n; index++) {
+            long value = series.get(index).value();
+            sumY += value;
+            sumXY += (double) index * value;
+        }
+        double sumX = (double) n * (n - 1) / 2;
+        double sumXX = (double) (n - 1) * n * (2 * n - 1) / 6;
+        double denominator = n * sumXX - sumX * sumX;
+        double mean = n == 0 ? 0 : sumY / n;
+        double slope = (n < 2 || denominator == 0 || mean == 0) ? 0 : (n * sumXY - sumX * sumY) / denominator;
+        double recentRate = 0;
+        if (n > 0) {
+            int window = Math.min(n, 6);
+            recentRate = series.subList(n - window, n).stream().mapToLong(ManagementResponse.TemporalPoint::value).sum() / (double) window;
+        }
+        double trendPercent = mean == 0 ? 0
+                : Math.max(-100.0, Math.min(300.0, Math.round(slope * n / mean * 10000.0) / 100.0));
         double dampedTrend = Math.max(-0.5, Math.min(0.5, trendPercent / 100.0)) * 0.25;
-        long projectedTasks = Math.max(0, Math.round(recentAverage * Math.max(1, series.size()) * (1 + dampedTrend)));
+        double adjustedRate = Math.max(0, recentRate * (1 + dampedTrend));
+        long projectedTasks = Math.max(0, Math.round(adjustedRate * Math.max(1, n)));
         long projectedPoints = observedTasks == 0 ? 0 : Math.max(0,
                 Math.round(projectedTasks * (observedPoints / (double) observedTasks)));
         String trend = trendPercent > 8 ? "alta" : trendPercent < -8 ? "queda" : "estável";
         String confidence = series.size() >= 12 && observedTasks >= 10 ? "média"
                 : series.size() >= 4 && observedTasks >= 3 ? "baixa" : "insuficiente";
-        long nextValue = Math.max(0, Math.round(recentAverage * (1 + dampedTrend)));
+        // ponytail: acumulado em terços do total projetado; taxa por bucket arredondava para zero e chapava o gráfico
         List<ManagementResponse.TemporalPoint> nextPeriods = List.of(
-                new ManagementResponse.TemporalPoint("Próx. 1", nextValue),
-                new ManagementResponse.TemporalPoint("Próx. 2", nextValue),
-                new ManagementResponse.TemporalPoint("Próx. 3", nextValue));
+                new ManagementResponse.TemporalPoint("Próx. 1", Math.max(0, Math.round(projectedTasks / 3.0))),
+                new ManagementResponse.TemporalPoint("Próx. 2", Math.max(0, Math.round(projectedTasks * 2 / 3.0))),
+                new ManagementResponse.TemporalPoint("Próx. 3", Math.max(0, projectedTasks)));
         return new ManagementResponse.Forecast(observedTasks, projectedTasks, observedPoints, projectedPoints,
                 trendPercent, trend, confidence, nextPeriods);
     }
