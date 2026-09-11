@@ -60,6 +60,10 @@ export default function TasksPage(){
   const [setorAtivo,setSetorAtivo]=useState("");
   const [filtros,setFiltros]=useState({responsavel:"", prioridade:"", origem:""});
   const [query, setQuery]=useState("");
+  // ponytail: sem scroll infinito por quadro; botão carrega +5 e continua enquanto houver resto
+  const [limites,setLimites]=useState({TODO:5, IN_PROGRESS:5, IN_REVIEW:5, COMPLETED:5});
+  const limiteDe=(status)=> limites[status]||5;
+  useEffect(()=>{ setLimites({TODO:5, IN_PROGRESS:5, IN_REVIEW:5, COMPLETED:5}); },[query, filtros, setorAtivo]);
   const [detailTask,setDetailTask]=useState(null);
   // modals
   const [showNova,setShowNova]=useState(taskQuery.get("nova")==="1");
@@ -282,7 +286,7 @@ export default function TasksPage(){
             <div key={col.status} className={`kanban-column status-${col.django}`}>
               <header><div><span>{col.label}</span><strong>{col.tarefas.length}</strong></div></header>
               <div className="kanban-list">
-                {col.tarefas.map(tarefa=>{
+                {col.tarefas.slice(0, limiteDe(col.status)).map(tarefa=>{
                   const situacao=prazoSituacao(tarefa);
                   const podeExcluir= isAdmin || ((tarefa.responsibles||[]).length===1 && String((tarefa.responsibles?.[0]?.id||tarefa.responsible?.id))===String(user.id));
                   const meId=currentEmployee?.id || employees.find(e=> String(e.email).toLowerCase()===String(user?.email||"").toLowerCase())?.id || user?.id;
@@ -331,6 +335,11 @@ export default function TasksPage(){
                   );
                 })}
                 {col.tarefas.length===0 && <div className="kanban-empty"><i className="bi bi-check2-square"></i> Nenhuma tarefa nesta etapa.</div>}
+                {col.tarefas.length > limiteDe(col.status) && (
+                  <button type="button" className="btn btn-outline-secondary btn-sm w-100" onClick={()=> setLimites((atual)=> ({...atual, [col.status]: limiteDe(col.status)+5}))}>
+                    <i className="bi bi-plus-circle"></i> Carregar mais 5 ({col.tarefas.length - limiteDe(col.status)} restantes)
+                  </button>
+                )}
               </div>
             </div>
           ))}
