@@ -13,6 +13,7 @@ import com.fiap.hackgov.cityhall_management.internal.repositories.SectorReposito
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
 import com.fiap.hackgov.shared.infra.exceptions.UnauthorizedException;
+import com.fiap.hackgov.shared.infra.security.CityHallScope;
 import com.fiap.hackgov.tasks.internal.entities.Task;
 import com.fiap.hackgov.tasks.internal.repositories.TaskReporitory;
 import com.fiap.hackgov.tools.internal.entities.ToolConfiguration;
@@ -38,6 +39,7 @@ public class AgendaEventService {
     private final SectorRepository sectorRepository;
     private final ToolConfigurationRepository toolRepository;
     private final ToolPermissionService permissionService;
+    private final CityHallScope cityHallScope;
 
     @Transactional(readOnly = true)
     public List<Response> findMonth(String month, UUID taskId, Employee employee) {
@@ -100,7 +102,7 @@ public class AgendaEventService {
         Employee current = requireEmployee(employee);
         requireCreate(current);
         AgendaEvent event = new AgendaEvent();
-        event.setCityHall(current.getCityHallId());
+        event.setCityHall(cityHallScope.resolveEntity(current));
         event.setCreatedBy(current);
         apply(event, request, current);
         return toResponse(eventRepository.save(event));
@@ -215,7 +217,7 @@ public class AgendaEventService {
     private UUID cityHallId(Employee employee) {
         if (employee.getCityHallId() == null)
             throw new BusinessException("O usuario precisa estar vinculado a uma prefeitura");
-        return employee.getCityHallId().getId();
+        return cityHallScope.resolve(employee);
     }
 
     private Response toResponse(AgendaEvent event) {

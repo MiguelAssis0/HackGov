@@ -14,6 +14,7 @@ import com.fiap.hackgov.cityhall_management.internal.repositories.SectorReposito
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
 import com.fiap.hackgov.shared.infra.filters.HibernateFilterActivator;
+import com.fiap.hackgov.shared.infra.security.CityHallScope;
 import com.fiap.hackgov.shared.infra.utils.AuditLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +57,9 @@ public class EmployeeService {
 
     @Autowired
     private HibernateFilterActivator hibernateFilterActivator;
+
+    @Autowired
+    private CityHallScope cityHallScope;
 
     private static final Logger log = LoggerFactory.getLogger(EmployeeService.class);
 
@@ -131,7 +135,7 @@ public class EmployeeService {
     @Transactional
     public Employee update(UUID id, com.fiap.hackgov.cityhall_management.internal.DTOs.Employee.UpdateEmployeeDTO dto, Employee actor) {
         Employee target = employeeRepository.findByIdWithDetails(id).orElseThrow(() -> new ResourceNotFoundException("Employee not found: " + id));
-        if (!target.getCityHallId().getId().equals(actor.getCityHallId().getId()))
+        if (!target.getCityHallId().getId().equals(cityHallScope.resolve(actor)))
             throw new BusinessException("Funcionario deve pertencer a mesma prefeitura");
         // ponytail: Django can_manage = is_city_admin or platform_admin or has_perm; aqui ADMIN pode editar
         if (!com.fiap.hackgov.auth.internal.entities.enums.Roles.ADMIN.equals(actor.getRole()))
@@ -165,7 +169,7 @@ public class EmployeeService {
     @Transactional
     public Employee toggle(UUID id, Employee actor) {
         Employee target = employeeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Employee not found: " + id));
-        if (!target.getCityHallId().getId().equals(actor.getCityHallId().getId()))
+        if (!target.getCityHallId().getId().equals(cityHallScope.resolve(actor)))
             throw new BusinessException("Funcionario deve pertencer a mesma prefeitura");
         if (!com.fiap.hackgov.auth.internal.entities.enums.Roles.ADMIN.equals(actor.getRole()))
             throw new BusinessException("Sem permissao para alterar status");

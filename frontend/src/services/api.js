@@ -24,6 +24,15 @@ async function requestFrom(baseUrl, path, options = {}) {
     headers.Authorization = `Bearer ${token}`;
   }
 
+  // ponytail: super admin atua na prefeitura selecionada; demais perfis o backend ignora
+  try {
+    const storedUser = getStoredUser();
+    const selected = getSelectedCityHall();
+    if (selected?.id && normalizeUserType(storedUser?.tipoUsuario || storedUser?.role, storedUser?.email) === "admin_equipe") {
+      headers["X-City-Hall-Id"] = selected.id;
+    }
+  } catch { /* header opcional */ }
+
   const response = await fetch(`${baseUrl}${path}`, {
     ...options,
     headers,
@@ -528,8 +537,9 @@ export async function saveSession(loginResponse, email) {
   if (refreshToken) {
     localStorage.setItem("hackgov.refreshToken", refreshToken);
   }
-  // ponytail: descarta permissões do usuário anterior para a navbar não herdar acessos
+  // ponytail: descarta permissões e prefeitura do usuário anterior para não herdar acessos
   localStorage.removeItem("hackgov.allowedTools");
+  localStorage.removeItem("hackgov.selectedCityHall");
 
   const tokenPayload = decodeJwtPayload(accessToken);
   const role = loginResponse.role || tokenPayload?.role || "";

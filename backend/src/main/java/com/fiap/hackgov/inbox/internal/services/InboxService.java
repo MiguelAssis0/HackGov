@@ -12,6 +12,7 @@ import com.fiap.hackgov.inbox.internal.repositories.InboxEntryRepository;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
 import com.fiap.hackgov.shared.infra.exceptions.UnauthorizedException;
+import com.fiap.hackgov.shared.infra.security.CityHallScope;
 import com.fiap.hackgov.tasks.internal.entities.CrossSectorTaskRequest;
 import com.fiap.hackgov.tasks.internal.entities.Task;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class InboxService {
     private final InboxEntryRepository repository;
+    private final CityHallScope cityHallScope;
 
     @Transactional(readOnly = true)
     public Page<Response> findVisible(InboxEntry.Status status, InboxEntry.Type type, boolean unreadOnly,
@@ -309,7 +311,7 @@ public class InboxService {
     private UUID cityHallId(Employee employee) {
         if (employee.getCityHallId() == null)
             throw new BusinessException("O usuario precisa estar vinculado a uma prefeitura");
-        return employee.getCityHallId().getId();
+        return cityHallScope.resolve(employee);
     }
 
     private Response toResponse(InboxEntry entry) {

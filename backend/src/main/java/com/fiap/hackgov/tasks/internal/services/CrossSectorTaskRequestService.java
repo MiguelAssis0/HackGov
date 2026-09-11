@@ -11,6 +11,7 @@ import com.fiap.hackgov.inbox.internal.services.InboxService;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
 import com.fiap.hackgov.shared.infra.exceptions.UnauthorizedException;
+import com.fiap.hackgov.shared.infra.security.CityHallScope;
 import com.fiap.hackgov.tasks.internal.DTOs.CrossSectorRequestDTOs.Answer;
 import com.fiap.hackgov.tasks.internal.DTOs.CrossSectorRequestDTOs.Create;
 import com.fiap.hackgov.tasks.internal.DTOs.CrossSectorRequestDTOs.Response;
@@ -40,6 +41,7 @@ public class CrossSectorTaskRequestService {
     private final BoardRepository boardRepository;
     private final TaskReporitory taskRepository;
     private final InboxService inboxService;
+    private final CityHallScope cityHallScope;
 
     @Transactional
     public Response create(Create dto, Employee employee) {
@@ -151,13 +153,12 @@ public class CrossSectorTaskRequestService {
 
     private UUID city(Employee employee) {
         if (employee.getCityHallId() == null) throw new BusinessException("Usuario sem prefeitura");
-        return employee.getCityHallId().getId();
+        return cityHallScope.resolve(employee);
     }
 
     private CityHall cityHall(Employee employee) {
         if (employee.getCityHallId() == null) throw new BusinessException("Usuario sem prefeitura");
-        UUID id = employee.getCityHallId().getId();
-        return cityHallRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Prefeitura nao encontrada"));
+        return cityHallScope.resolveEntity(employee);
     }
 
     private Sector sector(Employee employee) {

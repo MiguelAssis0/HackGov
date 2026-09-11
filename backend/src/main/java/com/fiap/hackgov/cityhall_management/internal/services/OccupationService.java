@@ -14,6 +14,7 @@ import com.fiap.hackgov.cityhall_management.internal.repositories.SectorReposito
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
 import com.fiap.hackgov.shared.infra.exceptions.UnauthorizedException;
+import com.fiap.hackgov.shared.infra.security.CityHallScope;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +31,7 @@ public class OccupationService {
     private final OccupationRepository occupationRepository;
     private final OccupationMapper occupationMapper;
     private final SectorRepository sectorRepository;
+    private final CityHallScope cityHallScope;
 
     @Transactional
     public OccupationResponseDTO createOccupation(CreateOccupationDTO dto, Employee employee) {
@@ -42,7 +44,7 @@ public class OccupationService {
 
         Occupation occupation = new Occupation();
         apply(occupation, dto, name, slug, sector, true);
-        occupation.setCityHall(current.getCityHallId());
+        occupation.setCityHall(cityHallScope.resolveEntity(current));
 
         return occupationMapper.toDTO(occupationRepository.save(occupation));
     }
@@ -139,6 +141,6 @@ public class OccupationService {
     private UUID city(Employee employee) {
         if (employee == null || employee.getCityHallId() == null)
             throw new BusinessException("O usuario precisa estar vinculado a uma prefeitura");
-        return employee.getCityHallId().getId();
+        return cityHallScope.resolve(employee);
     }
 }

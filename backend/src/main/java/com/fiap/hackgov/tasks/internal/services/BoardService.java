@@ -6,6 +6,7 @@ import com.fiap.hackgov.cityhall_management.internal.services.SectorService;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
 import com.fiap.hackgov.shared.infra.exceptions.UnauthorizedException;
+import com.fiap.hackgov.shared.infra.security.CityHallScope;
 import com.fiap.hackgov.tasks.internal.DTOs.Board.CreateBoardDTO;
 import com.fiap.hackgov.tasks.internal.entities.Board;
 import com.fiap.hackgov.tasks.internal.mapper.BoardMapper;
@@ -24,6 +25,7 @@ public class BoardService {
     private final BoardMapper boardMapper;
     private final CityHallService cityHallService;
     private final SectorService sectorService;
+    private final CityHallScope cityHallScope;
 
     public Board createBoard(CreateBoardDTO createBoardDTO, Employee authenticatedEmployee) {
         Employee currentEmployee = requireAuthenticated(authenticatedEmployee);
@@ -61,6 +63,6 @@ public class BoardService {
             throw new BusinessException("O usuario autenticado precisa estar vinculado a uma prefeitura");
         }
 
-        return employee.getCityHallId().getId();
+        return cityHallScope.resolve(employee);
     }
 }

@@ -307,6 +307,8 @@ export function DashboardLayout({ children, styles = [] }) {
                     normalizeCityHall(event.target.selectedOptions[0]?.textContent);
                   setSelectedCityHall(nextCityHall);
                   saveSelectedCityHall(nextCityHall);
+                  // ponytail: troca de prefeitura = troca de contexto; recarrega para tudo refetchar no novo escopo
+                  window.location.reload();
                 }}
                 aria-label="Selecionar prefeitura"
               >

@@ -5,6 +5,7 @@ import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
 import com.fiap.hackgov.shared.infra.exceptions.UnauthorizedException;
+import com.fiap.hackgov.shared.infra.security.CityHallScope;
 import com.fiap.hackgov.tools.internal.entities.ToolCategory;
 import com.fiap.hackgov.tools.internal.repositories.ToolCategoryRepository;
 import com.fiap.hackgov.tools.internal.repositories.ToolConfigurationRepository;
@@ -23,6 +24,7 @@ public class ToolCategoryService {
     private static final int MAX_NAME = 120;
     private final ToolCategoryRepository repository;
     private final ToolConfigurationRepository toolRepository;
+    private final CityHallScope cityHallScope;
 
     @Transactional(readOnly = true)
     public List<Response> list(Employee employee) {
@@ -40,7 +42,7 @@ public class ToolCategoryService {
             throw new BusinessException("Ja existe uma pasta com esse nome nesta prefeitura");
         }
         ToolCategory category = new ToolCategory();
-        category.setCityHall(current.getCityHallId());
+        category.setCityHall(cityHallScope.resolveEntity(current));
         apply(category, request, name, slug);
         return response(repository.save(category));
     }
@@ -112,7 +114,7 @@ public class ToolCategoryService {
 
     private UUID city(Employee employee) {
         if (employee.getCityHallId() == null) throw new BusinessException("Usuario sem prefeitura");
-        return employee.getCityHallId().getId();
+        return cityHallScope.resolve(employee);
     }
 
     private Response response(ToolCategory category) {

@@ -5,6 +5,7 @@ import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
 import com.fiap.hackgov.shared.infra.exceptions.UnauthorizedException;
+import com.fiap.hackgov.shared.infra.security.CityHallScope;
 import com.fiap.hackgov.tasks.internal.DTOs.TaskDetailDTOs.*;
 import com.fiap.hackgov.tasks.internal.entities.*;
 import com.fiap.hackgov.tasks.internal.repositories.*;
@@ -30,6 +31,7 @@ public class TaskDetailService {
     private final TaskChecklistRepository checklistRepository;
     private final TaskTimeEntryRepository timeRepository;
     private final TaskAttachmentRepository attachmentRepository;
+    private final CityHallScope cityHallScope;
 
     @Transactional(readOnly = true)
     public DetailResponse detail(UUID taskId, Employee employee) {
@@ -204,7 +206,7 @@ public class TaskDetailService {
 
     private Task visibleTask(UUID taskId, Employee employee) {
         Employee current = requireEmployee(employee);
-        UUID cityId = current.getCityHallId().getId();
+        UUID cityId = cityHallScope.resolve(current);
         if (Roles.ADMIN.equals(current.getRole())) {
             return taskRepository.findByIdAndBoard_CityHall_Id(taskId, cityId)
                     .orElseThrow(() -> new ResourceNotFoundException("Tarefa nao encontrada"));

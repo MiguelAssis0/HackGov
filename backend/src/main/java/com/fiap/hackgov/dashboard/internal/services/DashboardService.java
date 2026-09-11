@@ -11,6 +11,7 @@ import com.fiap.hackgov.cityhall_management.internal.repositories.SectorReposito
 import com.fiap.hackgov.dashboard.internal.DTOs.DashboardDTOs;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.exceptions.UnauthorizedException;
+import com.fiap.hackgov.shared.infra.security.CityHallScope;
 import com.fiap.hackgov.tasks.internal.entities.Task;
 import com.fiap.hackgov.tasks.internal.repositories.TaskReporitory;
 import com.fiap.hackgov.tools.internal.services.ToolConfigurationService;
@@ -37,11 +38,12 @@ public class DashboardService {
     private final TaskReporitory taskRepository;
     private final AgendaEventRepository agendaEventRepository;
     private final ToolConfigurationService toolConfigurationService;
+    private final CityHallScope cityHallScope;
 
     @Transactional
     public DashboardDTOs.Response get(Employee principal) {
         Employee employee = requireEmployee(principal);
-        CityHall cityHall = employee.getCityHallId();
+        CityHall cityHall = cityHallScope.resolveEntity(employee);
         UUID cityHallId = cityHall.getId();
         LocalDate today = LocalDate.now(BUSINESS_ZONE);
         YearMonth currentMonth = YearMonth.from(today);
@@ -111,7 +113,7 @@ public class DashboardService {
     private List<Task> calendarTasks(Employee employee, YearMonth month) {
         LocalDateTime start = month.atDay(1).atStartOfDay();
         LocalDateTime endExclusive = month.plusMonths(1).atDay(1).atStartOfDay();
-        UUID cityHallId = employee.getCityHallId().getId();
+        UUID cityHallId = cityHallScope.resolve(employee);
         if (Roles.ADMIN.equals(employee.getRole())) {
             return taskRepository.findDashboardCalendarTasks(
                     cityHallId, Task.Status.COMPLETED, start, endExclusive

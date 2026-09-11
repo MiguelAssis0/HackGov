@@ -12,6 +12,7 @@ import com.fiap.hackgov.imports.internal.repositories.ImportBatchRepository;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
 import com.fiap.hackgov.shared.infra.exceptions.UnauthorizedException;
+import com.fiap.hackgov.shared.infra.security.CityHallScope;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -45,6 +46,7 @@ public class SpreadsheetImportService {
     private final OccupationRepository occupationRepository;
     private final PasswordEncoder passwordEncoder;
     private final ObjectMapper json;
+    private final CityHallScope cityHallScope;
     private static final Map<String, List<Field>> TARGETS = Map.of("departments", List.of(new Field("nome", true, List.of("setor", "departamento", "secretaria")), new Field("slug", false, List.of("identificador", "codigo")), new Field("descricao", false, List.of("descricao", "observacao", "detalhes")), new Field("ativo", false, List.of("status", "situacao"))), "employees", List.of(new Field("nome", true, List.of("nome completo", "servidor", "funcionario")), new Field("email", true, List.of("email institucional", "e-mail", "mail")), new Field("cpf", false, List.of("documento", "cpf servidor")), new Field("numero_de_registro", false, List.of("matricula", "registro")), new Field("setor", false, List.of("departamento", "secretaria", "lotacao")), new Field("cargo", false, List.of("funcao", "ocupacao")), new Field("carga_horaria", false, List.of("horas", "jornada")), new Field("salario", false, List.of("remuneracao", "vencimento")), new Field("admissao", false, List.of("data admissao", "contratacao"))));
 
     @Transactional
@@ -55,7 +57,7 @@ public class SpreadsheetImportService {
         validateFile(file);
         Parsed parsed = parse(file);
         ImportBatch batch = new ImportBatch();
-        batch.setCityHall(current.getCityHallId());
+        batch.setCityHall(cityHallScope.resolveEntity(current));
         batch.setUploadedBy(current);
         batch.setOriginalFileName(safe(file.getOriginalFilename()));
         batch.setTargetModule(target);
@@ -263,7 +265,7 @@ public class SpreadsheetImportService {
         s.setSlug(v.getOrDefault("slug", "").trim());
         s.setDescription(v.getOrDefault("descricao", "").trim());
         s.setActive(bool(v.getOrDefault("ativo", "true")));
-        s.setCityHall(e.getCityHallId());
+        s.setCityHall(cityHallScope.resolveEntity(e));
         sectorRepository.save(s);
         return created;
     }
@@ -292,7 +294,7 @@ public class SpreadsheetImportService {
         String occupation = v.getOrDefault("cargo", "");
         if (!occupation.isBlank())
             item.setOccupationId(occupationRepository.findFirstByNameIgnoreCaseAndSectorId_CityHall_Id(occupation, city(e)).orElseThrow());
-        item.setCityHallId(e.getCityHallId());
+        item.setCityHallId(cityHallScope.resolveEntity(e));
         item.setRole(Roles.EMPLOYEE);
         item.setStatus(true);
         if (created) item.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
@@ -501,7 +503,7 @@ public class SpreadsheetImportService {
 
     private UUID city(Employee e) {
         if (e.getCityHallId() == null) throw new BusinessException("Usuario sem prefeitura");
-        return e.getCityHallId().getId();
+        return cityHallScope.resolve(e);
     }
 
     private Employee admin(Employee e) {

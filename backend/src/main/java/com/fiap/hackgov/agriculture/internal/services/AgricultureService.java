@@ -9,6 +9,7 @@ import com.fiap.hackgov.clients.internal.repositories.ClientRepository;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
 import com.fiap.hackgov.shared.infra.exceptions.UnauthorizedException;
+import com.fiap.hackgov.shared.infra.security.CityHallScope;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +34,7 @@ public class AgricultureService {
     private final AgriculturalServiceRequestRepository serviceRepository;
     private final OperationalControlRepository controlRepository;
     private final ClientRepository clientRepository;
+    private final CityHallScope cityHallScope;
 
     @Transactional
     public CatalogResponse catalog(Employee employee) {
@@ -50,7 +52,7 @@ public class AgricultureService {
                 if (request.area() == null || request.hourlyValue() == null)
                     throw new BusinessException("Area e valor sao obrigatorios");
                 AgriculturalServiceType item = new AgriculturalServiceType();
-                item.setCityHall(current.getCityHallId());
+                item.setCityHall(cityHallScope.resolveEntity(current));
                 item.setName(request.name().trim());
                 item.setArea(request.area());
                 item.setHourlyValue(request.hourlyValue());
@@ -59,21 +61,21 @@ public class AgricultureService {
             }
             case "PAYMENT_TYPE" -> {
                 PaymentProofType item = new PaymentProofType();
-                item.setCityHall(current.getCityHallId());
+                item.setCityHall(cityHallScope.resolveEntity(current));
                 item.setName(request.name().trim());
                 item = paymentTypeRepository.save(item);
                 yield new CatalogItem(item.getId(), item.getName(), kind, null, null, true);
             }
             case "MACHINERY" -> {
                 Machinery item = new Machinery();
-                item.setCityHall(current.getCityHallId());
+                item.setCityHall(cityHallScope.resolveEntity(current));
                 item.setName(request.name().trim());
                 item = machineryRepository.save(item);
                 yield new CatalogItem(item.getId(), item.getName(), kind, null, null, true);
             }
             case "DRIVER" -> {
                 TractorDriver item = new TractorDriver();
-                item.setCityHall(current.getCityHallId());
+                item.setCityHall(cityHallScope.resolveEntity(current));
                 item.setName(request.name().trim());
                 item = driverRepository.save(item);
                 yield new CatalogItem(item.getId(), item.getName(), kind, null, null, true);
@@ -102,7 +104,7 @@ public class AgricultureService {
         Client client = clientRepository.findByIdAndCityHall_Id(request.clientId(), city).orElseThrow(() -> new BusinessException("Cliente precisa pertencer a prefeitura"));
         AgriculturalServiceType type = typeRepository.findByIdAndCityHall_Id(request.serviceTypeId(), city).orElseThrow(() -> new BusinessException("Tipo de servico precisa pertencer a prefeitura"));
         AgriculturalServiceRequest item = new AgriculturalServiceRequest();
-        item.setCityHall(current.getCityHallId());
+        item.setCityHall(cityHallScope.resolveEntity(current));
         item.setClient(client);
         item.setServiceType(type);
         item.setCreatedBy(current);
@@ -214,14 +216,14 @@ public class AgricultureService {
 
     private UUID cityId(Employee employee) {
         if (employee.getCityHallId() == null) throw new BusinessException("Usuario sem prefeitura");
-        return employee.getCityHallId().getId();
+        return cityHallScope.resolve(employee);
     }
 
     private void ensureDefaults(Employee employee) {
         UUID city = cityId(employee);
         if (typeRepository.findByCityHall_IdOrderByAreaAscNameAsc(city).isEmpty()) {
             AgriculturalServiceType type = new AgriculturalServiceType();
-            type.setCityHall(employee.getCityHallId());
+            type.setCityHall(cityHallScope.resolveEntity(employee));
             type.setName("Hora maquina rural");
             type.setArea(AgriculturalServiceType.Area.RURAL);
             type.setHourlyValue(new BigDecimal("250.00"));
@@ -229,19 +231,19 @@ public class AgricultureService {
         }
         if (paymentTypeRepository.findByCityHall_IdOrderByNameAsc(city).isEmpty()) {
             PaymentProofType type = new PaymentProofType();
-            type.setCityHall(employee.getCityHallId());
+            type.setCityHall(cityHallScope.resolveEntity(employee));
             type.setName("Comprovante FUNDER");
             paymentTypeRepository.save(type);
         }
         if (machineryRepository.findByCityHall_IdOrderByNameAsc(city).isEmpty()) {
             Machinery machinery = new Machinery();
-            machinery.setCityHall(employee.getCityHallId());
+            machinery.setCityHall(cityHallScope.resolveEntity(employee));
             machinery.setName("Trator municipal");
             machineryRepository.save(machinery);
         }
         if (driverRepository.findByCityHall_IdOrderByNameAsc(city).isEmpty()) {
             TractorDriver driver = new TractorDriver();
-            driver.setCityHall(employee.getCityHallId());
+            driver.setCityHall(cityHallScope.resolveEntity(employee));
             driver.setName("Operador municipal");
             driverRepository.save(driver);
         }

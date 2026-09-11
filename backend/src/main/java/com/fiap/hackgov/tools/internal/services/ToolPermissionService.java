@@ -9,6 +9,7 @@ import com.fiap.hackgov.cityhall_management.internal.repositories.SectorReposito
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
 import com.fiap.hackgov.shared.infra.exceptions.UnauthorizedException;
+import com.fiap.hackgov.shared.infra.security.CityHallScope;
 import com.fiap.hackgov.tools.internal.entities.ToolConfiguration;
 import com.fiap.hackgov.tools.internal.entities.ToolPermissionRule;
 import com.fiap.hackgov.tools.internal.repositories.ToolConfigurationRepository;
@@ -31,6 +32,7 @@ public class ToolPermissionService {
     private final SectorRepository sectorRepository;
     private final OccupationRepository occupationRepository;
     private final EmployeeRepository employeeRepository;
+    private final CityHallScope cityHallScope;
 
     @Transactional(readOnly = true)
     public List<Response> list(Employee employee) {
@@ -119,7 +121,7 @@ public class ToolPermissionService {
 
     private UUID city(Employee e) {
         if (e.getCityHallId() == null) throw new BusinessException("Usuario sem prefeitura");
-        return e.getCityHallId().getId();
+        return cityHallScope.resolve(e);
     }
 
     private Response response(ToolPermissionRule r) {

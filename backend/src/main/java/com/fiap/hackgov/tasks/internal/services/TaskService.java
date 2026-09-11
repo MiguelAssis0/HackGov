@@ -7,6 +7,7 @@ import com.fiap.hackgov.inbox.internal.services.InboxService;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
 import com.fiap.hackgov.shared.infra.exceptions.UnauthorizedException;
+import com.fiap.hackgov.shared.infra.security.CityHallScope;
 import com.fiap.hackgov.tasks.internal.DTOs.Tasks.CreateTaskDTO;
 import com.fiap.hackgov.tasks.internal.DTOs.Tasks.TaskResponseDTO;
 import com.fiap.hackgov.tasks.internal.DTOs.Tasks.UpdateTaskDTO;
@@ -36,6 +37,7 @@ public class TaskService {
     private final BoardRepository boardRepository;
     private final InboxService inboxService;
     private final TaskTimeEntryRepository timeEntryRepository;
+    private final CityHallScope cityHallScope;
 
     public TaskResponseDTO create(CreateTaskDTO dto, Employee authenticatedEmployee) {
         Employee currentEmployee = requireAuthenticated(authenticatedEmployee);
@@ -241,7 +243,7 @@ public class TaskService {
             throw new BusinessException("O usuario autenticado precisa estar vinculado a uma prefeitura");
         }
 
-        return employee.getCityHallId().getId();
+        return cityHallScope.resolve(employee);
     }
 
     private UUID requireSectorId(Employee employee) {

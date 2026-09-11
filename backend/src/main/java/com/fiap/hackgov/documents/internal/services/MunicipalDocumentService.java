@@ -17,6 +17,7 @@ import com.fiap.hackgov.inbox.internal.services.InboxService;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
 import com.fiap.hackgov.shared.infra.exceptions.UnauthorizedException;
+import com.fiap.hackgov.shared.infra.security.CityHallScope;
 import lombok.RequiredArgsConstructor;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -54,6 +55,7 @@ public class MunicipalDocumentService {
     private final EmployeeRepository employeeRepository;
     private final SectorRepository sectorRepository;
     private final OccupationRepository occupationRepository;
+    private final CityHallScope cityHallScope;
 
     @Transactional(readOnly = true)
     public List<Response> list(String query, String type, Employee employee) {
@@ -255,7 +257,7 @@ public class MunicipalDocumentService {
             throw new BusinessException("Informe ao menos um destinatario");
         }
         MunicipalDocument document = new MunicipalDocument();
-        document.setCityHall(current.getCityHallId());
+        document.setCityHall(cityHallScope.resolveEntity(current));
         document.setOwner(current);
         document.setSector(current.getSectorId());
         document.setTitle(title.trim());
@@ -378,7 +380,7 @@ public class MunicipalDocumentService {
     private UUID cityId(Employee employee) {
         if (employee.getCityHallId() == null)
             throw new BusinessException("O usuario precisa estar vinculado a uma prefeitura");
-        return employee.getCityHallId().getId();
+        return cityHallScope.resolve(employee);
     }
 
     private Response toResponse(MunicipalDocument document) {

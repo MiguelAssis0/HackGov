@@ -16,6 +16,7 @@ import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceAlreadyExistsException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
 import com.fiap.hackgov.shared.infra.exceptions.UnauthorizedException;
+import com.fiap.hackgov.shared.infra.security.CityHallScope;
 import com.fiap.hackgov.shared.infra.security.SensitiveStringConverter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,6 +36,7 @@ public class ClientService {
     private final ClientRepository repository;
     private final ClientServiceRecordRepository recordRepository;
     private final ToolPermissionService permissionService;
+    private final CityHallScope cityHallScope;
 
     @Transactional(readOnly = true)
     public Page<Response> findAll(String query, Pageable pageable, Employee employee) {
@@ -69,7 +71,7 @@ public class ClientService {
         if (repository.findByCityHall_IdAndCpfLookup(cityId(current), lookup).isPresent())
             throw new ResourceAlreadyExistsException("Ja existe cliente com este CPF na prefeitura");
         Client client = new Client();
-        client.setCityHall(current.getCityHallId());
+        client.setCityHall(cityHallScope.resolveEntity(current));
         apply(client, request, cpf, lookup);
         return toResponse(repository.save(client), canViewSensitive(current));
     }
@@ -143,7 +145,7 @@ public class ClientService {
     private UUID cityId(Employee employee) {
         if (employee.getCityHallId() == null)
             throw new BusinessException("O usuario precisa estar vinculado a uma prefeitura");
-        return employee.getCityHallId().getId();
+        return cityHallScope.resolve(employee);
     }
 
     private boolean canViewSensitive(Employee employee) {

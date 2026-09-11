@@ -17,6 +17,7 @@ import com.fiap.hackgov.management.internal.DTOs.ManagementResponse.SectorPerfor
 import com.fiap.hackgov.management.internal.DTOs.ManagementResponse.TemporalPoint;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.exceptions.UnauthorizedException;
+import com.fiap.hackgov.shared.infra.security.CityHallScope;
 import com.fiap.hackgov.tasks.internal.entities.Task;
 import com.fiap.hackgov.tasks.internal.repositories.TaskReporitory;
 import com.fiap.hackgov.tools.internal.services.ToolPermissionService;
@@ -48,12 +49,13 @@ public class ManagementMetricsService {
     private final TaskReporitory taskRepository;
     private final ToolPermissionService toolPermissionService;
     private final AiService aiService;
+    private final CityHallScope cityHallScope;
 
     @Transactional(readOnly = true)
     public ManagementResponse find(Employee employee, String periodValue, UUID sectorId,
                                    LocalDate customStart, LocalDate customEnd) {
         Employee current = require(employee);
-        UUID cityId = current.getCityHallId().getId();
+        UUID cityId = cityHallScope.resolve(current);
         boolean admin = Roles.ADMIN.equals(current.getRole());
         if (!admin && !toolPermissionService.canAccess("relatorios", current)) {
             throw new UnauthorizedException("Voce nao possui acesso aos relatorios");

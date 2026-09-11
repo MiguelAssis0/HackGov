@@ -5,6 +5,7 @@ import com.fiap.hackgov.cityhall_management.internal.entities.Employee;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import com.fiap.hackgov.shared.infra.exceptions.ResourceNotFoundException;
 import com.fiap.hackgov.shared.infra.exceptions.UnauthorizedException;
+import com.fiap.hackgov.shared.infra.security.CityHallScope;
 import com.fiap.hackgov.tools.internal.entities.ToolCategory;
 import com.fiap.hackgov.tools.internal.entities.ToolConfiguration;
 import com.fiap.hackgov.tools.internal.entities.UserToolFavorite;
@@ -32,6 +33,7 @@ public class ToolConfigurationService {
     private final ToolCategoryRepository categoryRepository;
     private final UserToolFavoriteRepository favoriteRepository;
     private final ToolPermissionService permissionService;
+    private final CityHallScope cityHallScope;
 
     private static final List<Seed> SEEDS = List.of(
             new Seed("caixa-entrada", "Caixa de Entrada", "Usuarios", "bi-inbox-fill", "Receba documentos, alertas e solicitações por setor ou por funcionário.", "/caixa-entrada", true, true),
@@ -132,7 +134,7 @@ public class ToolConfigurationService {
             ToolConfiguration item = repository.findByCityHall_IdAndSlug(city(employee), seed.slug)
                     .orElseGet(() -> {
                         ToolConfiguration created = new ToolConfiguration();
-                        created.setCityHall(employee.getCityHallId());
+                        created.setCityHall(cityHallScope.resolveEntity(employee));
                         created.setSlug(seed.slug);
                         created.setEnabled(seed.enabled);
                         return created;
@@ -165,7 +167,7 @@ public class ToolConfigurationService {
 
     private UUID city(Employee employee) {
         if (employee.getCityHallId() == null) throw new BusinessException("Usuario sem prefeitura");
-        return employee.getCityHallId().getId();
+        return cityHallScope.resolve(employee);
     }
 
     private Response response(ToolConfiguration item, boolean favorite) {
