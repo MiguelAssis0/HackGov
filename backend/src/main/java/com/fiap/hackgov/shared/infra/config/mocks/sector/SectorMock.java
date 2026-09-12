@@ -20,25 +20,33 @@ public class SectorMock {
         Sector financeiro = createSector("Financeiro", ctx.cityHallSP);
         Sector contratos = createSector("Contratos", ctx.cityHallSP);
         Sector juridico = createSector("Jurídico", ctx.cityHallSP);
+        Sector cultura = createSector("Cultura", ctx.cityHallSP);
+        Sector educacao = createSector("Educação", ctx.cityHallSP);
 
         Sector tiRJ = createSector("Tecnologia da Informação", ctx.cityHallRJ);
         Sector comprasRJ = createSector("Compras", ctx.cityHallRJ);
         Sector financeiroRJ = createSector("Financeiro", ctx.cityHallRJ);
         Sector contratosRJ = createSector("Contratos", ctx.cityHallRJ);
         Sector juridicoRJ = createSector("Jurídico", ctx.cityHallRJ);
+        Sector culturaRJ = createSector("Cultura", ctx.cityHallRJ);
+        Sector educacaoRJ = createSector("Educação", ctx.cityHallRJ);
 
-        repository.saveAll(List.of(ti, compras, financeiro, contratos, juridico, tiRJ, comprasRJ, financeiroRJ, contratosRJ, juridicoRJ));
+        repository.saveAll(List.of(ti, compras, financeiro, contratos, juridico, cultura, educacao, tiRJ, comprasRJ, financeiroRJ, contratosRJ, juridicoRJ, culturaRJ, educacaoRJ));
 
         ctx.tiSectorsSP = ti;
         ctx.comprasSectorSP = compras;
         ctx.financeiroSectorSP = financeiro;
         ctx.contratosSectorSP = contratos;
         ctx.juridicoSectorSP = juridico;
+        ctx.culturaSectorSP = cultura;
+        ctx.educacaoSectorSP = educacao;
         ctx.tiSectorRJ = tiRJ;
         ctx.comprasSectorRJ = comprasRJ;
         ctx.financeiroSectorRJ = financeiroRJ;
         ctx.contratosSectorRJ = contratosRJ;
         ctx.juridicoSectorRJ = juridicoRJ;
+        ctx.culturaSectorRJ = culturaRJ;
+        ctx.educacaoSectorRJ = educacaoRJ;
     }
 
     private Sector createSector(String name, com.fiap.hackgov.cityhall_management.internal.entities.CityHall cityHall) {

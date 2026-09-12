@@ -49,6 +49,7 @@ public class MockDataLoader implements CommandLineRunner {
             cityHallRepository.findByCnpj(SEED_CITY_HALL_CNPJ).ifPresent(cityHall -> {
                 taskMock.loadPredictiveData(cityHall);
                 taskMock.loadBulkDemoData(cityHall);
+                taskMock.loadNewSectorDemoData(cityHall);
             });
             log.info("Mocks já carregados; carga inicial ignorada.");
             return;
@@ -64,6 +65,7 @@ public class MockDataLoader implements CommandLineRunner {
         employeeMock.load(ctx);
         taskMock.load(ctx);
         taskMock.loadBulkDemoData(ctx.cityHallSP);
+        taskMock.loadNewSectorDemoData(ctx.cityHallSP);
         chatMock.load(ctx);
         requisitionMock.load(ctx);
         licitationMock.load(ctx);

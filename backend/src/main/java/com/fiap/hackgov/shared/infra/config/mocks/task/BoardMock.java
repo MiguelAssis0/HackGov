@@ -20,12 +20,16 @@ public class BoardMock {
         Board financeiroSP = createBoard("Quadro Financeiro SP", ctx.cityHallSP, ctx.financeiroSectorSP);
         Board contratosSP = createBoard("Quadro Contratos SP", ctx.cityHallSP, ctx.contratosSectorSP);
         Board juridicoSP = createBoard("Quadro Juridico SP", ctx.cityHallSP, ctx.juridicoSectorSP);
+        Board culturaSP = createBoard("Quadro Cultura SP", ctx.cityHallSP, ctx.culturaSectorSP);
+        Board educacaoSP = createBoard("Quadro Educacao SP", ctx.cityHallSP, ctx.educacaoSectorSP);
 
         Board tiRJ = createBoard("Quadro TI RJ", ctx.cityHallRJ, ctx.tiSectorRJ);
         Board comprasRJ = createBoard("Quadro Compras RJ", ctx.cityHallRJ, ctx.comprasSectorRJ);
         Board financeiroRJ = createBoard("Quadro Financeiro RJ", ctx.cityHallRJ, ctx.financeiroSectorRJ);
         Board contratosRJ = createBoard("Quadro Contratos RJ", ctx.cityHallRJ, ctx.contratosSectorRJ);
         Board juridicoRJ = createBoard("Quadro Juridico RJ", ctx.cityHallRJ, ctx.juridicoSectorRJ);
+        Board culturaRJ = createBoard("Quadro Cultura RJ", ctx.cityHallRJ, ctx.culturaSectorRJ);
+        Board educacaoRJ = createBoard("Quadro Educacao RJ", ctx.cityHallRJ, ctx.educacaoSectorRJ);
 
         repository.saveAll(List.of(
                 tiSP,
@@ -33,11 +37,15 @@ public class BoardMock {
                 financeiroSP,
                 contratosSP,
                 juridicoSP,
+                culturaSP,
+                educacaoSP,
                 tiRJ,
                 comprasRJ,
                 financeiroRJ,
                 contratosRJ,
-                juridicoRJ
+                juridicoRJ,
+                culturaRJ,
+                educacaoRJ
         ));
 
         ctx.tiBoardSP = tiSP;
@@ -45,11 +53,15 @@ public class BoardMock {
         ctx.financeiroBoardSP = financeiroSP;
         ctx.contratosBoardSP = contratosSP;
         ctx.juridicoBoardSP = juridicoSP;
+        ctx.culturaBoardSP = culturaSP;
+        ctx.educacaoBoardSP = educacaoSP;
         ctx.tiBoardRJ = tiRJ;
         ctx.comprasBoardRJ = comprasRJ;
         ctx.financeiroBoardRJ = financeiroRJ;
         ctx.contratosBoardRJ = contratosRJ;
         ctx.juridicoBoardRJ = juridicoRJ;
+        ctx.culturaBoardRJ = culturaRJ;
+        ctx.educacaoBoardRJ = educacaoRJ;
     }
 
     private Board createBoard(String name, com.fiap.hackgov.cityhall_management.internal.entities.CityHall cityHall,

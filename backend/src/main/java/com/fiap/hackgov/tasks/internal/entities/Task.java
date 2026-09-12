@@ -35,6 +35,7 @@ public class Task {
 
     private String title;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @ManyToOne

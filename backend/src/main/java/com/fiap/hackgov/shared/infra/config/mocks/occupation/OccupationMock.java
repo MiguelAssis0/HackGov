@@ -79,6 +79,20 @@ public class OccupationMock {
         assessorJuridico.setLevel(LevelOccupation.SENIOR);
         assessorJuridico.setSectorId(ctx.juridicoSectorSP);
 
+        Occupation coordenadorCultura = new Occupation();
+        coordenadorCultura.setName("Coordenador de Cultura");
+        coordenadorCultura.setDescription("Coordena eventos, oficinas e projetos culturais do município");
+        coordenadorCultura.setTypes(TypeJobLevel.CARGO_COMISSAO);
+        coordenadorCultura.setLevel(LevelOccupation.MID);
+        coordenadorCultura.setSectorId(ctx.culturaSectorSP);
+
+        Occupation professor = new Occupation();
+        professor.setName("Professor");
+        professor.setDescription("Atua no ensino e em projetos pedagógicos da rede municipal");
+        professor.setTypes(TypeJobLevel.CONCURSADO);
+        professor.setLevel(LevelOccupation.MID);
+        professor.setSectorId(ctx.educacaoSectorSP);
+
         // ponytail: cityHall obrigatório — getAllOccupations filtra por prefeitura
         var occupations = List.of(
                 administradorMunicipal,
@@ -89,7 +103,9 @@ public class OccupationMock {
                 pregoeiro,
                 analistaFinanceiro,
                 gestorContratos,
-                assessorJuridico
+                assessorJuridico,
+                coordenadorCultura,
+                professor
         );
         occupations.forEach(occupation -> occupation.setCityHall(ctx.cityHallSP));
         repository.saveAll(occupations);
@@ -102,5 +118,7 @@ public class OccupationMock {
         ctx.analistaFinanceiro = analistaFinanceiro;
         ctx.gestorContratos = gestorContratos;
         ctx.assessorJuridico = assessorJuridico;
+        ctx.coordenadorCultura = coordenadorCultura;
+        ctx.professor = professor;
     }
 }

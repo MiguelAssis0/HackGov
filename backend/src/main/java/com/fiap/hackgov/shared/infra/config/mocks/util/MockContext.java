@@ -11,11 +11,15 @@ public class MockContext {
     public Sector financeiroSectorSP;
     public Sector contratosSectorSP;
     public Sector juridicoSectorSP;
+    public Sector culturaSectorSP;
+    public Sector educacaoSectorSP;
     public Sector tiSectorRJ;
     public Sector comprasSectorRJ;
     public Sector financeiroSectorRJ;
     public Sector contratosSectorRJ;
     public Sector juridicoSectorRJ;
+    public Sector culturaSectorRJ;
+    public Sector educacaoSectorRJ;
 
     public State sp;
     public State rj;
@@ -53,9 +57,12 @@ public class MockContext {
     public Occupation analistaFinanceiro;
     public Occupation gestorContratos;
     public Occupation assessorJuridico;
+    public Occupation coordenadorCultura;
+    public Occupation professor;
 
     public Employee admin;
     public Employee adminSistema;
+    public Employee geraldo;
     public Employee maria;
     public Employee joao;
     public Employee carlos;
@@ -67,15 +74,23 @@ public class MockContext {
     public Employee bruno;
     public Employee patricia;
     public Employee lucas;
+    public Employee camila;
+    public Employee diego;
+    public Employee beatriz;
+    public Employee thiago;
 
     public Board tiBoardSP;
     public Board comprasBoardSP;
     public Board financeiroBoardSP;
     public Board contratosBoardSP;
     public Board juridicoBoardSP;
+    public Board culturaBoardSP;
+    public Board educacaoBoardSP;
     public Board tiBoardRJ;
     public Board comprasBoardRJ;
     public Board financeiroBoardRJ;
     public Board contratosBoardRJ;
     public Board juridicoBoardRJ;
+    public Board culturaBoardRJ;
+    public Board educacaoBoardRJ;
 }
