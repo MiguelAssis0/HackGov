@@ -32,7 +32,7 @@ O projeto cobre desde cadastro e governança municipal até requisições, aprov
 - Fase 2 - https://docs.google.com/document/d/1a4SZjF-kROwfuIelkwPM8N8aXTQZkGIqoVtdb5gFEG0/edit?usp=sharing
 - Fase 3 - https://docs.google.com/document/d/1R0T0LqrMhG-JAuAYGsOdOuhcqgFUhftO9G5RfKHnr2A/edit?usp=sharing
 - Fase 4 - https://docs.google.com/document/d/1jjb1ibS3TBDOjyjgHxo70r9XnZEhO4RS6bPrJGww_Eg/edit?usp=sharing
-- Fase 5 -
+- Fase 5 - https://docs.google.com/document/d/1X7146BfA2aZCk-FGFzzUFDWuSXbBv_CH3c60TU3SAhw/edit?usp=sharing
 - Fase 6 -
 - Fase 7 -
 
