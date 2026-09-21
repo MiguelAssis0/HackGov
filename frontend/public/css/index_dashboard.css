@@ -562,6 +562,24 @@
     font-weight: 700;
 }
 
+.chat-unread-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-left: 0.45rem;
+    border-radius: 50%;
+    background: #dc3545;
+    vertical-align: middle;
+}
+
+.msg-unread-dot {
+    flex: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #dc3545;
+}
+
 .chat-widget-subtitle {
     color: rgba(255, 255, 255, 0.7);
 }

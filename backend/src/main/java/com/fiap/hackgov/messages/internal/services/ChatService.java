@@ -14,6 +14,7 @@ import com.fiap.hackgov.messages.internal.entities.enums.ChatType;
 import com.fiap.hackgov.messages.internal.mapper.ChatMapper;
 import com.fiap.hackgov.messages.internal.repositories.ChatParticipantRepository;
 import com.fiap.hackgov.messages.internal.repositories.ChatRepository;
+import com.fiap.hackgov.messages.internal.repositories.MessageRepository;
 import com.fiap.hackgov.shared.infra.exceptions.BusinessException;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,8 @@ import java.util.Set;
 public class ChatService {
 
     private final ChatRepository chatRepository;
+
+    private final MessageRepository messageRepository;
 
     private final ChatParticipantRepository chatParticipantRepository;
 
@@ -168,7 +171,15 @@ public class ChatService {
     public List<ChatDTO> getEmployeeChats(Employee employee) {
         List<Chat> chats = chatRepository.findAllByParticipant(employee.getId());
 
-        return chats.stream().map(chatMapper::toDTO).toList();
+        // ponytail: última mensagem por chat p/ bolinha de não lida; sem tabela de leitura
+        return chats.stream().map(chat -> {
+            ChatDTO base = chatMapper.toDTO(chat);
+            var last = messageRepository.findFirstByChatIdOrderBySentAtDesc(chat.getId());
+            return new ChatDTO(base.id(), base.title(), base.type(), base.cityHallId(),
+                    base.participants(), base.createdAt(),
+                    last.map(item -> item.getSentAt()).orElse(null),
+                    last.map(item -> item.getSender().getId()).orElse(null));
+        }).toList();
     }
 
 

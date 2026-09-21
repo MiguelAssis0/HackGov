@@ -13,6 +13,7 @@ import com.fiap.hackgov.shared.infra.config.mocks.requisition.RequisitionMock;
 import com.fiap.hackgov.shared.infra.config.mocks.sector.SectorMock;
 import com.fiap.hackgov.shared.infra.config.mocks.state.StateMock;
 import com.fiap.hackgov.shared.infra.config.mocks.task.BoardMock;
+import com.fiap.hackgov.shared.infra.config.mocks.task.CrossSectorRequestMock;
 import com.fiap.hackgov.shared.infra.config.mocks.task.TaskMock;
 import com.fiap.hackgov.shared.infra.config.mocks.util.MockContext;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class MockDataLoader implements CommandLineRunner {
     private final SectorMock sectorMock;
     private final BoardMock boardMock;
     private final TaskMock taskMock;
+    private final CrossSectorRequestMock crossSectorRequestMock;
     private final RequisitionMock requisitionMock;
     private final LicitationMock licitationMock;
     private final NoticeContractMock noticeContractMock;
@@ -50,6 +52,8 @@ public class MockDataLoader implements CommandLineRunner {
                 taskMock.loadPredictiveData(cityHall);
                 taskMock.loadBulkDemoData(cityHall);
                 taskMock.loadNewSectorDemoData(cityHall);
+                chatMock.loadCulturaMessage(cityHall);
+                crossSectorRequestMock.load(cityHall);
             });
             log.info("Mocks já carregados; carga inicial ignorada.");
             return;
@@ -67,6 +71,7 @@ public class MockDataLoader implements CommandLineRunner {
         taskMock.loadBulkDemoData(ctx.cityHallSP);
         taskMock.loadNewSectorDemoData(ctx.cityHallSP);
         chatMock.load(ctx);
+        crossSectorRequestMock.load(ctx.cityHallSP);
         requisitionMock.load(ctx);
         licitationMock.load(ctx);
         noticeContractMock.load(ctx);

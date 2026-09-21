@@ -118,6 +118,23 @@ function mergeMessages(current, incoming) {
   return unchanged ? current : merged;
 }
 
+const SEEN_STORAGE_KEY = "hackgov.chatSeen";
+
+function loadSeenChats() {
+  try {
+    return JSON.parse(localStorage.getItem(SEEN_STORAGE_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
+
+function isChatUnread(chat, currentEmployeeId, seenByChat) {
+  if (!chat?.lastMessageAt) return false;
+  if (String(chat.lastMessageSenderId) === String(currentEmployeeId)) return false;
+  const seenAt = seenByChat[String(chat.id)];
+  return !seenAt || new Date(chat.lastMessageAt).getTime() > new Date(seenAt).getTime();
+}
+
 export default function Messages({
   styles = [],
   chatOpen,
@@ -129,7 +146,6 @@ export default function Messages({
   const messagesEndRef = useRef(null);
   const attachmentInputRef = useRef(null);
   const socketClientRef = useRef(null);
-  const socketSubscriptionRef = useRef(null);
   const [search, setSearch] = useState("");
   const [currentEmployee, setCurrentEmployee] = useState(null);
   const [employees, setEmployees] = useState([]);
@@ -151,6 +167,25 @@ export default function Messages({
   const [sending, setSending] = useState(false);
   const [socketConnected, setSocketConnected] = useState(false);
   const [error, setError] = useState("");
+  const [seenByChat, setSeenByChat] = useState(loadSeenChats);
+  const selectedChatIdRef = useRef(null);
+  selectedChatIdRef.current = selectedChat?.id || null;
+
+  function markChatSeen(chatId, sentAt) {
+    const stamp = sentAt || new Date().toISOString();
+    setSeenByChat((current) => {
+      if (current[String(chatId)] && new Date(current[String(chatId)]).getTime() >= new Date(stamp).getTime()) {
+        return current;
+      }
+      const next = { ...current, [String(chatId)]: stamp };
+      try {
+        localStorage.setItem(SEEN_STORAGE_KEY, JSON.stringify(next));
+      } catch {
+        // ponytail: armazenamento indisponível — bolinha recalcula na sessão
+      }
+      return next;
+    });
+  }
 
   useEffect(() => {
     let mounted = true;
@@ -221,8 +256,6 @@ export default function Messages({
     socketClientRef.current = client;
 
     return () => {
-      socketSubscriptionRef.current?.unsubscribe();
-      socketSubscriptionRef.current = null;
       socketClientRef.current = null;
       setSocketConnected(false);
       client?.deactivate();
@@ -230,24 +263,25 @@ export default function Messages({
   }, []);
 
   useEffect(() => {
-    socketSubscriptionRef.current?.unsubscribe();
-    socketSubscriptionRef.current = null;
-
     const client = socketClientRef.current;
-    if (!socketConnected || !client?.connected || !selectedChat?.id) return undefined;
+    if (!socketConnected || !client?.connected || !chats.length) return undefined;
 
-    const subscription = subscribeToChat(client, selectedChat.id, (message) => {
-      setMessages((current) => mergeMessages(current, [message]));
-    });
-    socketSubscriptionRef.current = subscription;
+    // ponytail: assina todos os chats p/ acender a bolinha mesmo fora da conversa aberta
+    const subscriptions = chats.map((chat) => subscribeToChat(client, chat.id, (message) => {
+      setChats((current) => current.map((item) => String(item.id) === String(message.chatId)
+        ? { ...item, lastMessageAt: message.sentAt, lastMessageSenderId: message.senderId }
+        : item));
+      if (String(message.chatId) === String(selectedChatIdRef.current)) {
+        setMessages((current) => mergeMessages(current, [message]));
+        markChatSeen(message.chatId, message.sentAt);
+      }
+    }));
 
     return () => {
-      subscription.unsubscribe();
-      if (socketSubscriptionRef.current === subscription) {
-        socketSubscriptionRef.current = null;
-      }
+      subscriptions.forEach((subscription) => subscription.unsubscribe());
     };
-  }, [selectedChat?.id, socketConnected]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [socketConnected, chats.map((chat) => chat.id).join(",")]);
 
   const filteredEmployees = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -289,6 +323,21 @@ export default function Messages({
     );
   }, [employees, groupSearch, groupFilters]);
 
+  const hasUnreadChats = useMemo(
+    () => chats.some((chat) => isChatUnread(chat, currentEmployee?.id, seenByChat)),
+    [chats, currentEmployee?.id, seenByChat],
+  );
+
+  const unreadByEmployee = useMemo(() => {
+    const flagged = {};
+    chats.forEach((chat) => {
+      if (chat.type !== "PRIVATE" || !isChatUnread(chat, currentEmployee?.id, seenByChat)) return;
+      const other = privateChatParticipant(chat, currentEmployee?.id);
+      if (other?.employeeId) flagged[String(other.employeeId)] = true;
+    });
+    return flagged;
+  }, [chats, currentEmployee?.id, seenByChat]);
+
   async function openChat(chat) {
     setSelectedChat(chat);
     setLoadingMessages(true);
@@ -298,6 +347,7 @@ export default function Messages({
       const response = await api.getChatMessages(chat.id);
       const items = pageItems(response);
       setMessages(sortMessages(items));
+      markChatSeen(chat.id, items.length ? sortMessages(items)[items.length - 1].sentAt : undefined);
     } catch (requestError) {
       setMessages([]);
       setError(requestError.message || "Não foi possível carregar a conversa.");
@@ -438,6 +488,7 @@ export default function Messages({
         ) : (
           filteredChats.map((chat) => {
             const name = chatName(chat, currentEmployee?.id);
+            const unread = isChatUnread(chat, currentEmployee?.id, seenByChat);
             return (
               <button type="button" className="msg-item msg-item-button" key={chat.id} onClick={() => openChat(chat)}>
                 <div className="msg-avatar">{initials(name)}</div>
@@ -447,6 +498,7 @@ export default function Messages({
                     {chat.type === "GROUP" ? `${chat.participants?.length || 0} participantes` : "Conversa privada"}
                   </div>
                 </div>
+                {unread && <span className="msg-unread-dot" role="status" aria-label="Conversa com mensagens não lidas" />}
                 <i className="bi bi-chevron-right msg-item-arrow"></i>
               </button>
             );
@@ -560,13 +612,14 @@ export default function Messages({
         >
           <div className="msg-avatar">{initials(name)}</div>
           <div className="msg-info">
-            <div className="msg-sender">{name}</div>
-            <div className="msg-preview">
-              {[employee.occupationName, employee.sectorName].filter(Boolean).join(" · ") ||
-                employee.email}
+              <div className="msg-sender">{name}</div>
+              <div className="msg-preview">
+                {[employee.occupationName, employee.sectorName].filter(Boolean).join(" · ") ||
+                  employee.email}
+              </div>
             </div>
-          </div>
-          <i className={`bi ${isCreating ? "bi-hourglass-split" : "bi-chat-dots"} msg-item-arrow`}></i>
+            {unreadByEmployee[String(employee.id)] && <span className="msg-unread-dot" role="status" aria-label="Contato com mensagens não lidas" />}
+            <i className={`bi ${isCreating ? "bi-hourglass-split" : "bi-chat-dots"} msg-item-arrow`}></i>
         </button>
       );
     });
@@ -587,6 +640,7 @@ export default function Messages({
           <div className="chat-widget-title-wrap">
             <h5 className="chat-widget-title">
               <i className="bi bi-chat-dots-fill me-1"></i> Mensagens
+              {hasUnreadChats && <span className="chat-unread-dot" role="status" aria-label="Mensagens não lidas" />}
             </h5>
           </div>
           <div className="chat-widget-actions">

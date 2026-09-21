@@ -18,7 +18,11 @@ public record ChatDTO(
 
         List<ChatParticipantDTO> participants,
 
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+
+        LocalDateTime lastMessageAt,
+
+        UUID lastMessageSenderId
 
 ) {
 }
