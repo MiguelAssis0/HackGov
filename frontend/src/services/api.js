@@ -68,6 +68,20 @@ async function requestFrom(baseUrl, path, options = {}) {
     const error = new Error(message);
     error.status = response.status;
     error.data = data;
+    // ponytail: 403 aqui é sempre chamada anônima (permissão negada da app volta 401 "Unauthorized");
+    // sessão morreu no meio do caminho — limpa e volta ao login em vez de travar na tela
+    const hint = `${data?.detail || ""} ${data?.message || ""}`.toLowerCase();
+    const deadSession =
+      response.status === 403 ||
+      (response.status === 401 &&
+        ["token expired", "token has been invalidated", "invalid token", "sessao revogada", "sessão revogada"].some((part) => hint.includes(part)));
+    const onAuthPage =
+      window.location.pathname.startsWith("/login") ||
+      window.location.pathname.startsWith("/verify-2fa");
+    if (deadSession && !isAuth && token && !onAuthPage) {
+      try { clearSession(); } catch { /* storage indisponível */ }
+      window.location.assign("/login");
+    }
     throw error;
   }
 
