@@ -10,6 +10,29 @@ function getToken() {
 }
 
 /**
+ * Troca silenciosa do token (voo único p/ chamadas concorrentes)
+ */
+let refreshPromise = null;
+async function refreshSession() {
+  if (!refreshPromise) {
+    const stored = localStorage.getItem("hackgov.refreshToken");
+    if (!stored) throw new Error("Sem refresh token");
+    refreshPromise = (async () => {
+      const data = await requestFrom(API_BASE_URL, "/auth/refresh", {
+        method: "POST",
+        body: JSON.stringify({ refreshToken: stored }),
+      });
+      const accessToken = data?.token || data?.accessToken;
+      if (!accessToken) throw new Error("Refresh sem token");
+      localStorage.setItem("hackgov.accessToken", accessToken);
+      if (data?.refreshToken) localStorage.setItem("hackgov.refreshToken", data.refreshToken);
+      return accessToken;
+    })().finally(() => { refreshPromise = null; });
+  }
+  return refreshPromise;
+}
+
+/**
  * Cliente HTTP único da aplicação
  */
 async function requestFrom(baseUrl, path, options = {}) {
@@ -69,7 +92,7 @@ async function requestFrom(baseUrl, path, options = {}) {
     error.status = response.status;
     error.data = data;
     // ponytail: 403 aqui é sempre chamada anônima (permissão negada da app volta 401 "Unauthorized");
-    // sessão morreu no meio do caminho — limpa e volta ao login em vez de travar na tela
+    // tenta trocar o token em silêncio e repete a chamada uma vez; só volta ao login se o refresh falhar
     const hint = `${data?.detail || ""} ${data?.message || ""}`.toLowerCase();
     const deadSession =
       response.status === 403 ||
@@ -78,6 +101,12 @@ async function requestFrom(baseUrl, path, options = {}) {
     const onAuthPage =
       window.location.pathname.startsWith("/login") ||
       window.location.pathname.startsWith("/verify-2fa");
+    if (deadSession && !isAuth && token && !onAuthPage && !options._retried) {
+      try {
+        await refreshSession();
+        return requestFrom(baseUrl, path, { ...options, _retried: true });
+      } catch { /* refresh falhou — cai para o login abaixo */ }
+    }
     if (deadSession && !isAuth && token && !onAuthPage) {
       try { clearSession(); } catch { /* storage indisponível */ }
       window.location.assign("/login");
